@@ -5,8 +5,6 @@
 #include "thusly_value.h"
 
 void init_program(Program* program) {
-  printf("INIT PROGRAM..\n"); // TEMPORARY
-
   program->source_lines = NULL;
   program->instructions = NULL;
   program->count = 0;
