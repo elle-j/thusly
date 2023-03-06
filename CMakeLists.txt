@@ -13,12 +13,14 @@ add_subdirectory(src)
 # add_executable(cthusly src/main.c)
 
 add_executable(cthusly
-  src/main.c
-  src/common.h
-	src/program.h
-	src/program.c
+	src/main.c
+	src/common.h
+	src/debug.h
+	src/debug.c
 	src/memory.h
 	src/memory.c
+	src/program.h
+	src/program.c
 )
 
 target_include_directories(cthusly PUBLIC src)

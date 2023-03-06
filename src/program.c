@@ -3,7 +3,7 @@
 
 #include "program.h"
 
-void init_program(Program *program) {
+void init_program(Program* program) {
   printf("INIT PROGRAM..\n"); // TEMPORARY
 
   program->instructions = NULL;
@@ -11,7 +11,7 @@ void init_program(Program *program) {
   program->capacity = 0;
 }
 
-void free_program(Program *program) {
+void free_program(Program* program) {
   printf("FREEING PROGRAM..\n"); // TEMPORARY
   
   FREE_ARRAY(byte, program->instructions, program->capacity);
