@@ -1,0 +1,98 @@
+
+Grammar for a small subset of the language (incrementally added).
+
+------------------------------------------------------------------
+START RULES
+------------------------------------------------------------------
+
+file:
+	| statement* FILE_END
+
+repl:
+	| statementRepl			# TODO
+
+------------------------------------------------------------------
+STATEMENT RULES
+------------------------------------------------------------------
+
+statement:
+	| expressionStatement
+	| printStatement		# Temporary statement until built-in function exists
+	| varStatement
+
+varStatement:
+	| "var" IDENTIFIER ":" expression NEWLINE
+
+expressionStatement:
+	| expression NEWLINE
+
+------------------------------------------------------------------
+EXPRESSION RULES
+------------------------------------------------------------------
+
+expression:
+	| assignment
+	| disjunction
+
+assignment:
+	| IDENTIFIER ":" expression			# TODO: Prefix with `( call "." )?` when adding calls
+
+disjunction:
+	| conjunction ( "or" conjunction )*
+
+conjunction:
+	| comparison ( "and" comparison )*
+
+comparison:
+	| term ( ( "<" | "<=" | ">" | ">=" | "=" | "!=" ) term )*
+
+term:
+	| factor ( ( "+" | "-" ) factor )*
+
+factor:
+	| unary ( ( "*" | "/" ) unary )*
+
+unary:
+	| ( "not" | "-" ) unary
+	| atom								# TODO: Change to `call` when adding calls
+
+atom:
+	IDENTIFIER
+	| NUMBER
+	| TEXT
+	| "true"
+	| "false"
+	| "none"
+	| group
+
+group:
+	| "(" expression ")"
+
+------------------------------------------------------------------
+LEXICAL RULES
+------------------------------------------------------------------
+
+IDENTIFIER:
+	| ALPHA ( ALPHA | DIGIT )*
+
+NUMBER:
+	| DIGIT+ ( "." DIGIT+ )?
+
+TEXT:
+	| "\"" <any ASCII character except "\"" or NEWLINE>* "\""
+
+ALPHA:
+	| "a" ... "z"
+	| "A" ... "Z"
+	| "_"
+
+DIGIT:
+	| "0" ... "9"
+
+NEWLINE:
+    | "\n"
+    | "\r"
+    | "\r\n"
+
+FILE_END:
+    | <end of file>
