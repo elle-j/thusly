@@ -72,8 +72,9 @@ _deps
 # External projects
 *-prefix/
 
-### Build directories
+### Build directories and cache
 bin/
 build/
+.cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/c,cmake
