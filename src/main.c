@@ -1,8 +1,11 @@
 #include "common.h"
 #include "debug.h"
 #include "program.h"
+#include "vm.h"
 
 int main(int argc, const char* argv[]) {
+  VM vm;
+  init_vm(&vm);
   Program program;
   init_program(&program);
 
@@ -14,6 +17,9 @@ int main(int argc, const char* argv[]) {
 
   disassemble_program(&program, "Debugging");
 
+  interpret(&vm, &program);
+
+  free_vm(&vm);
   free_program(&program);
 
   return 1;
