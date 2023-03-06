@@ -3,11 +3,22 @@
 #include "common.h"
 #include "debug.h"
 #include "program.h"
+#include "thusly_value.h"
 
-static int print_op_code(const char* name, int offset) {
-  printf("op[%s]\n", name);
+static int print_opcode(const char* op_name, int offset) {
+  printf("op[%s]\n", op_name);
 
   return offset + 1;
+}
+
+static int print_constant(const char* op_name, Program* program, int offset) {
+  byte constant_index = program->instructions[offset + 1]; 
+  // printf("op[%-16s] index[%4d] value[", op_name, constant_index);
+  printf("op[%s] index[%d] value[", op_name, constant_index);
+  print_value(program->constant_pool.values[constant_index]);
+  printf("]\n");
+
+  return offset + 2;
 }
 
 void disassemble_program(Program* program, const char* name) {
@@ -21,10 +32,18 @@ void disassemble_program(Program* program, const char* name) {
 int disassemble_instruction(Program* program, int offset) {
   printf("offset[%04d] ", offset);
 
+  bool same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
+  if (same_line_as_previous)
+    printf("           ");
+  else
+    printf("line[%4d] ", program->source_lines[offset]);
+
   byte instruction = program->instructions[offset];
   switch (instruction) {
+    case OP_CONSTANT:
+      return print_constant("OP_CONSTANT", program, offset);
     case OP_RETURN:
-      return print_op_code("OP_RETURN", offset);
+      return print_opcode("OP_RETURN", offset);
     default:
       printf("Unsupported opcode %d\n", instruction);
       return offset + 1;

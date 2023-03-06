@@ -21,6 +21,8 @@ add_executable(cthusly
 	src/memory.c
 	src/program.h
 	src/program.c
+	src/thusly_value.h
+	src/thusly_value.c
 )
 
 target_include_directories(cthusly PUBLIC src)
