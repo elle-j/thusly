@@ -6,9 +6,14 @@
 #include "thusly_value.h"
 
 typedef enum {
+  OP_ADD,
   OP_CONSTANT,
+  OP_DIVIDE,
+  OP_MULTIPLY,
+  OP_NEGATE,
   OP_RETURN,
-} OpCode;
+  OP_SUBTRACT,
+} Opcode;
 
 typedef struct {
   ConstantPool constant_pool;

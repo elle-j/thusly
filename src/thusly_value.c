@@ -10,6 +10,8 @@ void init_constant_pool(ConstantPool* pool) {
 }
 
 void free_constant_pool(ConstantPool* pool) {
+  printf("FREEING CONSTANT POOL..\n"); // TEMPORARY
+
   FREE_ARRAY(ThuslyValue, pool->values, pool->capacity);
   init_constant_pool(pool);
 }

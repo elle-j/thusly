@@ -16,6 +16,8 @@ void init_vm(VM* vm) {
 
 void free_vm(VM* vm) {
   // TODO
+
+  printf("FREEING VM..\n"); // TEMPORARY
 }
 
 void push(VM* vm, ThuslyValue value) {
@@ -31,6 +33,32 @@ ThuslyValue pop(VM* vm) {
   return *vm->next_stack_top;
 
   // TODO: Check empty
+}
+
+typedef double (*BinaryOp)(double a, double b);
+
+static inline double op_add(double a, double b) {
+  return a + b;
+}
+
+static inline double op_divide(double a, double b) {
+  return a / b;
+}
+
+static inline double op_multiply(double a, double b) {
+  return a * b;
+}
+
+static inline double op_subtract(double a, double b) {
+  return a - b;
+}
+
+static inline void binary_op(VM* vm, BinaryOp op) {
+  {
+    double b = pop(vm);
+    double a = pop(vm);
+    push(vm, op(a, b));
+  }
 }
 
 static ErrorReport decode_and_execute(VM* vm) {
@@ -53,6 +81,22 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
+      case OP_ADD:
+        binary_op(vm, op_add);
+        break;
+      case OP_DIVIDE:
+        binary_op(vm, op_divide);
+        break;
+      case OP_MULTIPLY:
+        binary_op(vm, op_multiply);
+        break;
+      case OP_SUBTRACT:
+        binary_op(vm, op_subtract);
+        break;
+      case OP_NEGATE:
+        // Can temporarily use `-` directly since only treating ThuslyValues as doubles for now.
+        push(vm, -pop(vm));
+        break;
       case OP_RETURN: {
         printf("> Result: ");   // Temporary
         print_value(pop(vm));
