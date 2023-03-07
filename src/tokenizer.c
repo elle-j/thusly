@@ -30,8 +30,18 @@ static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   return token;
 }
 
+static bool is_alpha(char character) {
+  return (character >= 'a' && character <= 'z')
+    || (character >= 'A' && character <= 'Z')
+    || character == '_';
+}
+
 static bool is_digit(char character) {
   return character >= '0' && character <= '9';
+}
+
+static bool is_alphanumeric(char character) {
+  return is_alpha(character) || is_digit(character);
 }
 
 static bool is_at_end(Tokenizer* tokenizer) {
@@ -135,6 +145,57 @@ static Token consume_text(Tokenizer* tokenizer) {
   return token;
 }
 
+static TokenType search_keyword(Tokenizer* tokenizer, int prefix_length, const char* suffix, int suffix_length, TokenType type) {
+  int lexeme_length = tokenizer->current - tokenizer->start;
+  const char* lexeme_suffix = tokenizer->start + prefix_length;
+  bool is_exact_match =
+    lexeme_length == prefix_length + suffix_length
+    && memcmp(lexeme_suffix, suffix, suffix_length) == 0;
+
+  return is_exact_match ? type : TOKEN_IDENTIFIER;
+}
+
+static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
+  // Using a trie to check if it is one of the keywords.
+  int lexeme_length = tokenizer->current - tokenizer->start;
+  switch (tokenizer->start[0]) {
+    case 'a':
+      return search_keyword(tokenizer, 1, "nd", 2, TOKEN_AND);
+    case 'f':
+      return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
+    case 'n':
+      if (lexeme_length > 2) {
+        switch (tokenizer->start[1]) {
+          case 'o':
+            switch (tokenizer->start[2]) {
+              case 'n':
+                return search_keyword(tokenizer, 3, "e", 1, TOKEN_NONE);
+              case 't':
+                return search_keyword(tokenizer, 3, "", 0, TOKEN_NOT);
+            }
+        }
+      }
+      break;
+    case 'o':
+      return search_keyword(tokenizer, 1, "r", 1, TOKEN_OR);
+    case 'p':
+      return search_keyword(tokenizer, 1, "rint", 4, TOKEN_PRINT);
+    case 't':
+      return search_keyword(tokenizer, 1, "rue", 3, TOKEN_TRUE);
+    case 'v':
+      return search_keyword(tokenizer, 1, "ar", 2, TOKEN_VAR);
+  }
+
+  return TOKEN_IDENTIFIER;
+}
+
+static Token consume_keyword_or_identifier(Tokenizer* tokenizer) {
+  while (is_alphanumeric(peek(tokenizer)))
+    advance(tokenizer);
+
+  return make_token(tokenizer, get_keyword_or_identifier_type(tokenizer));
+}
+
 Token tokenize(Tokenizer* tokenizer) {
   skip_whitespace(tokenizer);
   skip_comment(tokenizer);
@@ -186,6 +247,8 @@ Token tokenize(Tokenizer* tokenizer) {
     case '"':
       return consume_text(tokenizer);
     default:
+      if (is_alpha(character))
+        return consume_keyword_or_identifier(tokenizer);
       if (is_digit(character))
         return consume_number(tokenizer);
 
