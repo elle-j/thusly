@@ -11,22 +11,25 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 add_subdirectory(src)
 
 # add_executable(cthusly src/main.c)
-
 add_executable(cthusly
 	src/main.c
 	src/common.h
+	src/compiler.h
+	src/compiler.c
 	src/debug.h
 	src/debug.c
+	src/exit_code.h
 	src/memory.h
 	src/memory.c
 	src/program.h
 	src/program.c
 	src/thusly_value.h
 	src/thusly_value.c
+	src/tokenizer.h
+	src/tokenizer.c
 	src/vm.h
 	src/vm.c
 )
 
 target_include_directories(cthusly PUBLIC src)
-
 # target_link_libraries(cthusly PUBLIC ..)

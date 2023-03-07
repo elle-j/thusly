@@ -57,7 +57,7 @@ unary:
 	| atom								# TODO: Change to `call` when adding calls
 
 atom:
-	IDENTIFIER
+	| IDENTIFIER
 	| NUMBER
 	| TEXT
 	| "true"
@@ -79,7 +79,7 @@ NUMBER:
 	| DIGIT+ ( "." DIGIT+ )?
 
 TEXT:
-	| "\"" <any ASCII character except "\"" or NEWLINE>* "\""
+	| "\"" <any ASCII character except "\"">* "\""
 
 ALPHA:
 	| "a" ... "z"
@@ -90,9 +90,9 @@ DIGIT:
 	| "0" ... "9"
 
 NEWLINE:
-    | "\n"
-    | "\r"
-    | "\r\n"
+	| "\n"
+	| "\r"
+	| "\r\n"
 
 FILE_END:
-    | <end of file>
+	| <end of file>

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "program.h"
 #include "thusly_value.h"
@@ -110,9 +111,8 @@ static ErrorReport decode_and_execute(VM* vm) {
   #undef READ_CONSTANT
 }
 
-ErrorReport interpret(VM* vm, Program* program) {
-  vm->program = program;
-  vm->next_instruction = vm->program->instructions;
+ErrorReport interpret(VM* vm, const char* source) {
+  compile(vm, source);
 
-  return decode_and_execute(vm);
+  return REPORT_NO_ERROR;
 }

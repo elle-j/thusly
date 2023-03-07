@@ -24,6 +24,6 @@ void init_vm(VM* vm);
 void free_vm(VM* vm);
 void push(VM* vm, ThuslyValue value);
 ThuslyValue pop(VM* vm);
-ErrorReport interpret(VM* vm, Program* program);
+ErrorReport interpret(VM* vm, const char* source);
 
 #endif
