@@ -1,6 +1,8 @@
 #ifndef CTHUSLY_TOKENIZER_H
 #define CTHUSLY_TOKENIZER_H
 
+#include "common.h"
+
 // Some of the token types (incrementally added).
 
 typedef enum {
@@ -63,6 +65,7 @@ typedef struct {
   const char* start;
   const char* current;
   int line;
+  bool is_blank_line;
 } Tokenizer;
 
 void init_tokenizer(Tokenizer* tokenizer, const char* source);

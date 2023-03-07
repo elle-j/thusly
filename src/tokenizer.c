@@ -7,25 +7,7 @@ void init_tokenizer(Tokenizer* tokenizer, const char* source) {
   tokenizer->start = source;
   tokenizer->current = source;
   tokenizer->line = 1;
-}
-
-static bool is_at_end(Tokenizer* tokenizer) {
-  return *tokenizer->current == '\0';
-}
-
-static char advance(Tokenizer* tokenizer) {
-  tokenizer->current++;
-
-  return tokenizer->current[-1];
-}
-
-static bool match(Tokenizer* tokenizer, char expected) {
-  if (is_at_end(tokenizer) || *tokenizer->current != expected)
-    return false;
-
-  advance(tokenizer);
-
-  return true;
+  tokenizer->is_blank_line = true;
 }
 
 static Token make_token(Tokenizer* tokenizer, TokenType type) {
@@ -48,14 +30,87 @@ static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   return token;
 }
 
+static bool is_at_end(Tokenizer* tokenizer) {
+  return *tokenizer->current == '\0';
+}
+
+static char advance(Tokenizer* tokenizer) {
+  tokenizer->current++;
+
+  return tokenizer->current[-1];
+}
+
+static char peek(Tokenizer* tokenizer) {
+  return *tokenizer->current;
+}
+
+static char peek_next(Tokenizer* tokenizer) {
+  if (is_at_end(tokenizer))
+    return '\0';
+
+  return tokenizer->current[1];
+}
+
+static bool match(Tokenizer* tokenizer, char expected) {
+  if (is_at_end(tokenizer) || *tokenizer->current != expected)
+    return false;
+
+  advance(tokenizer);
+
+  return true;
+}
+
+static inline bool is_whitespace(char character, bool is_blank_line) {
+  // TODO: Double check '\r' (and '\r\n'?)
+  return character == ' ' || character == '\t' || character == '\r' || (is_blank_line && character == '\n');
+}
+
+static void skip_whitespace(Tokenizer* tokenizer) {
+  while (is_whitespace(peek(tokenizer), tokenizer->is_blank_line)) {
+    if (peek(tokenizer) == '\n')
+      tokenizer->line++;
+
+    advance(tokenizer);
+  }
+}
+
+static void skip_comment(Tokenizer* tokenizer) {
+  char character = peek(tokenizer);
+  if (character == '/' && peek_next(tokenizer) == '/') {
+    while (character != '\n' && !is_at_end(tokenizer)) {
+      advance(tokenizer);
+      character = peek(tokenizer);
+    }
+
+    if (character == '\n' && tokenizer->is_blank_line) {
+      // If it's not a blank line, let the switch statement in
+      // `tokenize()` handle the significant newline instead.
+      tokenizer->line++;
+      advance(tokenizer);
+    }
+  }
+}
+
 Token tokenize(Tokenizer* tokenizer) {
+  skip_whitespace(tokenizer);
+  skip_comment(tokenizer);
+
+  tokenizer->is_blank_line = false;
   tokenizer->start = tokenizer->current;
 
   if (is_at_end(tokenizer))
     return make_token(tokenizer, TOKEN_FILE_END);
-  
+
   char character = advance(tokenizer);
   switch (character) {
+    case '\n': {
+      // Semantically insignificant newlines are handled in `skip_whitespace()`.
+      // (Make the token before incrementing line number.)
+      Token token = make_token(tokenizer, TOKEN_NEWLINE);
+      tokenizer->line++;
+      tokenizer->is_blank_line = true;
+      return token;
+    }
     case ':':
       return make_token(tokenizer, TOKEN_COLON);
     case '(':
@@ -85,6 +140,6 @@ Token tokenize(Tokenizer* tokenizer) {
         ? make_token(tokenizer, TOKEN_GREATER_THAN_EQUALS)
         : make_token(tokenizer, TOKEN_GREATER_THAN);
   }
-  
+
   return make_error_token(tokenizer, "You have included an illegal character");
 }
