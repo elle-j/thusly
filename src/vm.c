@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "program.h"
 #include "thusly_value.h"
@@ -111,5 +112,7 @@ static ErrorReport decode_and_execute(VM* vm) {
 }
 
 ErrorReport interpret(VM* vm, const char* source) {
+  compile(vm, source);
+
   return REPORT_NO_ERROR;
 }
