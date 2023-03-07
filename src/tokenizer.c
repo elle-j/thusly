@@ -30,6 +30,10 @@ static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   return token;
 }
 
+static bool is_digit(char character) {
+  return character >= '0' && character <= '9';
+}
+
 static bool is_at_end(Tokenizer* tokenizer) {
   return *tokenizer->current == '\0';
 }
@@ -91,6 +95,46 @@ static void skip_comment(Tokenizer* tokenizer) {
   }
 }
 
+static Token consume_number(Tokenizer* tokenizer) {
+  while (is_digit(peek(tokenizer)))
+    advance(tokenizer);
+
+  if (peek(tokenizer) == '.' && is_digit(peek_next(tokenizer))) {
+    // Consume the decimal point.
+    advance(tokenizer);
+
+    while (is_digit(peek(tokenizer)))
+      advance(tokenizer);
+  }
+
+  return make_token(tokenizer, TOKEN_NUMBER);
+}
+
+static Token consume_text(Tokenizer* tokenizer) {
+  // Save separate `line` variable rather than incrementing `tokenizer->line`
+  // directly so that tokens store the line number at the start of the text.
+  int line = tokenizer->line;
+  while (peek(tokenizer) != '"' && !is_at_end(tokenizer)) {
+    if (peek(tokenizer) == '\n')
+      line++;
+    
+    advance(tokenizer);
+  }
+
+  Token token;
+  if (is_at_end(tokenizer))
+    token = make_error_token(tokenizer, "The text is not terminated. Use \" to terminate it.");
+  else {
+    // Consume the terminating ".
+    advance(tokenizer);
+    token = make_token(tokenizer, TOKEN_TEXT);
+  }
+
+  tokenizer->line = line;
+
+  return token;
+}
+
 Token tokenize(Tokenizer* tokenizer) {
   skip_whitespace(tokenizer);
   skip_comment(tokenizer);
@@ -130,7 +174,7 @@ Token tokenize(Tokenizer* tokenizer) {
     case '!':
       if (match(tokenizer, '='))
         return make_token(tokenizer, TOKEN_EXCLAMATION_EQUALS);
-      return make_error_token(tokenizer, "You have included an illegal character: !");
+      return make_error_token(tokenizer, "You have included an illegal character: ! (This character is only allowed in !=)");
     case '<':
       return match(tokenizer, '=')
         ? make_token(tokenizer, TOKEN_LESS_THAN_EQUALS)
@@ -139,7 +183,12 @@ Token tokenize(Tokenizer* tokenizer) {
       return match(tokenizer, '=')
         ? make_token(tokenizer, TOKEN_GREATER_THAN_EQUALS)
         : make_token(tokenizer, TOKEN_GREATER_THAN);
-  }
+    case '"':
+      return consume_text(tokenizer);
+    default:
+      if (is_digit(character))
+        return consume_number(tokenizer);
 
-  return make_error_token(tokenizer, "You have included an illegal character");
+      return make_error_token(tokenizer, "You have included an illegal character.");
+  }
 }
