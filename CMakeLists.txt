@@ -17,6 +17,7 @@ add_executable(cthusly
 	src/common.h
 	src/debug.h
 	src/debug.c
+	src/exit_code.h
 	src/memory.h
 	src/memory.c
 	src/program.h

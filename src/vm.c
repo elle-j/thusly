@@ -110,9 +110,6 @@ static ErrorReport decode_and_execute(VM* vm) {
   #undef READ_CONSTANT
 }
 
-ErrorReport interpret(VM* vm, Program* program) {
-  vm->program = program;
-  vm->next_instruction = vm->program->instructions;
-
-  return decode_and_execute(vm);
+ErrorReport interpret(VM* vm, const char* source) {
+  return REPORT_NO_ERROR;
 }
