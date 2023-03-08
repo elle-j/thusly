@@ -30,9 +30,9 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   fprintf(stderr, "ERROR on line %d", token->line);
   if (token->type == TOKEN_FILE_END)
     fprintf(stderr, " at the end of the file.");
-  else if (token->type == TOKEN_ERROR) {
-    // The error message for `TOKEN_ERROR`s has been passed in as the
-    // `message` via `advance()`. There's no need to do anything here.
+  else if (token->type == TOKEN_LEXICAL_ERROR) {
+    // The error message for `TOKEN_LEXICAL_ERROR`s has been passed in as
+    // the `message` via `advance()`. There's no need to do anything here.
   }
   else {
     // `token->length` is passed as the argument for '*' (determining how many
@@ -53,15 +53,14 @@ static bool check(Parser* parser, TokenType type) {
 
 static void advance(Parser* parser, Tokenizer* tokenizer) {
   parser->previous = parser->current;
-  
-  while (true) {
-    parser->current = tokenize(tokenizer);
-    if (parser->current.type != TOKEN_ERROR)
-      break;
+  parser->current = tokenize(tokenizer);
 
-    // Whenever the tokenizer encounters an error it produces a token of
-    // type `TOKEN_ERROR` and saves the error message as the lexeme.
+  // Whenever the tokenizer encounters an error it produces a token of type
+  // `TOKEN_LEXICAL_ERROR`. Loop past (and report) these until the next valid token.
+  while (parser->current.type == TOKEN_LEXICAL_ERROR) {
+    // Lexical error tokens store the error message on the lexeme field.
     error_at(parser, &parser->current, parser->current.lexeme);
+    parser->current = tokenize(tokenizer);
   }
 }
 

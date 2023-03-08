@@ -50,7 +50,7 @@ typedef enum {
   TOKEN_NEWLINE,
 
   // Errors
-  TOKEN_ERROR,
+  TOKEN_LEXICAL_ERROR,
 } TokenType;
 
 typedef struct {
