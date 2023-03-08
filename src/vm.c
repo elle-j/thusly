@@ -25,7 +25,7 @@ void push(VM* vm, ThuslyValue value) {
   *vm->next_stack_top = value;
   vm->next_stack_top++;
 
-  // TODO: Check stack overflow
+  // TODO: Check size before pushing to prevent stack overflow
 }
 
 ThuslyValue pop(VM* vm) {
@@ -112,7 +112,20 @@ static ErrorReport decode_and_execute(VM* vm) {
 }
 
 ErrorReport interpret(VM* vm, const char* source) {
-  compile(vm, source);
+  Program program;
+  init_program(&program);
 
-  return REPORT_NO_ERROR;
+  bool has_error = !compile(vm, source, &program);
+  if (has_error) {
+    free_program(&program);
+    return REPORT_COMPILE_ERROR;
+  }
+
+  vm->program = &program;
+  vm->next_instruction = program.instructions;
+  ErrorReport report = decode_and_execute(vm);
+
+  free_program(&program);
+
+  return report;
 }
