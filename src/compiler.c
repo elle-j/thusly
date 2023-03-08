@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "compiler.h"
+#include "program.h"
+#include "thusly_value.h"
 #include "tokenizer.h"
 
 typedef struct {
@@ -76,6 +78,39 @@ static void consume(Parser* parser, TokenType type, const char* err_message) {
   error_at(parser, &parser->current, err_message);
 }
 
+static void write_instruction(Parser* parser, byte instruction) {
+  append_instruction(get_writable_program(parser), instruction, parser->previous.line);
+}
+
+static void write_instructions(Parser* parser, byte instruction1, byte instruction2) {
+  write_instruction(parser, instruction1);
+  write_instruction(parser, instruction2);
+}
+
+static byte make_constant(Parser* parser, ThuslyValue value) {
+  unsigned int constant_index = add_constant(get_writable_program(parser), value);
+  // The operand to the OP_CONSTANT instruction (i.e. the index of the constant)
+  // currently only supports 1 byte.
+  if (constant_index > UINT8_MAX) {
+    error(parser, "Too many constants have been used in the program.");
+    return 0;
+  }
+
+  return (byte)constant_index;
+}
+
+static void write_constant_instruction(Parser* parser, ThuslyValue value) {
+  write_instructions(parser, OP_CONSTANT, make_constant(parser, value));
+}
+
+static void write_return_instruction(Parser* parser) {
+  write_instruction(parser, OP_RETURN);
+}
+
+static void end_compilation(Parser* parser) {
+  write_return_instruction(parser);
+}
+
 bool compile(const char* source, Program* out_program) {
   Parser parser;
   init_parser(&parser, out_program);
@@ -83,6 +118,7 @@ bool compile(const char* source, Program* out_program) {
 
   advance(&parser);
   consume(&parser, TOKEN_FILE_END, "Expected the end of an expression.");
+  end_compilation(&parser);
 
   return !parser.has_error;
 }
