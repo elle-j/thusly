@@ -13,6 +13,8 @@ static void reset_stack(VM* vm) {
 
 void init_vm(VM* vm) {
   reset_stack(vm);
+
+  // TODO
 }
 
 void free_vm(VM* vm) {
@@ -115,7 +117,7 @@ ErrorReport interpret(VM* vm, const char* source) {
   Program program;
   init_program(&program);
 
-  bool has_error = !compile(vm, source, &program);
+  bool has_error = !compile(source, &program);
   if (has_error) {
     free_program(&program);
     return REPORT_COMPILE_ERROR;

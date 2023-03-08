@@ -4,6 +4,6 @@
 #include "program.h"
 #include "vm.h"
 
-bool compile(VM* vm, const char* source, Program* out_program);
+bool compile(const char* source, Program* out_program);
 
 #endif
