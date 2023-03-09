@@ -56,6 +56,7 @@ static inline double op_subtract(double a, double b) {
   return a - b;
 }
 
+// TODO: Perhaps make this a macro
 static inline void binary_op(VM* vm, BinaryOp op) {
   {
     double b = pop(vm);
@@ -67,6 +68,10 @@ static inline void binary_op(VM* vm, BinaryOp op) {
 static ErrorReport decode_and_execute(VM* vm) {
   #define READ_BYTE() (*vm->next_instruction++)
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
+
+  #ifdef DEBUG_EXECUTION
+  printf("========== Execution ==========\n");
+  #endif
 
   while (true) {
     #ifdef DEBUG_EXECUTION
@@ -103,7 +108,7 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_RETURN: {
         printf("> Result: ");   // Temporary
         print_value(pop(vm));
-        printf("\n");
+        printf("\n\n");
         return REPORT_NO_ERROR;
       }
     }

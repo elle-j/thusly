@@ -7,6 +7,10 @@
 #include "thusly_value.h"
 #include "tokenizer.h"
 
+#ifdef DEBUG_COMPILATION
+#include "debug.h"
+#endif
+
 /// The compiler and parser - parses the tokens received by the tokenizer on demand
 /// (it controls the tokenizer) and writes the bytecode instructions for the VM in
 /// a single pass in the instruction format expected by the VM. (It performs top-down
@@ -34,6 +38,69 @@ typedef enum {
   PRECEDENCE_FACTOR,
   PRECEDENCE_UNARY,
 } Precedence;
+
+/// A function used for parsing an expression.
+typedef void (*ParseFunction)(Parser*);
+
+/// Holds the function used for parsing a prefix or infix expression based
+/// on the given precedence level.
+typedef struct {
+  ParseFunction prefix;
+  ParseFunction infix;
+  Precedence precedence;
+} ParseRule;
+
+static void parse_binary(Parser* parser);
+static void parse_grouping(Parser* parser);
+static void parse_number(Parser* parser);
+static void parse_unary(Parser* parser);
+
+/// The parse rules associated with each type of token.
+static ParseRule rules[] = {
+  // Format (the token type enum constant becomes the index):
+  // [TOKEN_TYPE]               = { PREFIX_RULE, INFIX_RULE, PRECEDENCE_LEVEL }
+
+  // Punctuation and non-keyword operators
+  [TOKEN_CLOSE_PAREN]           = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_COLON]                 = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_EXCLAMATION_EQUALS]    = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_EQUALS]                = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_GREATER_THAN]          = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_GREATER_THAN_EQUALS]   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_LESS_THAN]             = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_LESS_THAN_EQUALS]      = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_MINUS]                 = { parse_unary, parse_binary, PRECEDENCE_TERM },
+  [TOKEN_OPEN_PAREN]            = { parse_grouping, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_PLUS]                  = { NULL, parse_binary, PRECEDENCE_TERM },
+  [TOKEN_SLASH]                 = { NULL, parse_binary, PRECEDENCE_FACTOR },
+  [TOKEN_STAR]                  = { NULL, parse_binary, PRECEDENCE_FACTOR },
+
+  // Reserved keywords
+  [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_FALSE]                 = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NONE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NOT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_PRINT]                 = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_TRUE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+
+  // Literals
+  [TOKEN_IDENTIFIER]            = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NUMBER]                = { parse_number, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_TEXT]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+
+  // Formatting
+  [TOKEN_FILE_END]              = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NEWLINE]               = { NULL, NULL, PRECEDENCE_IGNORE },
+
+  // Errors
+  [TOKEN_LEXICAL_ERROR]         = { NULL, NULL, PRECEDENCE_IGNORE },
+};
+
+static ParseRule* get_rule(TokenType type) {
+  return &rules[type];
+}
 
 static Program* get_writable_program(Parser* parser) {
   return parser->writable_program;
@@ -126,13 +193,59 @@ static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
-static void parse_precedence(Parser* parser, Precedence precedence) {
-  // TODO
+static void parse_precedence(Parser* parser, Precedence min_precedence) {
+  advance(parser);
+
+  // All valid expressions must begin with a prefix token.
+  ParseFunction prefix_rule = get_rule(parser->previous.type)->prefix;
+  if (prefix_rule == NULL) {
+    error(parser, "Expected an expression.");
+    return;
+  }
+  prefix_rule(parser);
+
+  // Keep parsing expressions as long as the precedence level is high enough.
+  while (get_rule(parser->current.type)->precedence >= min_precedence) {
+    advance(parser);
+    ParseFunction infix_rule = get_rule(parser->previous.type)->infix;
+    infix_rule(parser);
+  }
+
+  if (parser->current.type == TOKEN_NEWLINE)
+    advance(parser);
 }
 
 static void parse_expression(Parser* parser) {
   // Lowest precedence = PRECEDENCE_ASSIGNMENT
   parse_precedence(parser, PRECEDENCE_ASSIGNMENT);
+}
+
+static void parse_binary(Parser* parser) {
+  TokenType operator = parser->previous.type;
+  ParseRule* rule = get_rule(operator);
+  // Parse the right-hand operand using one precedence level above the current one
+  // in order to enforce left-associativity. E.g.:
+  // 5 + 6 + 7 should be parsed (5 + 6) + 7
+  // 5 + 6 * 7 / 8 should be parsed 5 + ((6 * 7) / 8)
+  parse_precedence(parser, (Precedence)(rule->precedence + 1));
+
+  switch (operator) {
+    case TOKEN_PLUS:
+      write_instruction(parser, OP_ADD);
+      break;
+    case TOKEN_MINUS:
+      write_instruction(parser, OP_SUBTRACT);
+      break;
+    case TOKEN_STAR:
+      write_instruction(parser, OP_MULTIPLY);
+      break;
+    case TOKEN_SLASH:
+      write_instruction(parser, OP_DIVIDE);
+      break;
+    default:
+      // This should not be reachable.
+      return;
+  }
 }
 
 static void parse_grouping(Parser* parser) {
@@ -158,6 +271,11 @@ static void parse_unary(Parser* parser) {
 
 static void end_compilation(Parser* parser) {
   write_return_instruction(parser);
+
+  #ifdef DEBUG_COMPILATION
+    if (!parser->has_error)
+      disassemble_program(get_writable_program(parser), "Program");
+  #endif
 }
 
 bool compile(const char* source, Program* out_program) {
@@ -166,9 +284,7 @@ bool compile(const char* source, Program* out_program) {
   init_tokenizer(&parser.tokenizer, source);
 
   advance(&parser);
-  advance(&parser);
   parse_expression(&parser);
-  parse_number(&parser);
   consume(&parser, TOKEN_FILE_END, "Expected the end of an expression.");
   end_compilation(&parser);
 
