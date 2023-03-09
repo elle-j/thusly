@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define DEBUG_COMPILATION
 #define DEBUG_EXECUTION
 
 typedef uint8_t byte;

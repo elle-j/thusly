@@ -13,6 +13,8 @@ static void reset_stack(VM* vm) {
 
 void init_vm(VM* vm) {
   reset_stack(vm);
+
+  // TODO
 }
 
 void free_vm(VM* vm) {
@@ -25,7 +27,7 @@ void push(VM* vm, ThuslyValue value) {
   *vm->next_stack_top = value;
   vm->next_stack_top++;
 
-  // TODO: Check stack overflow
+  // TODO: Check size before pushing to prevent stack overflow
 }
 
 ThuslyValue pop(VM* vm) {
@@ -54,6 +56,7 @@ static inline double op_subtract(double a, double b) {
   return a - b;
 }
 
+// TODO: Perhaps make this a macro
 static inline void binary_op(VM* vm, BinaryOp op) {
   {
     double b = pop(vm);
@@ -65,6 +68,10 @@ static inline void binary_op(VM* vm, BinaryOp op) {
 static ErrorReport decode_and_execute(VM* vm) {
   #define READ_BYTE() (*vm->next_instruction++)
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
+
+  #ifdef DEBUG_EXECUTION
+  printf("========== Execution ==========\n");
+  #endif
 
   while (true) {
     #ifdef DEBUG_EXECUTION
@@ -101,7 +108,7 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_RETURN: {
         printf("> Result: ");   // Temporary
         print_value(pop(vm));
-        printf("\n");
+        printf("\n\n");
         return REPORT_NO_ERROR;
       }
     }
@@ -112,7 +119,20 @@ static ErrorReport decode_and_execute(VM* vm) {
 }
 
 ErrorReport interpret(VM* vm, const char* source) {
-  compile(vm, source);
+  Program program;
+  init_program(&program);
 
-  return REPORT_NO_ERROR;
+  bool has_error = !compile(source, &program);
+  if (has_error) {
+    free_program(&program);
+    return REPORT_COMPILE_ERROR;
+  }
+
+  vm->program = &program;
+  vm->next_instruction = program.instructions;
+  ErrorReport report = decode_and_execute(vm);
+
+  free_program(&program);
+
+  return report;
 }

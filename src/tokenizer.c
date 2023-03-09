@@ -22,7 +22,7 @@ static Token make_token(Tokenizer* tokenizer, TokenType type) {
 
 static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   Token token;
-  token.type = TOKEN_ERROR;
+  token.type = TOKEN_LEXICAL_ERROR;
   token.lexeme = message;
   token.length = (int)(strlen(message));
   token.line = tokenizer->line;
