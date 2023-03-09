@@ -7,6 +7,12 @@
 #include "thusly_value.h"
 #include "tokenizer.h"
 
+/// The compiler and parser - parses the tokens received by the tokenizer on demand
+/// (it controls the tokenizer) and writes the bytecode instructions for the VM in
+/// a single pass in the instruction format expected by the VM. (It performs top-down
+/// operator precedence parsing.)
+
+///
 typedef struct {
   Program* writable_program; // TODO: Modify
   Tokenizer tokenizer;
@@ -15,6 +21,19 @@ typedef struct {
   bool has_error;
   bool panic_mode;
 } Parser;
+
+/// The levels of precedence from lowest to highest.
+typedef enum {
+  PRECEDENCE_IGNORE,      // E.g. `(`, `,`, or non-operator keywords.
+  PRECEDENCE_ASSIGNMENT,
+  PRECEDENCE_DISJUNCTION,
+  PRECEDENCE_CONJUNCTION,
+  PRECEDENCE_EQUALITY,    // TODO: Perhaps combine EQUALITY and COMPARISON
+  PRECEDENCE_COMPARISON,
+  PRECEDENCE_TERM,
+  PRECEDENCE_FACTOR,
+  PRECEDENCE_UNARY,
+} Precedence;
 
 static Program* get_writable_program(Parser* parser) {
   return parser->writable_program;
@@ -37,7 +56,7 @@ static void error_at(Parser* parser, Token* token, const char* message) {
 
   fprintf(stderr, "ERROR on line %d", token->line);
   if (token->type == TOKEN_FILE_END)
-    fprintf(stderr, " at the end of the file.");
+    fprintf(stderr, " at the end of the file");
   else if (token->type == TOKEN_LEXICAL_ERROR) {
     // The error message for `TOKEN_LEXICAL_ERROR` has been passed in as
     // the `message` via `advance()`. There's no need to do anything here.
@@ -92,7 +111,7 @@ static byte make_constant(Parser* parser, ThuslyValue value) {
   // The operand to the OP_CONSTANT instruction (i.e. the index of the constant)
   // currently only supports 1 byte.
   if (constant_index > UINT8_MAX) {
-    error(parser, "Too many constants have been used in the program.");
+    error(parser, "Too many constants have been used.");
     return 0;
   }
 
@@ -107,6 +126,36 @@ static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
+static void parse_precedence(Parser* parser, Precedence precedence) {
+  // TODO
+}
+
+static void parse_expression(Parser* parser) {
+  // Lowest precedence = PRECEDENCE_ASSIGNMENT
+  parse_precedence(parser, PRECEDENCE_ASSIGNMENT);
+}
+
+static void parse_grouping(Parser* parser) {
+  parse_expression(parser);
+  consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+}
+
+static void parse_number(Parser* parser) {
+  double value = strtod(parser->previous.lexeme, NULL);
+  write_constant_instruction(parser, value);
+}
+
+static void parse_unary(Parser* parser) {
+  TokenType operator = parser->previous.type;
+  parse_precedence(parser, PRECEDENCE_UNARY);
+
+  switch (operator) {
+    case TOKEN_MINUS:
+      write_instruction(parser, OP_NEGATE);
+      break;
+  }
+}
+
 static void end_compilation(Parser* parser) {
   write_return_instruction(parser);
 }
@@ -117,6 +166,9 @@ bool compile(const char* source, Program* out_program) {
   init_tokenizer(&parser.tokenizer, source);
 
   advance(&parser);
+  advance(&parser);
+  parse_expression(&parser);
+  parse_number(&parser);
   consume(&parser, TOKEN_FILE_END, "Expected the end of an expression.");
   end_compilation(&parser);
 
