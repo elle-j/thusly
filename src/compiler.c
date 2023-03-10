@@ -255,7 +255,7 @@ static void parse_grouping(Parser* parser) {
 
 static void parse_number(Parser* parser) {
   double value = strtod(parser->previous.lexeme, NULL);
-  write_constant_instruction(parser, value);
+  write_constant_instruction(parser, FROM_C_DOUBLE(value));
 }
 
 static void parse_unary(Parser* parser) {

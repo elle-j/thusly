@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "common.h"
@@ -23,6 +24,22 @@ void free_vm(VM* vm) {
   printf("FREEING VM..\n"); // TEMPORARY
 }
 
+static void error(VM* vm, const char* message, ...) {
+  // The instructions and source_lines array indexes mirror each other.
+  size_t instruction_index = vm->next_instruction - vm->program->instructions - 1;
+  int source_line = vm->program->source_lines[instruction_index];
+
+  fprintf(stderr, "ERROR on line %d:\n", source_line);
+  fprintf(stderr, "\t>> Help: ");
+  va_list args;
+  va_start(args, message);
+  vfprintf(stderr, message, args);
+  va_end(args);
+  fputs("\n", stderr);
+
+  reset_stack(vm);
+}
+
 void push(VM* vm, ThuslyValue value) {
   *vm->next_stack_top = value;
   vm->next_stack_top++;
@@ -36,6 +53,12 @@ ThuslyValue pop(VM* vm) {
   return *vm->next_stack_top;
 
   // TODO: Check empty
+}
+
+ThuslyValue peek(VM* vm, int offset) {
+  // The current stack top is 1 before next_stack_top. Thus, if the offset passed
+  // is 0, this should peek at next_stack_top[-1].
+  return vm->next_stack_top[-1 - offset];
 }
 
 typedef double (*BinaryOp)(double a, double b);
@@ -56,12 +79,17 @@ static inline double op_subtract(double a, double b) {
   return a - b;
 }
 
-// TODO: Perhaps make this a macro
-static inline void binary_op(VM* vm, BinaryOp op) {
+static inline ErrorReport binary_arithmetic(VM* vm, BinaryOp op) {
   {
-    double b = pop(vm);
-    double a = pop(vm);
-    push(vm, op(a, b));
+    if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
+      error(vm, "The operation can only be performed on numbers.");
+      return REPORT_RUNTIME_ERROR;
+    }
+    double b = TO_C_DOUBLE(pop(vm));
+    double a = TO_C_DOUBLE(pop(vm));
+    push(vm, FROM_C_DOUBLE(op(a, b)));
+
+    return REPORT_NO_ERROR;
   }
 }
 
@@ -89,21 +117,38 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
-      case OP_ADD:
-        binary_op(vm, op_add);
+      case OP_ADD: {
+        ErrorReport report = binary_arithmetic(vm, op_add);
+        if (report == REPORT_RUNTIME_ERROR)
+          return report;
         break;
-      case OP_DIVIDE:
-        binary_op(vm, op_divide);
+      }
+      case OP_DIVIDE: {
+        ErrorReport report = binary_arithmetic(vm, op_divide);
+        if (report == REPORT_RUNTIME_ERROR)
+          return report;
         break;
-      case OP_MULTIPLY:
-        binary_op(vm, op_multiply);
+      }
+      case OP_MULTIPLY: {
+        ErrorReport report = binary_arithmetic(vm, op_multiply);
+        if (report == REPORT_RUNTIME_ERROR)
+          return report;
         break;
-      case OP_SUBTRACT:
-        binary_op(vm, op_subtract);
+      }
+      case OP_SUBTRACT: {
+        ErrorReport report = binary_arithmetic(vm, op_subtract);
+        if (report == REPORT_RUNTIME_ERROR)
+          return report;
         break;
+      }
       case OP_NEGATE:
-        // Can temporarily use `-` directly since only treating ThuslyValues as doubles for now.
-        push(vm, -pop(vm));
+        // Peek at the stack rather than pop here in case there is garbage
+        // collection before the value is pushed onto the stack again.
+        if (!IS_NUMBER(peek(vm, 0))) {
+          error(vm, "Negating a value can only be performed on numbers.");
+          return REPORT_RUNTIME_ERROR;
+        }
+        push(vm, FROM_C_DOUBLE(-TO_C_DOUBLE(pop(vm))));
         break;
       case OP_RETURN: {
         printf("> Result: ");   // Temporary
