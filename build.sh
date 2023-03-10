@@ -3,7 +3,8 @@
 # Check dependencies
 if ! which cmake;
 then
-  echo "Configuration error: CMake was not found. Please install CMake v3.20 or higher and rerun the script."
+  echo -e "\nConfiguration error: CMake was not found. Please install CMake v3.20 or higher and rerun the script."
+  exit 1
 fi
 
 echo -e "\nCreating directory 'bin' for the build files and executable binary..."
