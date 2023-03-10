@@ -61,41 +61,21 @@ ThuslyValue peek(VM* vm, int offset) {
   return vm->next_stack_top[-1 - offset];
 }
 
-typedef double (*BinaryOp)(double a, double b);
-
-static inline double op_add(double a, double b) {
-  return a + b;
-}
-
-static inline double op_divide(double a, double b) {
-  return a / b;
-}
-
-static inline double op_multiply(double a, double b) {
-  return a * b;
-}
-
-static inline double op_subtract(double a, double b) {
-  return a - b;
-}
-
-static inline ErrorReport binary_arithmetic(VM* vm, BinaryOp op) {
-  {
-    if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
-      error(vm, "The operation can only be performed on numbers.");
-      return REPORT_RUNTIME_ERROR;
-    }
-    double b = TO_C_DOUBLE(pop(vm));
-    double a = TO_C_DOUBLE(pop(vm));
-    push(vm, FROM_C_DOUBLE(op(a, b)));
-
-    return REPORT_NO_ERROR;
-  }
-}
-
 static ErrorReport decode_and_execute(VM* vm) {
   #define READ_BYTE() (*vm->next_instruction++)
+
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
+
+  #define DO_BINARY_OP(from_c_value, operator)                        \
+    do {                                                              \
+      if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {       \
+        error(vm, "The operation can only be performed on numbers."); \
+        return REPORT_RUNTIME_ERROR;                                  \
+      }                                                               \
+      double b = TO_C_DOUBLE(pop(vm));                                \
+      double a = TO_C_DOUBLE(pop(vm));                                \
+      push(vm, from_c_value(a operator b));                           \
+    } while (false)
 
   #ifdef DEBUG_EXECUTION
   printf("========== Execution ==========\n");
@@ -117,30 +97,18 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
-      case OP_ADD: {
-        ErrorReport report = binary_arithmetic(vm, op_add);
-        if (report == REPORT_RUNTIME_ERROR)
-          return report;
+      case OP_ADD:
+        DO_BINARY_OP(FROM_C_DOUBLE, +);
         break;
-      }
-      case OP_DIVIDE: {
-        ErrorReport report = binary_arithmetic(vm, op_divide);
-        if (report == REPORT_RUNTIME_ERROR)
-          return report;
+      case OP_DIVIDE:
+        DO_BINARY_OP(FROM_C_DOUBLE, /);
         break;
-      }
-      case OP_MULTIPLY: {
-        ErrorReport report = binary_arithmetic(vm, op_multiply);
-        if (report == REPORT_RUNTIME_ERROR)
-          return report;
+      case OP_MULTIPLY:
+        DO_BINARY_OP(FROM_C_DOUBLE, *);
         break;
-      }
-      case OP_SUBTRACT: {
-        ErrorReport report = binary_arithmetic(vm, op_subtract);
-        if (report == REPORT_RUNTIME_ERROR)
-          return report;
+      case OP_SUBTRACT:
+        DO_BINARY_OP(FROM_C_DOUBLE, -);
         break;
-      }
       case OP_NEGATE:
         // Peek at the stack rather than pop here in case there is garbage
         // collection before the value is pushed onto the stack again.
@@ -161,6 +129,7 @@ static ErrorReport decode_and_execute(VM* vm) {
 
   #undef READ_BYTE
   #undef READ_CONSTANT
+  #undef DO_BINARY_OP
 }
 
 ErrorReport interpret(VM* vm, const char* source) {
