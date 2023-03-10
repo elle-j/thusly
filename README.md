@@ -33,12 +33,12 @@ The design and development are currently on-going and are highly subject to chan
 
 <img src="design/code-snippet.svg" width="600" alt="A snippet of Thusly code.">
 
-Whitespace is semantically insignificant; however, newlines on non-blank lines are significant and denote either the start of a block or end of a statement.
+Whitespace is semantically insignificant; however, newlines on non-blank lines are significant.
 
 ## Milestones
 
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
-  * To try out the tokenizer and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2).
+  * To try out the tokenizer in isolation and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2) (significant newline characters will be printed as newlines).
 - [x] One-line arithmetic expressions using `number`s (`double`) can be parsed and compiled.
   - [x] Addition (`+`)
   - [x] Subtraction (`-`)
@@ -62,7 +62,7 @@ When [running your code](#getting-started) by inputing a **one-line expression**
 | (1 + 2) * 3 / 4  | 2.25            | ((1 + 2) * 3) / 4           |
 | 1 + -2 - -3      | 2               | (1 + (-2)) - (-3)           |
 
-> Note: A debug flag is enabled which also prints the entire bytecode produced by the compiler, as well as the execution steps by the VM including the stack state.
+> Note: A debug flag is enabled which also prints the entire bytecode produced by the compiler, as well as the execution steps by the VM including its stack state.
 
 ## Getting Started
 
