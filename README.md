@@ -50,9 +50,9 @@ Whitespace is semantically insignificant; however, newlines on non-blank lines a
 - [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, and `none` can be executed.
   - [x] Equal to (`=`)
   - [x] Not equal to (`!=`)
-  - [x] Greater than (`>=`)
+  - [x] Greater than (`>`)
   - [x] Greater than or equal to (`>=`)
-  - [x] Less than (`<=`)
+  - [x] Less than (`<`)
   - [x] Less than or equal to (`<=`)
   - [x] Logical not (`not`)
 - [ ] Support `text` (`string`) data type.
