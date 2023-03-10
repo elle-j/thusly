@@ -28,6 +28,23 @@ void append_constant(ConstantPool* pool, ThuslyValue value) {
   pool->count++;
 }
 
+bool values_are_equal(ThuslyValue a, ThuslyValue b) {
+  if (a.type != b.type)
+    return false;
+
+  switch (a.type) {
+    case TYPE_BOOLEAN:
+      return TO_C_BOOL(a) == TO_C_BOOL(b);
+    case TYPE_NONE:
+      return true;
+    case TYPE_NUMBER:
+      return TO_C_DOUBLE(a) == TO_C_DOUBLE(b);
+    default:
+      // This should not be reachable.
+      return false;
+  }
+}
+
 void print_value(ThuslyValue value) {
   switch (value.type) {
     case TYPE_BOOLEAN:

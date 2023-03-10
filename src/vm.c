@@ -61,6 +61,12 @@ ThuslyValue peek(VM* vm, int offset) {
   return vm->next_stack_top[-1 - offset];
 }
 
+static bool is_truthy(ThuslyValue value) {
+  // At the current stage of implementation, all values, including 0, are considered
+  // truthy except for: none, false.
+  return !(IS_NONE(value) || (IS_BOOLEAN(value) && !TO_C_BOOL(value)));
+}
+
 static ErrorReport decode_and_execute(VM* vm) {
   #define READ_BYTE() (*vm->next_instruction++)
 
@@ -106,6 +112,30 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_CONSTANT_TRUE:
         push(vm, FROM_C_BOOL(true));
         break;
+      case OP_EQUALS: {
+        ThuslyValue b = pop(vm);
+        ThuslyValue a = pop(vm);
+        push(vm, FROM_C_BOOL(values_are_equal(a, b)));
+        break;
+      }
+      case OP_NOT_EQUALS: {
+        ThuslyValue b = pop(vm);
+        ThuslyValue a = pop(vm);
+        push(vm, FROM_C_BOOL(!values_are_equal(a, b)));
+        break;
+      }
+      case OP_GREATER_THAN:
+        DO_BINARY_OP(FROM_C_BOOL, >);
+        break;
+      case OP_GREATER_THAN_EQUALS:
+        DO_BINARY_OP(FROM_C_BOOL, >=);
+        break;
+      case OP_LESS_THAN:
+        DO_BINARY_OP(FROM_C_BOOL, <);
+        break;
+      case OP_LESS_THAN_EQUALS:
+        DO_BINARY_OP(FROM_C_BOOL, <=);
+        break;
       case OP_ADD:
         DO_BINARY_OP(FROM_C_DOUBLE, +);
         break;
@@ -126,6 +156,9 @@ static ErrorReport decode_and_execute(VM* vm) {
           return REPORT_RUNTIME_ERROR;
         }
         push(vm, FROM_C_DOUBLE(-TO_C_DOUBLE(pop(vm))));
+        break;
+      case OP_NOT:
+        push(vm, FROM_C_BOOL(!is_truthy(pop(vm))));
         break;
       case OP_RETURN: {
         printf("> Result: ");   // Temporary

@@ -39,6 +39,7 @@ typedef struct {
 void init_constant_pool(ConstantPool* pool);
 void free_constant_pool(ConstantPool* pool);
 void append_constant(ConstantPool* pool, ThuslyValue value);
+bool values_are_equal(ThuslyValue a, ThuslyValue b);
 void print_value(ThuslyValue value);
 
 #endif
