@@ -32,7 +32,7 @@ typedef enum {
   PRECEDENCE_ASSIGNMENT,
   PRECEDENCE_DISJUNCTION,
   PRECEDENCE_CONJUNCTION,
-  PRECEDENCE_EQUALITY,    // TODO: Perhaps combine EQUALITY and COMPARISON
+  PRECEDENCE_EQUALITY,
   PRECEDENCE_COMPARISON,
   PRECEDENCE_TERM,
   PRECEDENCE_FACTOR,
@@ -52,6 +52,8 @@ typedef struct {
 
 static void parse_binary(Parser* parser);
 static void parse_grouping(Parser* parser);
+static void parse_boolean(Parser* parser);
+static void parse_none(Parser* parser);
 static void parse_number(Parser* parser);
 static void parse_unary(Parser* parser);
 
@@ -63,12 +65,12 @@ static ParseRule rules[] = {
   // Punctuation and non-keyword operators
   [TOKEN_CLOSE_PAREN]           = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_COLON]                 = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_EXCLAMATION_EQUALS]    = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_EQUALS]                = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_GREATER_THAN]          = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_GREATER_THAN_EQUALS]   = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_LESS_THAN]             = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_LESS_THAN_EQUALS]      = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_EQUALS]                = { NULL, parse_binary, PRECEDENCE_EQUALITY },
+  [TOKEN_EXCLAMATION_EQUALS]    = { NULL, parse_binary, PRECEDENCE_EQUALITY },
+  [TOKEN_GREATER_THAN]          = { NULL, parse_binary, PRECEDENCE_COMPARISON },
+  [TOKEN_GREATER_THAN_EQUALS]   = { NULL, parse_binary, PRECEDENCE_COMPARISON },
+  [TOKEN_LESS_THAN]             = { NULL, parse_binary, PRECEDENCE_COMPARISON },
+  [TOKEN_LESS_THAN_EQUALS]      = { NULL, parse_binary, PRECEDENCE_COMPARISON },
   [TOKEN_MINUS]                 = { parse_unary, parse_binary, PRECEDENCE_TERM },
   [TOKEN_OPEN_PAREN]            = { parse_grouping, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PLUS]                  = { NULL, parse_binary, PRECEDENCE_TERM },
@@ -77,12 +79,12 @@ static ParseRule rules[] = {
 
   // Reserved keywords
   [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_FALSE]                 = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_NONE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_NOT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NOT]                   = { parse_unary, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PRINT]                 = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_TRUE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_TRUE]                  = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Literals
@@ -230,6 +232,24 @@ static void parse_binary(Parser* parser) {
   parse_precedence(parser, (Precedence)(rule->precedence + 1));
 
   switch (operator) {
+    case TOKEN_EQUALS:
+      write_instruction(parser, OP_EQUALS);
+      break;
+    case TOKEN_EXCLAMATION_EQUALS:
+      write_instruction(parser, OP_NOT_EQUALS);
+      break;
+    case TOKEN_GREATER_THAN:
+      write_instruction(parser, OP_GREATER_THAN);
+      break;
+    case TOKEN_GREATER_THAN_EQUALS:
+      write_instruction(parser, OP_GREATER_THAN_EQUALS);
+      break;
+    case TOKEN_LESS_THAN:
+      write_instruction(parser, OP_LESS_THAN);
+      break;
+    case TOKEN_LESS_THAN_EQUALS:
+      write_instruction(parser, OP_LESS_THAN_EQUALS);
+      break;
     case TOKEN_PLUS:
       write_instruction(parser, OP_ADD);
       break;
@@ -253,9 +273,27 @@ static void parse_grouping(Parser* parser) {
   consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
 }
 
+static void parse_boolean(Parser* parser) {
+  switch (parser->previous.type) {
+    case TOKEN_FALSE:
+      write_instruction(parser, OP_CONSTANT_FALSE);
+      break;
+    case TOKEN_TRUE:
+      write_instruction(parser, OP_CONSTANT_TRUE);
+      break;
+    default:
+      // This should not be reachable.
+      return;
+  }
+}
+
+static void parse_none(Parser* parser) {
+  write_instruction(parser, OP_CONSTANT_NONE);
+}
+
 static void parse_number(Parser* parser) {
   double value = strtod(parser->previous.lexeme, NULL);
-  write_constant_instruction(parser, value);
+  write_constant_instruction(parser, FROM_C_DOUBLE(value));
 }
 
 static void parse_unary(Parser* parser) {
@@ -266,6 +304,12 @@ static void parse_unary(Parser* parser) {
     case TOKEN_MINUS:
       write_instruction(parser, OP_NEGATE);
       break;
+    case TOKEN_NOT:
+      write_instruction(parser, OP_NOT);
+      break;
+    default:
+      // This should not be reachable.
+      return;
   }
 }
 

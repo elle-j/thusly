@@ -68,10 +68,13 @@ disjunction:
 	| conjunction ( "or" conjunction )*
 
 conjunction:
-	| comparison ( "and" comparison )*
+	| equality ( "and" equality )*
+
+equality:
+	| comparison ( ( "=" | "!=" ) comparison )*
 
 comparison:
-	| term ( ( "<" | "<=" | ">" | ">=" | "=" | "!=" ) term )*
+	| term ( ( "<" | "<=" | ">" | ">=" ) term )*
 
 term:
 	| factor ( ( "+" | "-" ) factor )*

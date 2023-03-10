@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "common.h"
@@ -23,6 +24,22 @@ void free_vm(VM* vm) {
   printf("FREEING VM..\n"); // TEMPORARY
 }
 
+static void error(VM* vm, const char* message, ...) {
+  // The instructions and source_lines array indexes mirror each other.
+  size_t instruction_index = vm->next_instruction - vm->program->instructions - 1;
+  int source_line = vm->program->source_lines[instruction_index];
+
+  fprintf(stderr, "ERROR on line %d:\n", source_line);
+  fprintf(stderr, "\t>> Help: ");
+  va_list args;
+  va_start(args, message);
+  vfprintf(stderr, message, args);
+  va_end(args);
+  fputs("\n", stderr);
+
+  reset_stack(vm);
+}
+
 void push(VM* vm, ThuslyValue value) {
   *vm->next_stack_top = value;
   vm->next_stack_top++;
@@ -38,36 +55,33 @@ ThuslyValue pop(VM* vm) {
   // TODO: Check empty
 }
 
-typedef double (*BinaryOp)(double a, double b);
-
-static inline double op_add(double a, double b) {
-  return a + b;
+ThuslyValue peek(VM* vm, int offset) {
+  // The current stack top is 1 before next_stack_top. Thus, if the offset passed
+  // is 0, this should peek at next_stack_top[-1].
+  return vm->next_stack_top[-1 - offset];
 }
 
-static inline double op_divide(double a, double b) {
-  return a / b;
-}
-
-static inline double op_multiply(double a, double b) {
-  return a * b;
-}
-
-static inline double op_subtract(double a, double b) {
-  return a - b;
-}
-
-// TODO: Perhaps make this a macro
-static inline void binary_op(VM* vm, BinaryOp op) {
-  {
-    double b = pop(vm);
-    double a = pop(vm);
-    push(vm, op(a, b));
-  }
+static bool is_truthy(ThuslyValue value) {
+  // At the current stage of implementation, all values, including 0, are considered
+  // truthy except for: none, false.
+  return !(IS_NONE(value) || (IS_BOOLEAN(value) && !TO_C_BOOL(value)));
 }
 
 static ErrorReport decode_and_execute(VM* vm) {
   #define READ_BYTE() (*vm->next_instruction++)
+
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
+
+  #define DO_BINARY_OP(from_c_value, operator)                        \
+    do {                                                              \
+      if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {       \
+        error(vm, "The operation can only be performed on numbers."); \
+        return REPORT_RUNTIME_ERROR;                                  \
+      }                                                               \
+      double b = TO_C_DOUBLE(pop(vm));                                \
+      double a = TO_C_DOUBLE(pop(vm));                                \
+      push(vm, from_c_value(a operator b));                           \
+    } while (false)
 
   #ifdef DEBUG_EXECUTION
   printf("========== Execution ==========\n");
@@ -89,21 +103,62 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
+      case OP_CONSTANT_FALSE:
+        push(vm, FROM_C_BOOL(false));
+        break;
+      case OP_CONSTANT_NONE:
+        push(vm, FROM_C_NULL);
+        break;
+      case OP_CONSTANT_TRUE:
+        push(vm, FROM_C_BOOL(true));
+        break;
+      case OP_EQUALS: {
+        ThuslyValue b = pop(vm);
+        ThuslyValue a = pop(vm);
+        push(vm, FROM_C_BOOL(values_are_equal(a, b)));
+        break;
+      }
+      case OP_NOT_EQUALS: {
+        ThuslyValue b = pop(vm);
+        ThuslyValue a = pop(vm);
+        push(vm, FROM_C_BOOL(!values_are_equal(a, b)));
+        break;
+      }
+      case OP_GREATER_THAN:
+        DO_BINARY_OP(FROM_C_BOOL, >);
+        break;
+      case OP_GREATER_THAN_EQUALS:
+        DO_BINARY_OP(FROM_C_BOOL, >=);
+        break;
+      case OP_LESS_THAN:
+        DO_BINARY_OP(FROM_C_BOOL, <);
+        break;
+      case OP_LESS_THAN_EQUALS:
+        DO_BINARY_OP(FROM_C_BOOL, <=);
+        break;
       case OP_ADD:
-        binary_op(vm, op_add);
+        DO_BINARY_OP(FROM_C_DOUBLE, +);
         break;
       case OP_DIVIDE:
-        binary_op(vm, op_divide);
+        DO_BINARY_OP(FROM_C_DOUBLE, /);
         break;
       case OP_MULTIPLY:
-        binary_op(vm, op_multiply);
+        DO_BINARY_OP(FROM_C_DOUBLE, *);
         break;
       case OP_SUBTRACT:
-        binary_op(vm, op_subtract);
+        DO_BINARY_OP(FROM_C_DOUBLE, -);
         break;
       case OP_NEGATE:
-        // Can temporarily use `-` directly since only treating ThuslyValues as doubles for now.
-        push(vm, -pop(vm));
+        // Peek at the stack rather than pop here in case there is garbage
+        // collection before the value is pushed onto the stack again.
+        if (!IS_NUMBER(peek(vm, 0))) {
+          error(vm, "Negating a value can only be performed on numbers.");
+          return REPORT_RUNTIME_ERROR;
+        }
+        push(vm, FROM_C_DOUBLE(-TO_C_DOUBLE(pop(vm))));
+        break;
+      case OP_NOT:
+        push(vm, FROM_C_BOOL(!is_truthy(pop(vm))));
         break;
       case OP_RETURN: {
         printf("> Result: ");   // Temporary
@@ -116,6 +171,7 @@ static ErrorReport decode_and_execute(VM* vm) {
 
   #undef READ_BYTE
   #undef READ_CONSTANT
+  #undef DO_BINARY_OP
 }
 
 ErrorReport interpret(VM* vm, const char* source) {

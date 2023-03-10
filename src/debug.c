@@ -55,6 +55,24 @@ int disassemble_instruction(Program* program, int offset) {
   switch (instruction) {
     case OP_CONSTANT:
       return print_constant("OP_CONSTANT", program, offset);
+    case OP_CONSTANT_FALSE:
+      return print_opcode("OP_CONSTANT_FALSE", offset);
+    case OP_CONSTANT_NONE:
+      return print_opcode("OP_CONSTANT_NONE", offset);
+    case OP_CONSTANT_TRUE:
+      return print_opcode("OP_CONSTANT_TRUE", offset);
+    case OP_EQUALS:
+      return print_opcode("OP_EQUALS", offset);
+    case OP_NOT_EQUALS:
+      return print_opcode("OP_NOT_EQUALS", offset);
+    case OP_GREATER_THAN:
+      return print_opcode("OP_GREATER_THAN", offset);
+    case OP_GREATER_THAN_EQUALS:
+      return print_opcode("OP_GREATER_THAN_EQUALS", offset);
+    case OP_LESS_THAN:
+      return print_opcode("OP_LESS_THAN", offset);
+    case OP_LESS_THAN_EQUALS:
+      return print_opcode("OP_LESS_THAN_EQUALS", offset);
     case OP_ADD:
       return print_opcode("OP_ADD", offset);
     case OP_DIVIDE:
@@ -65,6 +83,8 @@ int disassemble_instruction(Program* program, int offset) {
       return print_opcode("OP_SUBTRACT", offset);
     case OP_NEGATE:
       return print_opcode("OP_NEGATE", offset);
+    case OP_NOT:
+      return print_opcode("OP_NOT", offset);
     case OP_RETURN:
       return print_opcode("OP_RETURN", offset);
     default:
