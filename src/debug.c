@@ -55,6 +55,12 @@ int disassemble_instruction(Program* program, int offset) {
   switch (instruction) {
     case OP_CONSTANT:
       return print_constant("OP_CONSTANT", program, offset);
+    case OP_CONSTANT_FALSE:
+      return print_opcode("OP_CONSTANT_FALSE", offset);
+    case OP_CONSTANT_NONE:
+      return print_opcode("OP_CONSTANT_NONE", offset);
+    case OP_CONSTANT_TRUE:
+      return print_opcode("OP_CONSTANT_TRUE", offset);
     case OP_ADD:
       return print_opcode("OP_ADD", offset);
     case OP_DIVIDE:

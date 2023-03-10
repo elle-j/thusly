@@ -52,6 +52,8 @@ typedef struct {
 
 static void parse_binary(Parser* parser);
 static void parse_grouping(Parser* parser);
+static void parse_boolean(Parser* parser);
+static void parse_none(Parser* parser);
 static void parse_number(Parser* parser);
 static void parse_unary(Parser* parser);
 
@@ -77,12 +79,12 @@ static ParseRule rules[] = {
 
   // Reserved keywords
   [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_FALSE]                 = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_NONE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NOT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PRINT]                 = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_TRUE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_TRUE]                  = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Literals
@@ -251,6 +253,24 @@ static void parse_binary(Parser* parser) {
 static void parse_grouping(Parser* parser) {
   parse_expression(parser);
   consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+}
+
+static void parse_boolean(Parser* parser) {
+  switch (parser->previous.type) {
+    case TOKEN_FALSE:
+      write_instruction(parser, OP_CONSTANT_FALSE);
+      break;
+    case TOKEN_TRUE:
+      write_instruction(parser, OP_CONSTANT_TRUE);
+      break;
+    default:
+      // This should not be reachable.
+      return;
+  }
+}
+
+static void parse_none(Parser* parser) {
+  write_instruction(parser, OP_CONSTANT_NONE);
 }
 
 static void parse_number(Parser* parser) {

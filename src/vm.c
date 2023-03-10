@@ -97,6 +97,15 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
+      case OP_CONSTANT_FALSE:
+        push(vm, FROM_C_BOOL(false));
+        break;
+      case OP_CONSTANT_NONE:
+        push(vm, FROM_C_NULL);
+        break;
+      case OP_CONSTANT_TRUE:
+        push(vm, FROM_C_BOOL(true));
+        break;
       case OP_ADD:
         DO_BINARY_OP(FROM_C_DOUBLE, +);
         break;

@@ -29,6 +29,15 @@ void append_constant(ConstantPool* pool, ThuslyValue value) {
 }
 
 void print_value(ThuslyValue value) {
-  // TODO: Temporarily assuming it's a double.
-  printf("%g", TO_C_DOUBLE(value));
+  switch (value.type) {
+    case TYPE_BOOLEAN:
+      printf(TO_C_BOOL(value) ? "true" : "false");
+      break;
+    case TYPE_NONE:
+      printf("none");
+      break;
+    case TYPE_NUMBER:
+      printf("%g", TO_C_DOUBLE(value));
+      break;
+  }
 }
