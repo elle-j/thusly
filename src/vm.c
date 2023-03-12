@@ -1,9 +1,11 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "object.h"
 #include "program.h"
 #include "thusly_value.h"
 #include "vm.h"
@@ -14,14 +16,13 @@ static void reset_stack(VM* vm) {
 
 void init_vm(VM* vm) {
   reset_stack(vm);
-
-  // TODO
+  vm->program = NULL;
 }
 
 void free_vm(VM* vm) {
-  // TODO
-
   printf("FREEING VM..\n"); // TEMPORARY
+
+  vm->program = NULL;
 }
 
 static void error(VM* vm, const char* message, ...) {
@@ -65,6 +66,20 @@ static bool is_truthy(ThuslyValue value) {
   // At the current stage of implementation, all values, including 0, are considered
   // truthy except for: none, false.
   return !(IS_NONE(value) || (IS_BOOLEAN(value) && !TO_C_BOOL(value)));
+}
+
+static void concatenate(VM* vm) {
+  TextObject* b = TO_TEXT(pop(vm));
+  TextObject* a = TO_TEXT(pop(vm));
+  int length = a->length + b->length;
+  // Allocate +1 for the terminating null byte.
+  char* chars_concatenated = ALLOCATE(char, length + 1);
+  memcpy(chars_concatenated, a->chars, a->length);
+  memcpy(chars_concatenated + a->length, b->chars, b->length);
+  chars_concatenated[length] = '\0';
+
+  TextObject* result = claim_c_string(chars_concatenated, length);
+  push(vm, FROM_C_OBJECT_PTR(result));
 }
 
 static ErrorReport decode_and_execute(VM* vm) {
@@ -136,9 +151,20 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_LESS_THAN_EQUALS:
         DO_BINARY_OP(FROM_C_BOOL, <=);
         break;
-      case OP_ADD:
-        DO_BINARY_OP(FROM_C_DOUBLE, +);
+      case OP_ADD: {
+        if (IS_TEXT(peek(vm, 0)) && IS_TEXT(peek(vm, 1)))
+          concatenate(vm);
+        else if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) {
+          double b = TO_C_DOUBLE(pop(vm));
+          double a = TO_C_DOUBLE(pop(vm));
+          push(vm, FROM_C_DOUBLE(a + b));
+        }
+        else {
+          error(vm, "The '+' operation can only be performed on either numbers or texts.");
+          return REPORT_RUNTIME_ERROR;
+        }
         break;
+      }
       case OP_DIVIDE:
         DO_BINARY_OP(FROM_C_DOUBLE, /);
         break;

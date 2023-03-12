@@ -24,6 +24,10 @@ static TextObject* allocate_text_object(char* chars, int length) {
   return text;
 }
 
+TextObject* claim_c_string(char* chars, int length) {
+  return allocate_text_object(chars, length);
+}
+
 TextObject* copy_c_string(const char* chars, int length) {
   // Allocate +1 for the terminating null byte.
   char* chars_copy = ALLOCATE(char, length + 1);

@@ -31,6 +31,7 @@ struct TextObject {
   int length;
 };
 
+TextObject* claim_c_string(char* chars, int length);
 TextObject* copy_c_string(const char* chars, int length);
 void print_object(ThuslyValue value);
 
