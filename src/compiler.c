@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "compiler.h"
+#include "object.h"
 #include "program.h"
 #include "thusly_value.h"
 #include "tokenizer.h"
@@ -51,10 +52,11 @@ typedef struct {
 } ParseRule;
 
 static void parse_binary(Parser* parser);
-static void parse_grouping(Parser* parser);
 static void parse_boolean(Parser* parser);
+static void parse_grouping(Parser* parser);
 static void parse_none(Parser* parser);
 static void parse_number(Parser* parser);
+static void parse_text(Parser* parser);
 static void parse_unary(Parser* parser);
 
 /// The parse rules associated with each type of token.
@@ -90,7 +92,7 @@ static ParseRule rules[] = {
   // Literals
   [TOKEN_IDENTIFIER]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NUMBER]                = { parse_number, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_TEXT]                  = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_TEXT]                  = { parse_text, NULL, PRECEDENCE_IGNORE },
 
   // Formatting
   [TOKEN_FILE_END]              = { NULL, NULL, PRECEDENCE_IGNORE },
@@ -268,11 +270,6 @@ static void parse_binary(Parser* parser) {
   }
 }
 
-static void parse_grouping(Parser* parser) {
-  parse_expression(parser);
-  consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
-}
-
 static void parse_boolean(Parser* parser) {
   switch (parser->previous.type) {
     case TOKEN_FALSE:
@@ -287,6 +284,11 @@ static void parse_boolean(Parser* parser) {
   }
 }
 
+static void parse_grouping(Parser* parser) {
+  parse_expression(parser);
+  consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+}
+
 static void parse_none(Parser* parser) {
   write_instruction(parser, OP_CONSTANT_NONE);
 }
@@ -294,6 +296,14 @@ static void parse_none(Parser* parser) {
 static void parse_number(Parser* parser) {
   double value = strtod(parser->previous.lexeme, NULL);
   write_constant_instruction(parser, FROM_C_DOUBLE(value));
+}
+
+static void parse_text(Parser* parser) {
+  write_constant_instruction(
+    parser,
+    // Copy the lexeme without the surrounding double quotes.
+    FROM_C_OBJECT_PTR(copy_c_string(parser->previous.lexeme + 1, parser->previous.length - 2))
+  );
 }
 
 static void parse_unary(Parser* parser) {

@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#define ALLOCATE(type, capacity) (type*)handle_reallocation(NULL, 0, sizeof(type) * (capacity))
+
 #define GROWTH_FACTOR 2
 #define MIN_GROWTH_THRESHOLD 10
 #define GROW_CAPACITY(capacity) \

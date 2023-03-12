@@ -22,6 +22,7 @@ add_executable(cthusly
 	src/memory.h
 	src/memory.c
 	src/object.h
+	src/object.c
 	src/program.h
 	src/program.c
 	src/thusly_value.h

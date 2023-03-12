@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "memory.h"
+#include "object.h"
 #include "thusly_value.h"
 
 void init_constant_pool(ConstantPool* pool) {
@@ -39,6 +41,11 @@ bool values_are_equal(ThuslyValue a, ThuslyValue b) {
       return true;
     case TYPE_NUMBER:
       return TO_C_DOUBLE(a) == TO_C_DOUBLE(b);
+    case TYPE_OBJECT: {
+      TextObject* textA = TO_TEXT(a);
+      TextObject* textB = TO_TEXT(b);
+      return textA->length == textB->length && memcmp(textA->chars, textB->chars, textA->length) == 0;
+    }
     default:
       // This should not be reachable.
       return false;
@@ -55,6 +62,9 @@ void print_value(ThuslyValue value) {
       break;
     case TYPE_NUMBER:
       printf("%g", TO_C_DOUBLE(value));
+      break;
+    case TYPE_OBJECT:
+      print_object(value);
       break;
   }
 }

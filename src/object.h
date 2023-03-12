@@ -27,9 +27,12 @@ struct Object {
 struct TextObject {
   // IMPORTANT: This field must be first (see notes in `Object`).
   Object base;
-  int length;
   char* chars;
+  int length;
 };
+
+TextObject* copy_c_string(const char* chars, int length);
+void print_object(ThuslyValue value);
 
 static inline bool is_object_type(ThuslyValue value, ObjectType type) {
   return IS_OBJECT(value) && TO_C_OBJECT_PTR(value)->type == type;
