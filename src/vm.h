@@ -6,11 +6,23 @@
 
 #define STACK_MAX 256
 
+struct VM;
+
+/// Heap data used by the VM.
 typedef struct {
+  struct VM* vm;
+  // Heap-allocated objects (points to the head).
+  Object* objects;
+} Environment;
+
+/// The virtual machine interpreting and executing the instructions in
+/// the compiled program in a sequential order.
+typedef struct VM {
+  Environment environment;
   Program* program;
   byte* next_instruction;
   ThuslyValue stack[STACK_MAX];
-  // When pointing to zeroth element, the stack is empty.
+  // When pointing to the zeroth element, the stack is empty.
   ThuslyValue* next_stack_top;
 } VM;
 

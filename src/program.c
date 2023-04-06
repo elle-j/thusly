@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "memory.h"
 #include "program.h"
-#include "thusly_value.h"
 
 void init_program(Program* program) {
   program->source_lines = NULL;

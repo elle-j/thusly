@@ -33,21 +33,20 @@ The design and development are currently on-going and are highly subject to chan
 
 <img src="design/code-snippet.svg" width="600" alt="A snippet of Thusly code.">
 
-Whitespace is semantically insignificant; however, newlines on non-blank lines are significant.
+Whitespace is semantically insignificant except for newline characters on non-blank lines.
 
 ## Milestones
 
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
   * To try out the tokenizer in isolation and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2) (significant newline characters will be printed as newlines).
-- [x] One-line arithmetic expressions using `number` (`double`) can be parsed and compiled.
+- [x] One-line arithmetic expressions using `number` (double) can be executed.
   - [x] Addition (`+`)
   - [x] Subtraction (`-`)
   - [x] Multiplication (`*`)
   - [x] Division (`/`)
   - [x] Unary negation (`-`)
   - [x] Precedence altering (`()`)
-- [x] One-line arithmetic expressions using `number` can be executed.
-- [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, and `none` can be executed.
+- [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, `none`, and `text` can be executed.
   - [x] Equal to (`=`)
   - [x] Not equal to (`!=`)
   - [x] Greater than (`>`)
@@ -55,23 +54,25 @@ Whitespace is semantically insignificant; however, newlines on non-blank lines a
   - [x] Less than (`<`)
   - [x] Less than or equal to (`<=`)
   - [x] Logical not (`not`)
-- [ ] Support `text` (`string`) data type.
+- [x] Concatenation of `text` literals using `+` can be executed.
 - [ ] Support variable declarations and assignments.
 - [ ] TODO (more milestones will be added here)
 
 ### Implemented Functionality
 
-This section is for briefly demonstrating implemented functionality and what to expect when [running your code](#getting-started).
+This section is for briefly demonstrating implemented functionality thus far and expected behavior when [running your code](#getting-started).
 
 By inputing a **one-line expression** from either a file or via the REPL, the VM will interpret it and output the result.
 
-| Example input            | Expected output | Expected precedence parsing   |
-|--------------------------|-----------------|-------------------------------|
-| 1 + 2 * 3 / 4            | 2.5             | 1 + ((2 * 3) / 4)             |
-| (1 + 2) * 3 / 4          | 2.25            | ((1 + 2) * 3) / 4             |
-| 1 + -2 - -3              | 2               | (1 + (-2)) - (-3)             |
-| 1 > 2 = 3 > 4            | true            | (1 > 2) = (3 > 4)             |
-| false != not(1 + 2 >= 3) | false           | false != (not((1 + 2) >= 3))  |
+| Example input              | Expected output | Expected precedence parsing   |
+|----------------------------|-----------------|-------------------------------|
+| 1 + 2 * 3 / 4              | 2.5             | 1 + ((2 * 3) / 4)             |
+| (1 + 2) * 3 / 4            | 2.25            | ((1 + 2) * 3) / 4             |
+| 1 + -2 - -3                | 2               | (1 + (-2)) - (-3)             |
+| 1 > 2 = 3 > 4              | true            | (1 > 2) = (3 > 4)             |
+| false != not(1 + 2 >= 3)   | false           | false != (not((1 + 2) >= 3))  |
+| "he" + "llo" = "hello"     | true            | ("he" + "llo") = "hello"      |
+| "keep " + "on " + "coding" | keep on coding  | ("keep " + "on ") + "coding"  |
 
 > Note: A debug flag is enabled which also prints the entire bytecode produced by the compiler, as well as the execution steps by the VM including its stack state.
 
@@ -80,7 +81,7 @@ By inputing a **one-line expression** from either a file or via the REPL, the VM
 ### Prerequisites
 
 * A C compiler (e.g. Clang or GCC)
-* [CMake](https://cmake.org/) version 3.20 or higher
+* [CMake](https://cmake.org/) version 3.20 or later
 
 ### Building the Project
 
@@ -90,7 +91,8 @@ Run the below command to make Thusly come to life. It will create a top-level `b
 ./build.sh
 ```
 
-> If permission is denied, first add executable permission to the build script by running `chmod +x build.sh`.
+> If permission is denied, first add executable permission to the build script by running:
+> `chmod +x build.sh`.
 
 ### Running Code
 
@@ -98,7 +100,7 @@ Once you have [built](#building-the-project) the project you can go ahead and fe
 
 **Interpret code from a file:**
 ```sh
-./bin/cthusly path/to/file
+./bin/cthusly path/to/your/file
 ```
 
 **Start the REPL (interactive prompt):**

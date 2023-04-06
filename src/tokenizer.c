@@ -1,6 +1,5 @@
 #include <string.h>
 
-#include "common.h"
 #include "tokenizer.h"
 
 void init_tokenizer(Tokenizer* tokenizer, const char* source) {
