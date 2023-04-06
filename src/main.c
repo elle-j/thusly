@@ -86,5 +86,5 @@ int main(int argc, const char* argv[]) {
 
   free_vm(&vm);
 
-  return 1;
+  return EXIT_SUCCESS;
 }
