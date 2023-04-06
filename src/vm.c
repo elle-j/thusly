@@ -5,9 +5,8 @@
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "memory.h"
 #include "object.h"
-#include "program.h"
-#include "thusly_value.h"
 #include "vm.h"
 
 static void reset_stack(VM* vm) {
@@ -16,6 +15,8 @@ static void reset_stack(VM* vm) {
 
 void init_vm(VM* vm) {
   reset_stack(vm);
+  vm->environment.vm = vm;
+  vm->environment.objects = NULL;
   vm->program = NULL;
 }
 
@@ -23,6 +24,7 @@ void free_vm(VM* vm) {
   printf("FREEING VM..\n"); // TEMPORARY
 
   vm->program = NULL;
+  free_objects(&vm->environment);
 }
 
 static void error(VM* vm, const char* message, ...) {
@@ -78,7 +80,7 @@ static void concatenate(VM* vm) {
   memcpy(chars_concatenated + a->length, b->chars, b->length);
   chars_concatenated[length] = '\0';
 
-  TextObject* result = claim_c_string(chars_concatenated, length);
+  TextObject* result = claim_c_string(&vm->environment, chars_concatenated, length);
   push(vm, FROM_C_OBJECT_PTR(result));
 }
 
@@ -204,7 +206,7 @@ ErrorReport interpret(VM* vm, const char* source) {
   Program program;
   init_program(&program);
 
-  bool has_error = !compile(source, &program);
+  bool has_error = !compile(&vm->environment, source, &program);
   if (has_error) {
     free_program(&program);
     return REPORT_COMPILE_ERROR;

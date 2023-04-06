@@ -2,6 +2,7 @@
 #define CTHUSLY_MEMORY_H
 
 #include "common.h"
+#include "vm.h"
 
 #define ALLOCATE(type, capacity) (type*)handle_reallocation(NULL, 0, sizeof(type) * (capacity))
 
@@ -16,6 +17,9 @@
 #define FREE_ARRAY(elem_type, array, capacity) \
   handle_reallocation(array, sizeof(elem_type) * (capacity), 0)
 
+#define FREE(type, memory) handle_reallocation(memory, sizeof(type), 0)
+
 void* handle_reallocation(void* memory, size_t old_capacity, size_t new_capacity);
+void free_objects(Environment* environment);
 
 #endif

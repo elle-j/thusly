@@ -2,7 +2,6 @@
 #define CTHUSLY_PROGRAM_H
 
 #include "common.h"
-#include "memory.h"
 #include "thusly_value.h"
 
 typedef enum {

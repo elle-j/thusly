@@ -19,6 +19,7 @@
 
 ///
 typedef struct {
+  Environment* environment;
   Program* writable_program; // TODO: Modify
   Tokenizer tokenizer;
   Token current;
@@ -106,14 +107,15 @@ static ParseRule* get_rule(TokenType type) {
   return &rules[type];
 }
 
-static Program* get_writable_program(Parser* parser) {
-  return parser->writable_program;
-}
-
-static void init_parser(Parser* parser, Program* writable_program) {
+static void init_parser(Parser* parser, Environment* environment, Program* writable_program) {
+  parser->environment = environment;
   parser->writable_program = writable_program;
   parser->has_error = false;
   parser->panic_mode = false;
+}
+
+static Program* get_writable_program(Parser* parser) {
+  return parser->writable_program;
 }
 
 static void error_at(Parser* parser, Token* token, const char* message) {
@@ -301,8 +303,10 @@ static void parse_number(Parser* parser) {
 static void parse_text(Parser* parser) {
   write_constant_instruction(
     parser,
-    // Copy the lexeme without the surrounding double quotes.
-    FROM_C_OBJECT_PTR(copy_c_string(parser->previous.lexeme + 1, parser->previous.length - 2))
+    FROM_C_OBJECT_PTR(
+      // Copy the lexeme without the surrounding double quotes.
+      copy_c_string(parser->environment, parser->previous.lexeme + 1, parser->previous.length - 2)
+    )
   );
 }
 
@@ -332,9 +336,9 @@ static void end_compilation(Parser* parser) {
   #endif
 }
 
-bool compile(const char* source, Program* out_program) {
+bool compile(Environment* environment, const char* source, Program* out_program) {
   Parser parser;
-  init_parser(&parser, out_program);
+  init_parser(&parser, environment, out_program);
   init_tokenizer(&parser.tokenizer, source);
 
   advance(&parser);
