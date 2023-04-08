@@ -8,11 +8,22 @@
 #include "program.h"
 #include "vm.h"
 
-static void print_help() {
-  fprintf(stderr, "Run in interactive mode: ./cthusly\nExecute a file: ./cthusly path/to/file\n");
+static void print_help(FILE* fout) {
+  fprintf(fout,
+    "\n"
+    "Usage: ./bin/cthusly [options] [path]\n"
+    "\n"
+    "    The REPL (interactive prompt) starts if no [path] is provided\n"
+    "\n"
+    "    -h, --help                Show usage\n"
+    "\n"
+  );
 }
 
-static void run_repl(VM* vm) {
+static void run_repl() {
+  VM vm;
+  init_vm(&vm);
+
   char line[1024];
   while (true) {
     printf("> ");
@@ -22,14 +33,16 @@ static void run_repl(VM* vm) {
       break;
     }
 
-    interpret(vm, line);
+    interpret(&vm, line);
   }
+
+  free_vm(&vm);
 }
 
 static char* read_file(const char* path) {
   FILE* file = fopen(path, "rb");
   if (file == NULL) {
-    fprintf(stderr, "The file could not be opened (\"%s\").", path);
+    fprintf(stderr, "The file could not be opened. (File name: \"%s\")\n", path);
     exit(EXIT_CODE_IO_OP_ERROR);
   }
 
@@ -42,14 +55,14 @@ static char* read_file(const char* path) {
   // Add +1 for terminating the string (null byte).
   char* source_buffer = (char*)malloc(file_size + 1);
   if (source_buffer == NULL) {
-    fprintf(stderr, "There was not enough memory available to read the file (\"%s\").", path);
+    fprintf(stderr, "There was not enough memory available to read the file (\"%s\").\n", path);
     exit(EXIT_CODE_IO_OP_ERROR);
   }
 
   // Read from the file and into the allocated string buffer.
   size_t num_bytes_read = fread(source_buffer, sizeof(char), file_size, file);
   if (num_bytes_read < file_size) {
-    fprintf(stderr, "The file could not be read (\"%s\").", path);
+    fprintf(stderr, "The file could not be read (\"%s\").\n", path);
     exit(EXIT_CODE_IO_OP_ERROR);
   }
   source_buffer[num_bytes_read] = '\0';
@@ -59,11 +72,16 @@ static char* read_file(const char* path) {
   return source_buffer;
 }
 
-static void run_file(VM* vm, const char* path) {
+static void run_file(const char* path) {
+  VM vm;
+  init_vm(&vm);
   char* source = read_file(path);
-  ErrorReport report = interpret(vm, source);
+
+  ErrorReport report = interpret(&vm, source);
+
   // `read_file()` uses `malloc()` for the source, thus it needs to be freed here.
   free(source);
+  free_vm(&vm);
 
   if (report == REPORT_COMPILE_ERROR)
     exit(EXIT_CODE_INPUT_DATA_ERROR);
@@ -72,19 +90,25 @@ static void run_file(VM* vm, const char* path) {
 }
 
 int main(int argc, const char* argv[]) {
-  VM vm;
-  init_vm(&vm);
-  
   if (argc == 1)
-    run_repl(&vm);
-  else if (argc == 2)
-    run_file(&vm, argv[1]);
-  else {
-    print_help();
-    exit(EXIT_CODE_USAGE_ERROR);
+    run_repl();
+  else if (argc == 2) {
+    const char* argv1 = argv[1];
+    if (strcmp(argv1, "-h") == 0 || strcmp(argv1, "--help") == 0)
+      print_help(stdout);
+    else
+      run_file(argv1);
   }
-
-  free_vm(&vm);
+  /*else if (argc == 3) {
+    // TODO:
+    // Currently only allowing '-h' or '--help' without providing the [path] as
+    // the next arg. Other flags, e.g. debug flags, will be allowed as the arg
+    // preceeding the [path]. Add in this block when 3 args are supoprted.
+  }*/
+  else {
+    print_help(stderr);
+    return EXIT_CODE_USAGE_ERROR;
+  }
 
   return EXIT_SUCCESS;
 }

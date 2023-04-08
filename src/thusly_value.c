@@ -12,7 +12,11 @@ void init_constant_pool(ConstantPool* pool) {
 }
 
 void free_constant_pool(ConstantPool* pool) {
-  printf("FREEING CONSTANT POOL..\n"); // TEMPORARY
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING CONSTANT POOL..\n");
+  #endif
+  // ---------------
 
   FREE_ARRAY(ThuslyValue, pool->values, pool->capacity);
   init_constant_pool(pool);

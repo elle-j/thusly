@@ -13,7 +13,11 @@ void init_program(Program* program) {
 }
 
 void free_program(Program* program) {
-  printf("FREEING PROGRAM..\n"); // TEMPORARY
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING PROGRAM..\n");
+  #endif
+  // ---------------
 
   FREE_ARRAY(int, program->source_lines, program->capacity);
   FREE_ARRAY(byte, program->instructions, program->capacity);

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "memory.h"
@@ -33,6 +34,12 @@ static void free_object(Object* object) {
 }
 
 void free_objects(Environment* environment) {
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING GC OBJECTS..\n");
+  #endif
+  // ---------------
+
   Object* current = environment->objects;
   while (current != NULL) {
     Object* next = current->next;

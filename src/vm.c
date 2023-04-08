@@ -21,7 +21,11 @@ void init_vm(VM* vm) {
 }
 
 void free_vm(VM* vm) {
-  printf("FREEING VM..\n"); // TEMPORARY
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING VM..\n");
+  #endif
+  // ---------------
 
   vm->program = NULL;
   free_objects(&vm->environment);
@@ -120,6 +124,7 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
+      // TODO: Add comment about providing designated instructions for certain constants.
       case OP_CONSTANT_FALSE:
         push(vm, FROM_C_BOOL(false));
         break;
@@ -189,9 +194,8 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, FROM_C_BOOL(!is_truthy(pop(vm))));
         break;
       case OP_RETURN: {
-        printf("> Result: ");   // Temporary
         print_value(pop(vm));
-        printf("\n\n");
+        printf("\n");
         return REPORT_NO_ERROR;
       }
     }

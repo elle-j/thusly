@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// Comment/uncomment to disable/enable debug output
 #define DEBUG_COMPILATION
 #define DEBUG_EXECUTION
 

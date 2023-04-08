@@ -1,8 +1,8 @@
 # Thusly
 
-A stack-based virtual machine for the **Thusly** general-purpose programming language.
+A general-purpose programming language coming to life through a one-pass compiler and a stack-based virtual machine.
 
-> ⚠️ The language is in a design phase but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
+> ⚠️ The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
 
 ## Table of Contents
 
@@ -46,7 +46,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
   - [x] Division (`/`)
   - [x] Unary negation (`-`)
   - [x] Precedence altering (`()`)
-- [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, `none`, and `text` can be executed.
+- [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, `text` (string), and `none` can be executed.
   - [x] Equal to (`=`)
   - [x] Not equal to (`!=`)
   - [x] Greater than (`>`)
@@ -64,6 +64,8 @@ This section is for briefly demonstrating implemented functionality thus far and
 
 By inputing a **one-line expression** from either a file or via the REPL, the VM will interpret it and output the result.
 
+**Table 1: Valid user input**
+
 | Example input              | Expected output | Expected precedence parsing   |
 |----------------------------|-----------------|-------------------------------|
 | 1 + 2 * 3 / 4              | 2.5             | 1 + ((2 * 3) / 4)             |
@@ -74,7 +76,13 @@ By inputing a **one-line expression** from either a file or via the REPL, the VM
 | "he" + "llo" = "hello"     | true            | ("he" + "llo") = "hello"      |
 | "keep " + "on " + "coding" | keep on coding  | ("keep " + "on ") + "coding"  |
 
-> Note: A debug flag is enabled which also prints the entire bytecode produced by the compiler, as well as the execution steps by the VM including its stack state.
+**Table 2: Invalid user input**
+
+| Example invalid input      | Error type   | Expected error reason                        |
+|----------------------------|--------------|----------------------------------------------|
+| "one" + 2                  | Runtime      | `+` operates on `number` only or `text` only |
+| "one" < 2                  | Runtime      | `<` operates on `number` only                |
+| !true                      | Compile      | `!` is only allowed in `!=` (use `not`)      |
 
 ## Getting Started
 
@@ -98,6 +106,18 @@ Run the below command to make Thusly come to life. It will create a top-level `b
 
 Once you have [built](#building-the-project) the project you can go ahead and feed it some code to interpret thusly (..get it?):
 
+**Usage example** (use the flag `-h` or `--help`):
+
+```
+$ ./bin/cthusly --help
+
+Usage: ./bin/cthusly [options] [path]
+
+    REPL (interactive prompt) starts if no [path] is provided
+
+    -h, --help                Show usage
+```
+
 **Interpret code from a file:**
 ```sh
 ./bin/cthusly path/to/your/file
@@ -107,6 +127,28 @@ Once you have [built](#building-the-project) the project you can go ahead and fe
 ```sh
 ./bin/cthusly
 ```
+
+Example:
+
+```
+$ ./bin/cthusly
+
+> "he" + "llo" = "hello"
+true
+> (1 + 2) * 3 / 4
+2.25
+> 
+```
+
+> **Enable/disable debug output:**
+>
+> Comment or uncomment the following macros in [src/common.h](src/common.h) to disable or enable printouts (then [rebuild](#building-the-project) the project):
+>
+> **DEBUG_COMPILATION**
+>   - Prints the entire bytecode produced by the compiler.
+>
+> **DEBUG_EXECUTION**
+>   - Prints the VM execution steps including its stack state.
 
 ## License
 
