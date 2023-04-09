@@ -83,6 +83,7 @@ static ParseRule rules[] = {
   // Reserved keywords
   [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NOT]                   = { parse_unary, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
@@ -265,6 +266,9 @@ static void parse_binary(Parser* parser) {
       break;
     case TOKEN_SLASH:
       write_instruction(parser, OP_DIVIDE);
+      break;
+    case TOKEN_MOD:
+      write_instruction(parser, OP_MODULO);
       break;
     default:
       // This should not be reachable.
