@@ -31,6 +31,7 @@ typedef enum {
   TOKEN_FALSE,
   // TOKEN_FUN,
   // TOKEN_IF,
+  TOKEN_MOD,
   TOKEN_NONE,
   TOKEN_NOT,
   TOKEN_OR,

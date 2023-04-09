@@ -162,6 +162,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       return search_keyword(tokenizer, 1, "nd", 2, TOKEN_AND);
     case 'f':
       return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
+    case 'm':
+      return search_keyword(tokenizer, 1, "od", 2, TOKEN_MOD);
     case 'n':
       if (lexeme_length > 2) {
         switch (tokenizer->start[1]) {
@@ -234,7 +236,7 @@ Token tokenize(Tokenizer* tokenizer) {
     case '!':
       if (match(tokenizer, '='))
         return make_token(tokenizer, TOKEN_EXCLAMATION_EQUALS);
-      return make_error_token(tokenizer, "You have included an illegal character: ! (This character is only allowed in !=)");
+      return make_error_token(tokenizer, "You have included an illegal character: ! (This character is only allowed in `!=`. Did you mean `not`?)");
     case '<':
       return match(tokenizer, '=')
         ? make_token(tokenizer, TOKEN_LESS_THAN_EQUALS)

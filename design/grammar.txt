@@ -80,7 +80,7 @@ term:
 	| factor ( ( "+" | "-" ) factor )*
 
 factor:
-	| unary ( ( "*" | "/" ) unary )*
+	| unary ( ( "*" | "/" | "mod" ) unary )*
 
 unary:
 	| ( "not" | "-" ) unary
