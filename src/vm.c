@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 #include "debug.h"
 #include "gc_object.h"
 #include "memory.h"
+#include "program.h"
 #include "vm.h"
 
 static void reset_stack(VM* vm) {
@@ -124,7 +126,6 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, constant);
         break;
       }
-      // TODO: Add comment about providing designated instructions for certain constants.
       case OP_CONSTANT_FALSE:
         push(vm, FROM_C_BOOL(false));
         break;
@@ -172,15 +173,27 @@ static ErrorReport decode_and_execute(VM* vm) {
         }
         break;
       }
-      case OP_DIVIDE:
-        DO_BINARY_OP(FROM_C_DOUBLE, /);
+      case OP_SUBTRACT:
+        DO_BINARY_OP(FROM_C_DOUBLE, -);
         break;
       case OP_MULTIPLY:
         DO_BINARY_OP(FROM_C_DOUBLE, *);
         break;
-      case OP_SUBTRACT:
-        DO_BINARY_OP(FROM_C_DOUBLE, -);
+      case OP_DIVIDE:
+        DO_BINARY_OP(FROM_C_DOUBLE, /);
         break;
+        // TODO: Handle division by 0
+      case OP_MODULO: {
+        if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
+          error(vm, "Modulo can only be performed on numbers.");
+          return REPORT_RUNTIME_ERROR;
+        }
+        double b = TO_C_DOUBLE(pop(vm));
+        double a = TO_C_DOUBLE(pop(vm));
+        push(vm, FROM_C_DOUBLE(fmod(a, b)));
+        break;
+        // TODO: Handle division by 0
+      }
       case OP_NEGATE:
         // Peek at the stack rather than pop here in case there is garbage
         // collection before the value is pushed onto the stack again.
