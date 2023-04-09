@@ -7,6 +7,7 @@
 typedef enum {
   OP_ADD,
   OP_CONSTANT,
+  // Dedicated operations for common constants.
   OP_CONSTANT_FALSE,
   OP_CONSTANT_NONE,
   OP_CONSTANT_TRUE,
@@ -16,6 +17,7 @@ typedef enum {
   OP_GREATER_THAN_EQUALS,
   OP_LESS_THAN,
   OP_LESS_THAN_EQUALS,
+  OP_MODULO,
   OP_MULTIPLY,
   OP_NEGATE,
   OP_NOT,

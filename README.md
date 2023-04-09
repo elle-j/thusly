@@ -8,7 +8,7 @@ A general-purpose programming language coming to life through a one-pass compile
 
 - [Language](#language)
     - [Characteristics](#characteristics)
-    - [Early Syntax](#early-syntax)
+    - [Syntax](#syntax)
 - [Milestones](#milestones)
     - [Implemented Functionality](#implemented-functionality)
 - [Getting Started](#getting-started)
@@ -27,9 +27,9 @@ A general-purpose programming language coming to life through a one-pass compile
 * Imperative
 * Garbage collected
 
-### Early Syntax 
+### Syntax
 
-The design and development are currently on-going and are highly subject to change. The following is a subset of the language:
+The development of both the language and the surrounding documentation is currently on-going, but the following is a subset of the language:
 
 <img src="design/code-snippet.svg" width="600" alt="A snippet of Thusly code.">
 
@@ -44,6 +44,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
   - [x] Subtraction (`-`)
   - [x] Multiplication (`*`)
   - [x] Division (`/`)
+  - [x] Modulo (`mod`)
   - [x] Unary negation (`-`)
   - [x] Precedence altering (`()`)
 - [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, `text` (string), and `none` can be executed.
@@ -78,11 +79,11 @@ By inputing a **one-line expression** from either a file or via the REPL, the VM
 
 **Table 2: Invalid user input**
 
-| Example invalid input      | Error type   | Expected error reason                        |
-|----------------------------|--------------|----------------------------------------------|
-| "one" + 2                  | Runtime      | `+` operates on `number` only or `text` only |
-| "one" < 2                  | Runtime      | `<` operates on `number` only                |
-| !true                      | Compile      | `!` is only allowed in `!=` (use `not`)      |
+| Example input | Error type | Expected error reason                           |
+|---------------|------------|-------------------------------------------------|
+| "one" + 2     | Runtime    | `+` operates on `number` only or `text` only    |
+| "one" < 2     | Runtime    | `<` operates on `number` only                   |
+| !true         | Compile    | `!` is only allowed in `!=` (use `not`)         |
 
 ## Getting Started
 
