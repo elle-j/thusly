@@ -8,7 +8,6 @@
 #include "debug.h"
 #include "gc_object.h"
 #include "memory.h"
-#include "program.h"
 #include "vm.h"
 
 static void reset_stack(VM* vm) {
