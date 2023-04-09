@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "gc_object.h"
 #include "memory.h"
-#include "object.h"
 
 void* handle_reallocation(void* memory, size_t old_size, size_t new_size) {
   bool should_free = new_size == 0;
@@ -22,9 +22,9 @@ void* handle_reallocation(void* memory, size_t old_size, size_t new_size) {
   return reallocated_memory;
 }
 
-static void free_object(Object* object) {
+static void free_object(GCObject* object) {
   switch (object->type) {
-    case OBJECT_TYPE_TEXT: {
+    case GC_OBJECT_TYPE_TEXT: {
       TextObject* text = (TextObject*)object;
       FREE_ARRAY(char, text->chars, text->length + 1);
       FREE(TextObject, object);
@@ -40,9 +40,9 @@ void free_objects(Environment* environment) {
   #endif
   // ---------------
 
-  Object* current = environment->objects;
+  GCObject* current = environment->gc_objects;
   while (current != NULL) {
-    Object* next = current->next;
+    GCObject* next = current->next;
     free_object(current);
     current = next;
   }

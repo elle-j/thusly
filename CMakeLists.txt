@@ -19,10 +19,10 @@ add_executable(cthusly
 	src/debug.h
 	src/debug.c
 	src/exit_code.h
+	src/gc_object.h
+	src/gc_object.c
 	src/memory.h
 	src/memory.c
-	src/object.h
-	src/object.c
 	src/program.h
 	src/program.c
 	src/thusly_value.h

@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-typedef struct Object Object;
+typedef struct GCObject GCObject;
 typedef struct TextObject TextObject;
 
 /// Built-in data types for a ThuslyValue.
@@ -12,7 +12,7 @@ typedef enum {
   TYPE_NONE,
   TYPE_NUMBER,
   // Dynamically (heap) allocated type (e.g. `text` (string))
-  TYPE_OBJECT,
+  TYPE_GC_OBJECT,
 } DataType;
 
 typedef struct {
@@ -21,14 +21,20 @@ typedef struct {
   union {
     bool c_bool;
     double c_double;
-    Object* c_object_ptr;
+    GCObject* c_object_ptr;
   } to;
 } ThuslyValue;
+
+typedef struct {
+  ThuslyValue* values;
+  int count;
+  int capacity;
+} ConstantPool;
 
 #define IS_BOOLEAN(thusly_value)      ((thusly_value).type == TYPE_BOOLEAN)
 #define IS_NONE(thusly_value)         ((thusly_value).type == TYPE_NONE)
 #define IS_NUMBER(thusly_value)       ((thusly_value).type == TYPE_NUMBER)
-#define IS_OBJECT(thusly_value)       ((thusly_value).type == TYPE_OBJECT)
+#define IS_GC_OBJECT(thusly_value)    ((thusly_value).type == TYPE_GC_OBJECT)
 
 #define TO_C_BOOL(thusly_value)       ((thusly_value).to.c_bool)
 #define TO_C_DOUBLE(thusly_value)     ((thusly_value).to.c_double)
@@ -37,13 +43,7 @@ typedef struct {
 #define FROM_C_BOOL(c_value)          ((ThuslyValue){ TYPE_BOOLEAN, { .c_bool = c_value } })
 #define FROM_C_NULL                   ((ThuslyValue){ TYPE_NONE, { .c_double = 0 } })
 #define FROM_C_DOUBLE(c_value)        ((ThuslyValue){ TYPE_NUMBER, { .c_double = c_value } })
-#define FROM_C_OBJECT_PTR(c_ptr)      ((ThuslyValue){ TYPE_OBJECT, { .c_object_ptr = (Object*)c_ptr } })
-
-typedef struct {
-  ThuslyValue* values;
-  int count;
-  int capacity;
-} ConstantPool;
+#define FROM_C_OBJECT_PTR(c_ptr)      ((ThuslyValue){ TYPE_GC_OBJECT, { .c_object_ptr = (GCObject*)c_ptr } })
 
 void init_constant_pool(ConstantPool* pool);
 void free_constant_pool(ConstantPool* pool);

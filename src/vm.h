@@ -12,7 +12,7 @@ struct VM;
 typedef struct {
   struct VM* vm;
   // Heap-allocated objects (points to the head).
-  Object* objects;
+  GCObject* gc_objects;
 } Environment;
 
 /// The virtual machine interpreting and executing the instructions in

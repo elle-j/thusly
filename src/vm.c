@@ -5,8 +5,8 @@
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "gc_object.h"
 #include "memory.h"
-#include "object.h"
 #include "vm.h"
 
 static void reset_stack(VM* vm) {
@@ -16,7 +16,7 @@ static void reset_stack(VM* vm) {
 void init_vm(VM* vm) {
   reset_stack(vm);
   vm->environment.vm = vm;
-  vm->environment.objects = NULL;
+  vm->environment.gc_objects = NULL;
   vm->program = NULL;
 }
 

@@ -2,27 +2,27 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "gc_object.h"
 #include "memory.h"
-#include "object.h"
 
-#define ALLOCATE_OBJECT(environment, type, object_type) \
-  (type*)allocate_object(environment, sizeof(type), object_type)
+#define ALLOCATE_OBJECT(environment, type, gc_object_type) \
+  (type*)allocate_object(environment, sizeof(type), gc_object_type)
 
-static Object* allocate_object(Environment* environment, size_t size, ObjectType object_type) {
-  // `size` needs to come from the argument (rather than using `sizeof(Object)`)
+static GCObject* allocate_object(Environment* environment, size_t size, GCObjectType gc_object_type) {
+  // `size` needs to come from the argument (rather than using `sizeof(GCObject)`)
   // since there are different-sized object types.
-  Object* object = (Object*)handle_reallocation(NULL, 0, size);
-  object->type = object_type;
+  GCObject* object = (GCObject*)handle_reallocation(NULL, 0, size);
+  object->type = gc_object_type;
 
   // Add the object to the linked list (inserting at the beginning).
-  object->next = environment->objects;
-  environment->objects = object;
+  object->next = environment->gc_objects;
+  environment->gc_objects = object;
 
   return object;
 }
 
 static TextObject* allocate_text_object(Environment* environment, char* chars, int length) {
-  TextObject* text = ALLOCATE_OBJECT(environment, TextObject, OBJECT_TYPE_TEXT);
+  TextObject* text = ALLOCATE_OBJECT(environment, TextObject, GC_OBJECT_TYPE_TEXT);
   text->chars = chars;
   text->length = length;
 
@@ -43,8 +43,8 @@ TextObject* copy_c_string(Environment* environment, const char* chars, int lengt
 }
 
 void print_object(ThuslyValue value) {
-  switch (GET_OBJECT_TYPE(value)) {
-    case OBJECT_TYPE_TEXT:
+  switch (GET_GC_OBJECT_TYPE(value)) {
+    case GC_OBJECT_TYPE_TEXT:
       printf("%s", TO_C_STRING(value));
       break;
   }

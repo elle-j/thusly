@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "compiler.h"
-#include "object.h"
+#include "gc_object.h"
 #include "program.h"
 #include "thusly_value.h"
 #include "tokenizer.h"
