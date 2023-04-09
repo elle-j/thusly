@@ -75,12 +75,14 @@ int disassemble_instruction(Program* program, int offset) {
       return print_opcode("OP_LESS_THAN_EQUALS", offset);
     case OP_ADD:
       return print_opcode("OP_ADD", offset);
-    case OP_DIVIDE:
-      return print_opcode("OP_DIVIDE", offset);
-    case OP_MULTIPLY:
-      return print_opcode("OP_MULTIPLY", offset);
     case OP_SUBTRACT:
       return print_opcode("OP_SUBTRACT", offset);
+    case OP_MULTIPLY:
+      return print_opcode("OP_MULTIPLY", offset);
+    case OP_DIVIDE:
+      return print_opcode("OP_DIVIDE", offset);
+    case OP_MODULO:
+      return print_opcode("OP_MODULO", offset);
     case OP_NEGATE:
       return print_opcode("OP_NEGATE", offset);
     case OP_NOT:
