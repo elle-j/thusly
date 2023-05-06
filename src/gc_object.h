@@ -1,5 +1,5 @@
-#ifndef CTHUSLY_OBJECT_H
-#define CTHUSLY_OBJECT_H
+#ifndef CTHUSLY_GC_OBJECT_H
+#define CTHUSLY_GC_OBJECT_H
 
 #include "common.h"
 #include "thusly_value.h"

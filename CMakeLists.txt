@@ -27,6 +27,8 @@ add_executable(cthusly
 	src/program.c
 	src/thusly_value.h
 	src/thusly_value.c
+	src/table.h
+	src/table.c
 	src/tokenizer.h
 	src/tokenizer.c
 	src/vm.h
