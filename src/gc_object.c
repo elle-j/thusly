@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -21,16 +22,36 @@ static GCObject* allocate_object(Environment* environment, size_t size, GCObject
   return object;
 }
 
-static TextObject* allocate_text_object(Environment* environment, char* chars, int length) {
+static TextObject* allocate_text_object(Environment* environment, char* chars, int length, uint32_t hash_code) {
   TextObject* text = ALLOCATE_OBJECT(environment, TextObject, GC_OBJECT_TYPE_TEXT);
   text->chars = chars;
   text->length = length;
+  text->hash_code = hash_code;
 
   return text;
 }
 
+static uint32_t hash(const char* key, int length) {
+  // FNV1 hash algorithm: http://www.isthe.com/chongo/tech/comp/fnv/
+  #define FNV1_32_INIT 2166136261u;
+  #define FNV_32_PRIME 16777619;
+
+  uint32_t hash = FNV1_32_INIT;
+  for (int i = 0; i < length; i++) {
+    // Incorporate each char into the hash (xor the bottom with the current octet).
+    hash ^= (uint8_t)key[i];
+    // Shuffle the bits (multiply by the 32 bit FNV magic prime)
+    hash *= FNV_32_PRIME;
+  }
+
+  return hash;
+
+  #undef FNV1_32_INIT
+  #undef FNV_32_PRIME
+}
+
 TextObject* claim_c_string(Environment* environment, char* chars, int length) {
-  return allocate_text_object(environment, chars, length);
+  return allocate_text_object(environment, chars, length, hash(chars, length));
 }
 
 TextObject* copy_c_string(Environment* environment, const char* chars, int length) {
@@ -39,7 +60,7 @@ TextObject* copy_c_string(Environment* environment, const char* chars, int lengt
   memcpy(chars_copy, chars, length);
   chars_copy[length] = '\0';
 
-  return allocate_text_object(environment, chars_copy, length);
+  return allocate_text_object(environment, chars_copy, length, hash(chars, length));
 }
 
 void print_object(ThuslyValue value) {

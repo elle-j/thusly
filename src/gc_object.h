@@ -1,6 +1,8 @@
 #ifndef CTHUSLY_GC_OBJECT_H
 #define CTHUSLY_GC_OBJECT_H
 
+#include <stdint.h>
+
 #include "common.h"
 #include "thusly_value.h"
 #include "vm.h"
@@ -33,6 +35,7 @@ struct TextObject {
   GCObject base;
   char* chars;
   int length;
+  uint32_t hash_code;
 };
 
 TextObject* claim_c_string(Environment* environment, char* chars, int length);
