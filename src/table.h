@@ -21,5 +21,6 @@ void init_table(Table* table);
 void free_table(Table* table);
 bool get_table(Table* table, TextObject* key, ThuslyValue* out_value);
 bool set_table(Table* table, TextObject* key, ThuslyValue value);
+bool pop_table(Table* table, TextObject* key);
 
 #endif
