@@ -2,6 +2,7 @@
 #define CTHUSLY_VM_H
 
 #include "program.h"
+#include "table.h"
 #include "thusly_value.h"
 
 #define STACK_MAX 256
@@ -13,6 +14,9 @@ typedef struct {
   struct VM* vm;
   // Heap-allocated objects (points to the head).
   GCObject* gc_objects;
+  // All texts (strings) created are interned. (Only the keys in this
+  // table are used, so the values will all be `None` ThuslyValues.)
+  Table texts;
 } Environment;
 
 /// The virtual machine interpreting and executing the instructions in

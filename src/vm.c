@@ -19,6 +19,7 @@ void init_vm(VM* vm) {
   vm->environment.vm = vm;
   vm->environment.gc_objects = NULL;
   vm->program = NULL;
+  init_table(&vm->environment.texts);
 }
 
 void free_vm(VM* vm) {
@@ -29,6 +30,7 @@ void free_vm(VM* vm) {
   // ---------------
 
   vm->program = NULL;
+  free_table(&vm->environment.texts);
   free_objects(&vm->environment);
 }
 

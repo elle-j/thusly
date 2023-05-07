@@ -27,20 +27,21 @@ static TextObject* allocate_text_object(Environment* environment, char* chars, i
   text->chars = chars;
   text->length = length;
   text->hash_code = hash_code;
+  set_table(&environment->texts, text, FROM_C_NULL);
 
   return text;
 }
 
 static uint32_t hash(const char* key, int length) {
   // FNV1 hash algorithm: http://www.isthe.com/chongo/tech/comp/fnv/
-  #define FNV1_32_INIT 2166136261u;
-  #define FNV_32_PRIME 16777619;
+  #define FNV1_32_INIT (uint32_t)2166136261u;
+  #define FNV_32_PRIME (uint32_t)16777619;
 
   uint32_t hash = FNV1_32_INIT;
   for (int i = 0; i < length; i++) {
     // Incorporate each char into the hash (xor the bottom with the current octet).
     hash ^= (uint8_t)key[i];
-    // Shuffle the bits (multiply by the 32 bit FNV magic prime)
+    // Shuffle the bits around (multiply by the 32 bit FNV magic prime).
     hash *= FNV_32_PRIME;
   }
 
@@ -51,16 +52,28 @@ static uint32_t hash(const char* key, int length) {
 }
 
 TextObject* claim_c_string(Environment* environment, char* chars, int length) {
-  return allocate_text_object(environment, chars, length, hash(chars, length));
+  uint32_t hash_code = hash(chars, length);
+  TextObject* interned_text = table_get_interned_text(&environment->texts, chars, length, hash_code);
+  if (interned_text != NULL) {
+    FREE_ARRAY(char, chars, length + 1);
+    return interned_text;
+  }
+
+  return allocate_text_object(environment, chars, length, hash_code);
 }
 
 TextObject* copy_c_string(Environment* environment, const char* chars, int length) {
+  uint32_t hash_code = hash(chars, length);
+  TextObject* interned_text = table_get_interned_text(&environment->texts, chars, length, hash_code);
+  if (interned_text != NULL)
+    return interned_text;
+
   // Allocate +1 for the terminating null byte.
   char* chars_copy = ALLOCATE(char, length + 1);
   memcpy(chars_copy, chars, length);
   chars_copy[length] = '\0';
 
-  return allocate_text_object(environment, chars_copy, length, hash(chars, length));
+  return allocate_text_object(environment, chars_copy, length, hash_code);
 }
 
 void print_object(ThuslyValue value) {

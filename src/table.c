@@ -1,9 +1,13 @@
+#include <stdio.h>
+#include <string.h>
+
 #include "gc_object.h"
 #include "memory.h"
 #include "table.h"
 
 #define TABLE_MAX_LOAD 0.75
-#define ENTRY_EXISTS(entry) ((entry)->key != NULL)
+#define ENTRY_EXISTS(entry)   ((entry)->key != NULL)
+#define TABLE_IS_EMPTY(table) ((table)->count == 0)
 
 void init_table(Table* table) {
   table->entries = NULL;
@@ -12,19 +16,46 @@ void init_table(Table* table) {
 }
 
 void free_table(Table* table) {
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING TABLE..\n");
+  #endif
+  // ---------------
+
   FREE_ARRAY(TableEntry, table->entries, table->capacity);
   init_table(table);
 }
 
-static TableEntry* get_new_or_existing_entry(TableEntry* entries, int capacity, TextObject* key) {
+static TextObject* find_interned_text(Table* interned_texts, const char* chars, int length, uint32_t hash_code) {
+  uint32_t index = hash_code % interned_texts->capacity;
+  while (true) {
+    TableEntry* entry = &interned_texts->entries[index];
+    if (!ENTRY_EXISTS(entry)) {
+      bool is_tombstone = IS_BOOLEAN(entry->value);
+      if (!is_tombstone)
+        return NULL;
+    }
+    else if (
+      entry->key->length == length &&
+      entry->key->hash_code == hash_code &&
+      memcmp(entry->key->chars, chars, length) == 0
+    )
+      return entry->key;
+
+    index = (index + 1) % interned_texts->capacity;
+  }
+}
+
+static TableEntry* find_new_or_existing_entry(TableEntry* entries, int capacity, TextObject* key) {
   uint32_t index = key->hash_code % capacity;
   TableEntry* next_available_entry = NULL;
   while (true) {
     TableEntry* entry = &entries[index];
-    // TODO: Replace `==` key equality
+    // `==` works for texts (strings) too since all texts are interned
+    // (each text is unique and points to the same memory location).
     if (entry->key == key)
       return entry;
-    
+
     if (!ENTRY_EXISTS(entry)) {
       bool is_tombstone = IS_BOOLEAN(entry->value);
       if (is_tombstone)
@@ -54,7 +85,7 @@ static void rebuild_table(Table* table, int new_capacity) {
   for (int i = 0; i < table->capacity; i++) {
     TableEntry* old_entry = &table->entries[i];
     if (ENTRY_EXISTS(old_entry)) {
-      TableEntry* new_entry = get_new_or_existing_entry(new_entries, new_capacity, old_entry->key);
+      TableEntry* new_entry = find_new_or_existing_entry(new_entries, new_capacity, old_entry->key);
       new_entry->key = old_entry->key;
       new_entry->value = old_entry->value;
       table->count++;
@@ -67,10 +98,10 @@ static void rebuild_table(Table* table, int new_capacity) {
 }
 
 bool get_table(Table* table, TextObject* key, ThuslyValue* out_value) {
-  if (table->count == 0)
+  if (TABLE_IS_EMPTY(table))
     return false;
 
-  TableEntry* entry = get_new_or_existing_entry(table->entries, table->capacity, key);
+  TableEntry* entry = find_new_or_existing_entry(table->entries, table->capacity, key);
   bool exists = ENTRY_EXISTS(entry);
   if (exists)
     *out_value = entry->value;
@@ -78,12 +109,19 @@ bool get_table(Table* table, TextObject* key, ThuslyValue* out_value) {
   return exists;
 }
 
+TextObject* table_get_interned_text(Table* table, const char* chars, int length, uint32_t hash_code) {
+  if (TABLE_IS_EMPTY(table))
+    return NULL;
+
+  return find_interned_text(table, chars, length, hash_code);
+}
+
 bool set_table(Table* table, TextObject* key, ThuslyValue value) {
   bool should_grow = table->count + 1 > table->capacity * TABLE_MAX_LOAD;
   if (should_grow)
     rebuild_table(table, GROW_CAPACITY(table->capacity));
 
-  TableEntry* entry = get_new_or_existing_entry(table->entries, table->capacity, key);
+  TableEntry* entry = find_new_or_existing_entry(table->entries, table->capacity, key);
   bool exists = ENTRY_EXISTS(entry);
   bool is_brand_new = !exists && IS_NONE(entry->value); // Tombstones are not counted as "brand new".
   if (is_brand_new)
@@ -101,10 +139,10 @@ static void place_tombstone(TableEntry* entry) {
 }
 
 bool pop_table(Table* table, TextObject* key) {
-  if (table->count == 0)
+  if (TABLE_IS_EMPTY(table))
     return false;
 
-  TableEntry* entry = get_new_or_existing_entry(table->entries, table->capacity, key);
+  TableEntry* entry = find_new_or_existing_entry(table->entries, table->capacity, key);
   bool exists = ENTRY_EXISTS(entry);
   if (exists)
     // Only place the tombstone, don't decrement the count (otherwise

@@ -45,11 +45,8 @@ bool values_are_equal(ThuslyValue a, ThuslyValue b) {
       return true;
     case TYPE_NUMBER:
       return TO_C_DOUBLE(a) == TO_C_DOUBLE(b);
-    case TYPE_GC_OBJECT: {
-      TextObject* textA = TO_TEXT(a);
-      TextObject* textB = TO_TEXT(b);
-      return textA->length == textB->length && memcmp(textA->chars, textB->chars, textA->length) == 0;
-    }
+    case TYPE_GC_OBJECT:
+      return TO_C_OBJECT_PTR(a) == TO_C_OBJECT_PTR(b);
     default:
       // This should not be reachable.
       return false;
