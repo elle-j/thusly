@@ -103,7 +103,7 @@ int main(int argc, const char* argv[]) {
     // TODO:
     // Currently only allowing '-h' or '--help' without providing the [path] as
     // the next arg. Other flags, e.g. debug flags, will be allowed as the arg
-    // preceeding the [path]. Add in this block when 3 args are supoprted.
+    // preceding the [path]. Add to this block when 3 args are supported.
   }*/
   else {
     print_help(stderr);

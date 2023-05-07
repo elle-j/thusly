@@ -17,7 +17,7 @@ void* handle_reallocation(void* memory, size_t old_size, size_t new_size) {
   void* reallocated_memory = realloc(memory, new_size);
   if (reallocated_memory == NULL)
     // Not enough available memory.
-    exit(1);
+    exit(EXIT_FAILURE);
 
   return reallocated_memory;
 }
