@@ -2,7 +2,7 @@
 
 A general-purpose programming language coming to life through a one-pass compiler and a stack-based virtual machine.
 
-> ⚠️ The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
+> The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
   * To try out the tokenizer in isolation and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2) (significant newline characters will be printed as newlines).
-- [x] One-line arithmetic expressions using `number` (double) can be executed.
+- [x] Arithmetic expressions using `number` (double) can be evaluated.
   - [x] Addition (`+`)
   - [x] Subtraction (`-`)
   - [x] Multiplication (`*`)
@@ -47,15 +47,16 @@ Whitespace is semantically insignificant except for newline characters on non-bl
   - [x] Modulo (`mod`)
   - [x] Unary negation (`-`)
   - [x] Precedence altering (`()`)
-- [x] One-line comparison, equality, and logical negation expressions using `number`, `boolean`, `text` (string), and `none` can be executed.
-  - [x] Equal to (`=`)
-  - [x] Not equal to (`!=`)
+- [x] Comparison expressions using `number` can be evaluated.
   - [x] Greater than (`>`)
   - [x] Greater than or equal to (`>=`)
   - [x] Less than (`<`)
   - [x] Less than or equal to (`<=`)
+- [x] Equality and logical negation expressions using `number`, `boolean`, `text` (string), and `none` can be evaluated.
+  - [x] Equal to (`=`)
+  - [x] Not equal to (`!=`)
   - [x] Logical not (`not`)
-- [x] Concatenation of `text` literals using `+` can be executed.
+- [x] Concatenation of `text` literals using `+` can be evaluated.
 - [ ] Support variable declarations and assignments.
 - [ ] TODO (more milestones will be added here)
 
@@ -83,7 +84,7 @@ By inputing a **one-line expression** from either a file or via the REPL, the VM
 |---------------|------------|-------------------------------------------------|
 | "one" + 2     | Runtime    | `+` operates on `number` only or `text` only    |
 | "one" < 2     | Runtime    | `<` operates on `number` only                   |
-| !true         | Compile    | `!` is only allowed in `!=` (use `not`)         |
+| !true         | Comptime   | `!` is only allowed in `!=` (use `not`)         |
 
 ## Getting Started
 

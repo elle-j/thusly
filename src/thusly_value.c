@@ -5,13 +5,13 @@
 #include "memory.h"
 #include "thusly_value.h"
 
-void init_constant_pool(ConstantPool* pool) {
+void constant_pool_init(ConstantPool* pool) {
   pool->values = NULL;
   pool->count = 0;
   pool->capacity = 0;
 }
 
-void free_constant_pool(ConstantPool* pool) {
+void constant_pool_free(ConstantPool* pool) {
   // -- TEMPORARY --
   #ifdef DEBUG_EXECUTION
     printf("FREEING CONSTANT POOL..\n");
@@ -19,12 +19,12 @@ void free_constant_pool(ConstantPool* pool) {
   // ---------------
 
   FREE_ARRAY(ThuslyValue, pool->values, pool->capacity);
-  init_constant_pool(pool);
+  constant_pool_init(pool);
 }
 
-void append_constant(ConstantPool* pool, ThuslyValue value) {
-  bool should_grow = pool->capacity < pool->count + 1;
-  if (should_grow) {
+void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
+  bool max_capacity_reached = pool->count + 1 > pool->capacity;
+  if (max_capacity_reached) {
     int old_capacity = pool->capacity;
     pool->capacity = GROW_CAPACITY(old_capacity);
     pool->values = GROW_ARRAY(ThuslyValue, pool->values, old_capacity, pool->capacity);
@@ -45,11 +45,8 @@ bool values_are_equal(ThuslyValue a, ThuslyValue b) {
       return true;
     case TYPE_NUMBER:
       return TO_C_DOUBLE(a) == TO_C_DOUBLE(b);
-    case TYPE_GC_OBJECT: {
-      TextObject* textA = TO_TEXT(a);
-      TextObject* textB = TO_TEXT(b);
-      return textA->length == textB->length && memcmp(textA->chars, textB->chars, textA->length) == 0;
-    }
+    case TYPE_GC_OBJECT:
+      return TO_C_OBJECT_PTR(a) == TO_C_OBJECT_PTR(b);
     default:
       // This should not be reachable.
       return false;

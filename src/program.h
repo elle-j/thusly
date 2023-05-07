@@ -34,9 +34,9 @@ typedef struct {
   int capacity;
 } Program;
 
-void init_program(Program* program);
-void free_program(Program* program);
-void append_instruction(Program* program, byte instruction, int source_line);
-int add_constant(Program* program, ThuslyValue value);
+void program_init(Program* program);
+void program_free(Program* program);
+void program_write(Program* program, byte instruction, int source_line);
+int program_add_constant(Program* program, ThuslyValue value);
 
 #endif
