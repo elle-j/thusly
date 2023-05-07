@@ -47,6 +47,7 @@ static TextObject* find_interned_text(Table* interned_texts, const char* chars, 
 }
 
 static TableEntry* find_new_or_existing_entry(TableEntry* entries, int capacity, TextObject* key) {
+  // "Open addressing" using linear probing is used as the collision resolution method.
   uint32_t index = key->hash_code % capacity;
   TableEntry* next_available_entry = NULL;
   while (true) {
@@ -68,16 +69,16 @@ static TableEntry* find_new_or_existing_entry(TableEntry* entries, int capacity,
   }
 }
 
-static void init_entries(TableEntry* entries, int capacity) {
+static void entries_init(TableEntry* entries, int capacity) {
   for (int i = 0; i < capacity; i++) {
     entries[i].key = NULL;
     entries[i].value = FROM_C_NULL;
   }
 }
 
-static void rebuild_table(Table* table, int new_capacity) {
+static void grow_and_rebuild_table(Table* table, int new_capacity) {
   TableEntry* new_entries = ALLOCATE(TableEntry, new_capacity);
-  init_entries(new_entries, new_capacity);
+  entries_init(new_entries, new_capacity);
 
   // Reset the count and increment it only if an entry exists in
   // order to not include tombstones in the count when rebuilding.
@@ -117,9 +118,9 @@ TextObject* table_get_interned_text(Table* table, const char* chars, int length,
 }
 
 bool table_set(Table* table, TextObject* key, ThuslyValue value) {
-  bool should_grow = table->count + 1 > table->capacity * TABLE_MAX_LOAD;
-  if (should_grow)
-    rebuild_table(table, GROW_CAPACITY(table->capacity));
+  bool max_load_reached = table->count + 1 > table->capacity * TABLE_MAX_LOAD;
+  if (max_load_reached)
+    grow_and_rebuild_table(table, GROW_CAPACITY(table->capacity));
 
   TableEntry* entry = find_new_or_existing_entry(table->entries, table->capacity, key);
   bool exists = ENTRY_EXISTS(entry);

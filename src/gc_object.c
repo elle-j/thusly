@@ -37,15 +37,15 @@ static uint32_t hash(const char* key, int length) {
   #define FNV1_32_INIT ((uint32_t)2166136261u)
   #define FNV_32_PRIME ((uint32_t)16777619)
 
-  uint32_t hash = FNV1_32_INIT;
+  uint32_t hash_code = FNV1_32_INIT;
   for (int i = 0; i < length; i++) {
     // Incorporate each char into the hash (xor the bottom with the current octet).
-    hash ^= (uint8_t)key[i];
+    hash_code ^= (uint8_t)key[i];
     // Shuffle the bits around (multiply by the 32 bit FNV magic prime).
-    hash *= FNV_32_PRIME;
+    hash_code *= FNV_32_PRIME;
   }
 
-  return hash;
+  return hash_code;
 
   #undef FNV1_32_INIT
   #undef FNV_32_PRIME

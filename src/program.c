@@ -26,8 +26,8 @@ void program_free(Program* program) {
 }
 
 void program_write(Program* program, byte instruction, int source_line) {
-  bool should_grow = program->capacity < program->count + 1;
-  if (should_grow) {
+  bool max_capacity_reached = program->count + 1 > program->capacity;
+  if (max_capacity_reached) {
     int old_capacity = program->capacity;
     program->capacity = GROW_CAPACITY(old_capacity);
     program->instructions = GROW_ARRAY(byte, program->instructions, old_capacity, program->capacity);

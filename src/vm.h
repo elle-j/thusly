@@ -15,7 +15,7 @@ typedef struct {
   // Heap-allocated objects (points to the head).
   GCObject* gc_objects;
   // All texts (strings) created are interned. (Only the keys in this
-  // table are used, so the values will all be `None` ThuslyValues.)
+  // table are used, so the values will all be `none` ThuslyValues.)
   Table texts;
 } Environment;
 

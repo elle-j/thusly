@@ -23,8 +23,8 @@ void constant_pool_free(ConstantPool* pool) {
 }
 
 void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
-  bool should_grow = pool->capacity < pool->count + 1;
-  if (should_grow) {
+  bool max_capacity_reached = pool->count + 1 > pool->capacity;
+  if (max_capacity_reached) {
     int old_capacity = pool->capacity;
     pool->capacity = GROW_CAPACITY(old_capacity);
     pool->values = GROW_ARRAY(ThuslyValue, pool->values, old_capacity, pool->capacity);
