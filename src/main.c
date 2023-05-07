@@ -22,7 +22,7 @@ static void print_help(FILE* fout) {
 
 static void run_repl() {
   VM vm;
-  init_vm(&vm);
+  vm_init(&vm);
 
   char line[1024];
   while (true) {
@@ -36,7 +36,7 @@ static void run_repl() {
     interpret(&vm, line);
   }
 
-  free_vm(&vm);
+  vm_free(&vm);
 }
 
 static char* read_file(const char* path) {
@@ -74,14 +74,14 @@ static char* read_file(const char* path) {
 
 static void run_file(const char* path) {
   VM vm;
-  init_vm(&vm);
+  vm_init(&vm);
   char* source = read_file(path);
 
   ErrorReport report = interpret(&vm, source);
 
   // `read_file()` uses `malloc()` for the source, thus it needs to be freed here.
   free(source);
-  free_vm(&vm);
+  vm_free(&vm);
 
   if (report == REPORT_COMPILE_ERROR)
     exit(EXIT_CODE_INPUT_DATA_ERROR);

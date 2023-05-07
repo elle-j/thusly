@@ -5,13 +5,13 @@
 #include "memory.h"
 #include "thusly_value.h"
 
-void init_constant_pool(ConstantPool* pool) {
+void constant_pool_init(ConstantPool* pool) {
   pool->values = NULL;
   pool->count = 0;
   pool->capacity = 0;
 }
 
-void free_constant_pool(ConstantPool* pool) {
+void constant_pool_free(ConstantPool* pool) {
   // -- TEMPORARY --
   #ifdef DEBUG_EXECUTION
     printf("FREEING CONSTANT POOL..\n");
@@ -19,10 +19,10 @@ void free_constant_pool(ConstantPool* pool) {
   // ---------------
 
   FREE_ARRAY(ThuslyValue, pool->values, pool->capacity);
-  init_constant_pool(pool);
+  constant_pool_init(pool);
 }
 
-void append_constant(ConstantPool* pool, ThuslyValue value) {
+void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
   bool should_grow = pool->capacity < pool->count + 1;
   if (should_grow) {
     int old_capacity = pool->capacity;

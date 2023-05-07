@@ -45,9 +45,9 @@ typedef struct {
 #define FROM_C_DOUBLE(c_value)        ((ThuslyValue){ TYPE_NUMBER, { .c_double = c_value } })
 #define FROM_C_OBJECT_PTR(c_ptr)      ((ThuslyValue){ TYPE_GC_OBJECT, { .c_object_ptr = (GCObject*)c_ptr } })
 
-void init_constant_pool(ConstantPool* pool);
-void free_constant_pool(ConstantPool* pool);
-void append_constant(ConstantPool* pool, ThuslyValue value);
+void constant_pool_init(ConstantPool* pool);
+void constant_pool_free(ConstantPool* pool);
+void constant_pool_add(ConstantPool* pool, ThuslyValue value);
 bool values_are_equal(ThuslyValue a, ThuslyValue b);
 void print_value(ThuslyValue value);
 

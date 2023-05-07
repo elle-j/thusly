@@ -2,7 +2,7 @@
 
 #include "tokenizer.h"
 
-void init_tokenizer(Tokenizer* tokenizer, const char* source) {
+void tokenizer_init(Tokenizer* tokenizer, const char* source) {
   tokenizer->start = source;
   tokenizer->current = source;
   tokenizer->line = 1;

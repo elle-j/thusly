@@ -17,11 +17,11 @@ typedef struct {
   int capacity;
 } Table;
 
-void init_table(Table* table);
-void free_table(Table* table);
-bool get_table(Table* table, TextObject* key, ThuslyValue* out_value);
-bool set_table(Table* table, TextObject* key, ThuslyValue value);
-bool pop_table(Table* table, TextObject* key);
+void table_init(Table* table);
+void table_free(Table* table);
+bool table_get(Table* table, TextObject* key, ThuslyValue* out_value);
+bool table_set(Table* table, TextObject* key, ThuslyValue value);
+bool table_pop(Table* table, TextObject* key);
 TextObject* table_get_interned_text(Table* table, const char* chars, int length, uint32_t hash_code);
 
 #endif

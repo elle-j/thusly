@@ -9,13 +9,13 @@
 #define ENTRY_EXISTS(entry)   ((entry)->key != NULL)
 #define TABLE_IS_EMPTY(table) ((table)->count == 0)
 
-void init_table(Table* table) {
+void table_init(Table* table) {
   table->entries = NULL;
   table->count = 0;
   table->capacity = 0;
 }
 
-void free_table(Table* table) {
+void table_free(Table* table) {
   // -- TEMPORARY --
   #ifdef DEBUG_EXECUTION
     printf("FREEING TABLE..\n");
@@ -23,7 +23,7 @@ void free_table(Table* table) {
   // ---------------
 
   FREE_ARRAY(TableEntry, table->entries, table->capacity);
-  init_table(table);
+  table_init(table);
 }
 
 static TextObject* find_interned_text(Table* interned_texts, const char* chars, int length, uint32_t hash_code) {
@@ -97,7 +97,7 @@ static void rebuild_table(Table* table, int new_capacity) {
   table->capacity = new_capacity;
 }
 
-bool get_table(Table* table, TextObject* key, ThuslyValue* out_value) {
+bool table_get(Table* table, TextObject* key, ThuslyValue* out_value) {
   if (TABLE_IS_EMPTY(table))
     return false;
 
@@ -116,7 +116,7 @@ TextObject* table_get_interned_text(Table* table, const char* chars, int length,
   return find_interned_text(table, chars, length, hash_code);
 }
 
-bool set_table(Table* table, TextObject* key, ThuslyValue value) {
+bool table_set(Table* table, TextObject* key, ThuslyValue value) {
   bool should_grow = table->count + 1 > table->capacity * TABLE_MAX_LOAD;
   if (should_grow)
     rebuild_table(table, GROW_CAPACITY(table->capacity));
@@ -138,7 +138,7 @@ static void place_tombstone(TableEntry* entry) {
   entry->value = FROM_C_BOOL(true);
 }
 
-bool pop_table(Table* table, TextObject* key) {
+bool table_pop(Table* table, TextObject* key) {
   if (TABLE_IS_EMPTY(table))
     return false;
 

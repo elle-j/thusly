@@ -14,15 +14,15 @@ static void reset_stack(VM* vm) {
   vm->next_stack_top = vm->stack;
 }
 
-void init_vm(VM* vm) {
+void vm_init(VM* vm) {
   reset_stack(vm);
   vm->environment.vm = vm;
   vm->environment.gc_objects = NULL;
   vm->program = NULL;
-  init_table(&vm->environment.texts);
+  table_init(&vm->environment.texts);
 }
 
-void free_vm(VM* vm) {
+void vm_free(VM* vm) {
   // -- TEMPORARY --
   #ifdef DEBUG_EXECUTION
     printf("FREEING VM..\n");
@@ -30,7 +30,7 @@ void free_vm(VM* vm) {
   // ---------------
 
   vm->program = NULL;
-  free_table(&vm->environment.texts);
+  table_free(&vm->environment.texts);
   free_objects(&vm->environment);
 }
 
@@ -50,14 +50,14 @@ static void error(VM* vm, const char* message, ...) {
   reset_stack(vm);
 }
 
-void push(VM* vm, ThuslyValue value) {
+static void push(VM* vm, ThuslyValue value) {
   *vm->next_stack_top = value;
   vm->next_stack_top++;
 
   // TODO: Check size before pushing to prevent stack overflow
 }
 
-ThuslyValue pop(VM* vm) {
+static ThuslyValue pop(VM* vm) {
   vm->next_stack_top--;
   
   return *vm->next_stack_top;
@@ -65,7 +65,7 @@ ThuslyValue pop(VM* vm) {
   // TODO: Check empty
 }
 
-ThuslyValue peek(VM* vm, int offset) {
+static ThuslyValue peek(VM* vm, int offset) {
   // The current stack top is 1 before next_stack_top. Thus, if the offset passed
   // is 0, this should peek at next_stack_top[-1].
   return vm->next_stack_top[-1 - offset];
@@ -222,11 +222,11 @@ static ErrorReport decode_and_execute(VM* vm) {
 
 ErrorReport interpret(VM* vm, const char* source) {
   Program program;
-  init_program(&program);
+  program_init(&program);
 
   bool has_error = !compile(&vm->environment, source, &program);
   if (has_error) {
-    free_program(&program);
+    program_free(&program);
     return REPORT_COMPILE_ERROR;
   }
 
@@ -234,7 +234,7 @@ ErrorReport interpret(VM* vm, const char* source) {
   vm->next_instruction = program.instructions;
   ErrorReport report = decode_and_execute(vm);
 
-  free_program(&program);
+  program_free(&program);
 
   return report;
 }

@@ -172,7 +172,7 @@ static void consume(Parser* parser, TokenType type, const char* err_message) {
 }
 
 static void write_instruction(Parser* parser, byte instruction) {
-  append_instruction(get_writable_program(parser), instruction, parser->previous.line);
+  program_write(get_writable_program(parser), instruction, parser->previous.line);
 }
 
 static void write_instructions(Parser* parser, byte instruction1, byte instruction2) {
@@ -181,7 +181,7 @@ static void write_instructions(Parser* parser, byte instruction1, byte instructi
 }
 
 static byte make_constant(Parser* parser, ThuslyValue value) {
-  unsigned int constant_index = add_constant(get_writable_program(parser), value);
+  unsigned int constant_index = program_add_constant(get_writable_program(parser), value);
   // The operand to the OP_CONSTANT instruction (i.e. the index of the constant)
   // currently only supports 1 byte.
   if (constant_index > UINT8_MAX) {
@@ -343,7 +343,7 @@ static void end_compilation(Parser* parser) {
 bool compile(Environment* environment, const char* source, Program* out_program) {
   Parser parser;
   init_parser(&parser, environment, out_program);
-  init_tokenizer(&parser.tokenizer, source);
+  tokenizer_init(&parser.tokenizer, source);
 
   advance(&parser);
   parse_expression(&parser);

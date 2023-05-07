@@ -27,15 +27,15 @@ static TextObject* allocate_text_object(Environment* environment, char* chars, i
   text->chars = chars;
   text->length = length;
   text->hash_code = hash_code;
-  set_table(&environment->texts, text, FROM_C_NULL);
+  table_set(&environment->texts, text, FROM_C_NULL);
 
   return text;
 }
 
 static uint32_t hash(const char* key, int length) {
   // FNV1 hash algorithm: http://www.isthe.com/chongo/tech/comp/fnv/
-  #define FNV1_32_INIT (uint32_t)2166136261u;
-  #define FNV_32_PRIME (uint32_t)16777619;
+  #define FNV1_32_INIT ((uint32_t)2166136261u)
+  #define FNV_32_PRIME ((uint32_t)16777619)
 
   uint32_t hash = FNV1_32_INIT;
   for (int i = 0; i < length; i++) {

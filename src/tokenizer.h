@@ -70,7 +70,7 @@ typedef struct {
   bool is_blank_line;
 } Tokenizer;
 
-void init_tokenizer(Tokenizer* tokenizer, const char* source);
+void tokenizer_init(Tokenizer* tokenizer, const char* source);
 Token tokenize(Tokenizer* tokenizer);
 
 #endif

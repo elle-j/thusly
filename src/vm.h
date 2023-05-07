@@ -36,10 +36,8 @@ typedef enum {
   REPORT_RUNTIME_ERROR,
 } ErrorReport;
 
-void init_vm(VM* vm);
-void free_vm(VM* vm);
-void push(VM* vm, ThuslyValue value);
-ThuslyValue pop(VM* vm);
+void vm_init(VM* vm);
+void vm_free(VM* vm);
 ErrorReport interpret(VM* vm, const char* source);
 
 #endif
