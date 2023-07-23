@@ -53,6 +53,7 @@ typedef struct {
 } ParseRule;
 
 static void parse_statement(Parser* parser);
+static void parse_expression_statement(Parser* parser);
 static void parse_out_statement(Parser* parser);
 static void parse_expression(Parser* parser);
 static void parse_binary(Parser* parser);
@@ -222,9 +223,16 @@ static void write_return_instruction(Parser* parser) {
 }
 
 static void parse_statement(Parser* parser) {
-  if (match(parser, TOKEN_OUT)) {
+  if (match(parser, TOKEN_OUT))
     parse_out_statement(parser);
-  }
+  else
+    parse_expression_statement(parser);
+}
+
+static void parse_expression_statement(Parser* parser) {
+  parse_expression(parser);
+  consume_newline(parser);
+  write_instruction(parser, OP_POP);
 }
 
 static void parse_out_statement(Parser* parser) {

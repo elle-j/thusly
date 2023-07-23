@@ -122,6 +122,9 @@ static ErrorReport decode_and_execute(VM* vm) {
 
     byte instruction = READ_BYTE();
     switch (instruction) {
+      case OP_POP:
+        pop(vm);
+        break;
       case OP_CONSTANT: {
         ThuslyValue constant = READ_CONSTANT();
         push(vm, constant);

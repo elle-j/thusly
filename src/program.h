@@ -24,6 +24,7 @@ typedef enum {
   OP_NOT,
   OP_NOT_EQUALS,
   OP_OUT,
+  OP_POP,
   OP_RETURN,
   OP_SUBTRACT,
 } Opcode;
