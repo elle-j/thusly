@@ -72,7 +72,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 
 This section is for briefly demonstrating implemented functionality thus far and expected behavior when [running your code](#getting-started).
 
-By inputing a **one-line expression** from either a file or via the REPL, the VM will interpret it and output the result.
+By inputting code from either a file or via the REPL, the VM will interpret it and output the result if an `@out` statement is used.
 
 **Table 1: Valid user input (expressions)**
 
