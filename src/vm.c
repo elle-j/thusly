@@ -207,9 +207,11 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_NOT:
         push(vm, FROM_C_BOOL(!is_truthy(pop(vm))));
         break;
-      case OP_RETURN: {
+      case OP_OUT:
         print_value(pop(vm));
         printf("\n");
+        break;
+      case OP_RETURN: {
         return REPORT_NO_ERROR;
       }
     }
