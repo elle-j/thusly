@@ -52,6 +52,9 @@ typedef struct {
   Precedence precedence;
 } ParseRule;
 
+static void parse_statement(Parser* parser);
+static void parse_out_statement(Parser* parser);
+static void parse_expression(Parser* parser);
 static void parse_binary(Parser* parser);
 static void parse_boolean(Parser* parser);
 static void parse_grouping(Parser* parser);
@@ -87,7 +90,7 @@ static ParseRule rules[] = {
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NOT]                   = { parse_unary, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_PRINT]                 = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_OUT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_TRUE]                  = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
 
@@ -108,7 +111,7 @@ static ParseRule* get_rule(TokenType type) {
   return &rules[type];
 }
 
-static void init_parser(Parser* parser, Environment* environment, Program* writable_program) {
+static void parser_init(Parser* parser, Environment* environment, Program* writable_program) {
   parser->environment = environment;
   parser->writable_program = writable_program;
   parser->has_error = false;
@@ -171,6 +174,24 @@ static void consume(Parser* parser, TokenType type, const char* err_message) {
   error_at(parser, &parser->current, err_message);
 }
 
+static void consume_newline(Parser* parser) {
+  if (check(parser, TOKEN_NEWLINE)) {
+    advance(parser);
+    return;
+  }
+
+  error_at(parser, &parser->current, "The statement must end with a newline.");
+}
+
+static bool match(Parser* parser, TokenType type) {
+  if (!check(parser, type))
+    return false;
+
+  advance(parser);
+
+  return true;
+}
+
 static void write_instruction(Parser* parser, byte instruction) {
   program_write(get_writable_program(parser), instruction, parser->previous.line);
 }
@@ -200,6 +221,18 @@ static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
+static void parse_statement(Parser* parser) {
+  if (match(parser, TOKEN_OUT)) {
+    parse_out_statement(parser);
+  }
+}
+
+static void parse_out_statement(Parser* parser) {
+  parse_expression(parser);
+  consume_newline(parser);
+  write_instruction(parser, OP_OUT);
+}
+
 static void parse_precedence(Parser* parser, Precedence min_precedence) {
   advance(parser);
 
@@ -217,9 +250,6 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
     ParseFunction infix_rule = get_rule(parser->previous.type)->infix;
     infix_rule(parser);
   }
-
-  if (parser->current.type == TOKEN_NEWLINE)
-    advance(parser);
 }
 
 static void parse_expression(Parser* parser) {
@@ -342,12 +372,15 @@ static void end_compilation(Parser* parser) {
 
 bool compile(Environment* environment, const char* source, Program* out_program) {
   Parser parser;
-  init_parser(&parser, environment, out_program);
+  parser_init(&parser, environment, out_program);
   tokenizer_init(&parser.tokenizer, source);
 
   advance(&parser);
-  parse_expression(&parser);
-  consume(&parser, TOKEN_FILE_END, "Expected the end of an expression.");
+
+  while (!match(&parser, TOKEN_FILE_END)) {
+    parse_statement(&parser);
+  }
+
   end_compilation(&parser);
 
   return !parser.has_error;
