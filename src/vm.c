@@ -39,8 +39,11 @@ static void error(VM* vm, const char* message, ...) {
   size_t instruction_index = vm->next_instruction - vm->program->instructions - 1;
   int source_line = vm->program->source_lines[instruction_index];
 
-  fprintf(stderr, "ERROR on line %d:\n", source_line);
-  fprintf(stderr, "\t>> Help: ");
+  fprintf(stderr, "\n---------");
+  fprintf(stderr, "\n| ERROR |");
+  fprintf(stderr, "\n---------");
+  fprintf(stderr, "\n\t> Line:\n\t\t%d", source_line);
+  fprintf(stderr, "\n\t> What's wrong:\n\t\t");
   va_list args;
   va_start(args, message);
   vfprintf(stderr, message, args);
@@ -96,15 +99,15 @@ static ErrorReport decode_and_execute(VM* vm) {
 
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
 
-  #define DO_BINARY_OP(from_c_value, operator)                        \
-    do {                                                              \
-      if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {       \
-        error(vm, "The operation can only be performed on numbers."); \
-        return REPORT_RUNTIME_ERROR;                                  \
-      }                                                               \
-      double b = TO_C_DOUBLE(pop(vm));                                \
-      double a = TO_C_DOUBLE(pop(vm));                                \
-      push(vm, from_c_value(a operator b));                           \
+  #define DO_BINARY_OP(from_c_value, operator, operator_string)                             \
+    do {                                                                                    \
+      if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {                             \
+        error(vm, "The operation (%s) can only be performed on numbers.", operator_string); \
+        return REPORT_RUNTIME_ERROR;                                                        \
+      }                                                                                     \
+      double b = TO_C_DOUBLE(pop(vm));                                                      \
+      double a = TO_C_DOUBLE(pop(vm));                                                      \
+      push(vm, from_c_value(a operator b));                                                 \
     } while (false)
 
   #ifdef DEBUG_EXECUTION
@@ -152,16 +155,16 @@ static ErrorReport decode_and_execute(VM* vm) {
         break;
       }
       case OP_GREATER_THAN:
-        DO_BINARY_OP(FROM_C_BOOL, >);
+        DO_BINARY_OP(FROM_C_BOOL, >, ">");
         break;
       case OP_GREATER_THAN_EQUALS:
-        DO_BINARY_OP(FROM_C_BOOL, >=);
+        DO_BINARY_OP(FROM_C_BOOL, >=, ">=");
         break;
       case OP_LESS_THAN:
-        DO_BINARY_OP(FROM_C_BOOL, <);
+        DO_BINARY_OP(FROM_C_BOOL, <, "<");
         break;
       case OP_LESS_THAN_EQUALS:
-        DO_BINARY_OP(FROM_C_BOOL, <=);
+        DO_BINARY_OP(FROM_C_BOOL, <=, "<=");
         break;
       case OP_ADD: {
         if (IS_TEXT(peek(vm, 0)) && IS_TEXT(peek(vm, 1)))
@@ -172,24 +175,24 @@ static ErrorReport decode_and_execute(VM* vm) {
           push(vm, FROM_C_DOUBLE(a + b));
         }
         else {
-          error(vm, "The '+' operation can only be performed on either numbers or texts.");
+          error(vm, "Addition/concatenation (+) can only be performed on either numbers or texts.");
           return REPORT_RUNTIME_ERROR;
         }
         break;
       }
       case OP_SUBTRACT:
-        DO_BINARY_OP(FROM_C_DOUBLE, -);
+        DO_BINARY_OP(FROM_C_DOUBLE, -, "-");
         break;
       case OP_MULTIPLY:
-        DO_BINARY_OP(FROM_C_DOUBLE, *);
+        DO_BINARY_OP(FROM_C_DOUBLE, *, "*");
         break;
       case OP_DIVIDE:
-        DO_BINARY_OP(FROM_C_DOUBLE, /);
+        DO_BINARY_OP(FROM_C_DOUBLE, /, "/");
         break;
         // TODO: Handle division by 0
       case OP_MODULO: {
         if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
-          error(vm, "Modulo can only be performed on numbers.");
+          error(vm, "Modulo (\%) can only be performed on numbers.");
           return REPORT_RUNTIME_ERROR;
         }
         double b = TO_C_DOUBLE(pop(vm));
@@ -202,7 +205,7 @@ static ErrorReport decode_and_execute(VM* vm) {
         // Peek at the stack rather than pop here in case there is garbage
         // collection before the value is pushed onto the stack again.
         if (!IS_NUMBER(peek(vm, 0))) {
-          error(vm, "Negating a value can only be performed on numbers.");
+          error(vm, "Negation (-) can only be performed on numbers.");
           return REPORT_RUNTIME_ERROR;
         }
         push(vm, FROM_C_DOUBLE(-TO_C_DOUBLE(pop(vm))));

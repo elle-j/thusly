@@ -132,17 +132,26 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   parser->panic_mode = true;
   parser->saw_error = true;
 
-  fprintf(stderr, "ERROR on line %d", token->line);
+  fprintf(stderr, "\n---------");
+  fprintf(stderr, "\n| ERROR |");
+  fprintf(stderr, "\n---------");
+  fprintf(stderr, "\n\t> Line:\n\t\t%d", token->line);
+  fprintf(stderr, "\n\t> Where:\n\t\t");
   if (token->type == TOKEN_FILE_END)
-    fprintf(stderr, " at the end of the file");
+    fprintf(stderr, "At the end of the file");
+  else if (token->type == TOKEN_NEWLINE)
+    fprintf(stderr, "At the end of the line");
   else if (token->type == TOKEN_LEXICAL_ERROR) {
-    // The error message for `TOKEN_LEXICAL_ERROR` has been passed in as
-    // the `message` via `advance()`. There's no need to do anything here.
+    // The error message for `TOKEN_LEXICAL_ERROR` was stored as the `lexeme`
+    // and has been passed in as the `message` via `advance()`. Therefore,
+    // `parser.tokenizer` is being accessed directly here instead.
+    int token_length = parser->tokenizer.current - parser->tokenizer.start;
+    fprintf(stderr, "At '%.*s'", token_length, parser->tokenizer.start);
   }
   else
-    fprintf(stderr, " at '%.*s'", token->length, token->lexeme);
+    fprintf(stderr, "At '%.*s'", token->length, token->lexeme);
 
-  fprintf(stderr, ":\n\t>> Help: %s\n", message);
+  fprintf(stderr, "\n\t> What's wrong:\n\t\t%s\n", message);
 }
 
 static void error(Parser* parser, const char* message) {
