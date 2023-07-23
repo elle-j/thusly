@@ -158,6 +158,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
   // Using a trie to check if it is one of the keywords.
   int lexeme_length = tokenizer->current - tokenizer->start;
   switch (tokenizer->start[0]) {
+    case '@':
+      return search_keyword(tokenizer, 1, "out", 3, TOKEN_OUT);
     case 'a':
       return search_keyword(tokenizer, 1, "nd", 2, TOKEN_AND);
     case 'f':
@@ -179,8 +181,6 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       break;
     case 'o':
       return search_keyword(tokenizer, 1, "r", 1, TOKEN_OR);
-    case 'p':
-      return search_keyword(tokenizer, 1, "rint", 4, TOKEN_PRINT);
     case 't':
       return search_keyword(tokenizer, 1, "rue", 3, TOKEN_TRUE);
     case 'v':
@@ -247,6 +247,13 @@ Token tokenize(Tokenizer* tokenizer) {
         : make_token(tokenizer, TOKEN_GREATER_THAN);
     case '"':
       return consume_text(tokenizer);
+    case '@': {
+      Token token = consume_keyword_or_identifier(tokenizer);
+      // Temporary until built-in functions are supported.
+      return token.type == TOKEN_OUT
+        ? token
+        : make_error_token(tokenizer, "'@' is only allowed in names of the built-in functionality.");
+    }
     default:
       if (is_alpha(character))
         return consume_keyword_or_identifier(tokenizer);

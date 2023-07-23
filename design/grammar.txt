@@ -45,10 +45,14 @@ STATEMENT RULES
 
 statement:
 	| expressionStatement
+	| outStatement			# Temporary until built-in function
 	| varStatement
 
 varStatement:
 	| "var" IDENTIFIER ":" expression NEWLINE
+
+outStatement:
+	| "@out" expression NEWLINE
 
 expressionStatement:
 	| expression NEWLINE
@@ -104,6 +108,9 @@ LEXICAL RULES
 
 IDENTIFIER:
 	| ALPHA ( ALPHA | DIGIT )*
+
+NATIVE_IDENTIFIER:
+	| "@" IDENTIFIER
 
 NUMBER:
 	| DIGIT+ ( "." DIGIT+ )?
