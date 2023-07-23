@@ -24,7 +24,7 @@ typedef struct {
   Tokenizer tokenizer;
   Token current;
   Token previous;
-  bool has_error;
+  bool saw_error;
   bool panic_mode;
 } Parser;
 
@@ -115,7 +115,7 @@ static ParseRule* get_rule(TokenType type) {
 static void parser_init(Parser* parser, Environment* environment, Program* writable_program) {
   parser->environment = environment;
   parser->writable_program = writable_program;
-  parser->has_error = false;
+  parser->saw_error = false;
   parser->panic_mode = false;
 }
 
@@ -130,7 +130,7 @@ static void error_at(Parser* parser, Token* token, const char* message) {
     return;
 
   parser->panic_mode = true;
-  parser->has_error = true;
+  parser->saw_error = true;
 
   fprintf(stderr, "ERROR on line %d", token->line);
   if (token->type == TOKEN_FILE_END)
@@ -193,13 +193,29 @@ static bool match(Parser* parser, TokenType type) {
   return true;
 }
 
-static void write_instruction(Parser* parser, byte instruction) {
-  program_write(get_writable_program(parser), instruction, parser->previous.line);
+static bool is_at_end(Parser* parser) {
+  return parser->current.type == TOKEN_FILE_END;
 }
 
-static void write_instructions(Parser* parser, byte instruction1, byte instruction2) {
-  write_instruction(parser, instruction1);
-  write_instruction(parser, instruction2);
+static bool is_at_start_of_statement(Parser* parser) {
+  switch (parser->current.type) {
+    // TODO: Add synchronization points as these are added to the language.
+    case TOKEN_OUT:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/// Synchronize the parsing when the parser has entered panic mode. This
+/// synchronizes to the next statement encountered and is performed in order
+/// to minimize cascaded and falsely reported errors.
+static void synchronize(Parser* parser) {
+  parser->panic_mode = false;
+
+  while (!is_at_end(parser) && !is_at_start_of_statement(parser)) {
+    advance(parser);
+  }
 }
 
 static byte make_constant(Parser* parser, ThuslyValue value) {
@@ -212,6 +228,15 @@ static byte make_constant(Parser* parser, ThuslyValue value) {
   }
 
   return (byte)constant_index;
+}
+
+static void write_instruction(Parser* parser, byte instruction) {
+  program_write(get_writable_program(parser), instruction, parser->previous.line);
+}
+
+static void write_instructions(Parser* parser, byte instruction1, byte instruction2) {
+  write_instruction(parser, instruction1);
+  write_instruction(parser, instruction2);
 }
 
 static void write_constant_instruction(Parser* parser, ThuslyValue value) {
@@ -227,6 +252,9 @@ static void parse_statement(Parser* parser) {
     parse_out_statement(parser);
   else
     parse_expression_statement(parser);
+
+  if (parser->panic_mode)
+    synchronize(parser);
 }
 
 static void parse_expression_statement(Parser* parser) {
@@ -373,7 +401,7 @@ static void end_compilation(Parser* parser) {
   write_return_instruction(parser);
 
   #ifdef DEBUG_COMPILATION
-    if (!parser->has_error)
+    if (!parser->saw_error)
       disassemble_program(get_writable_program(parser), "Program");
   #endif
 }
@@ -391,5 +419,5 @@ bool compile(Environment* environment, const char* source, Program* out_program)
 
   end_compilation(&parser);
 
-  return !parser.has_error;
+  return !parser.saw_error;
 }

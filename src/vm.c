@@ -229,8 +229,8 @@ ErrorReport interpret(VM* vm, const char* source) {
   Program program;
   program_init(&program);
 
-  bool has_error = !compile(&vm->environment, source, &program);
-  if (has_error) {
+  bool saw_error = !compile(&vm->environment, source, &program);
+  if (saw_error) {
     program_free(&program);
     return REPORT_COMPILE_ERROR;
   }
