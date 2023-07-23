@@ -53,6 +53,8 @@ int disassemble_instruction(Program* program, int offset) {
 
   byte instruction = program->instructions[offset];
   switch (instruction) {
+    case OP_POP:
+      return print_opcode("OP_POP", offset);
     case OP_CONSTANT:
       return print_constant("OP_CONSTANT", program, offset);
     case OP_CONSTANT_FALSE:
@@ -87,6 +89,8 @@ int disassemble_instruction(Program* program, int offset) {
       return print_opcode("OP_NEGATE", offset);
     case OP_NOT:
       return print_opcode("OP_NOT", offset);
+    case OP_OUT:
+      return print_opcode("OP_OUT", offset);
     case OP_RETURN:
       return print_opcode("OP_RETURN", offset);
     default:

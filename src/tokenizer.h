@@ -35,7 +35,7 @@ typedef enum {
   TOKEN_NONE,
   TOKEN_NOT,
   TOKEN_OR,
-  TOKEN_PRINT,    // Temporary until built-in function exists
+  TOKEN_OUT,    // Temporary until built-in function exists
   // TOKEN_RETURN,
   TOKEN_TRUE,
   TOKEN_VAR,

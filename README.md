@@ -10,6 +10,8 @@ A general-purpose programming language coming to life through a one-pass compile
     - [Characteristics](#characteristics)
     - [Syntax](#syntax)
 - [Milestones](#milestones)
+    - [Milestone 1 - Expressions](#milestone-1-evaluate-arithmetic-comparison-and-equality-expressions)
+    - [Milestone 2 - Statements](#milestone-2-execute-variable-control-flow-and-function-statements)
     - [Implemented Functionality](#implemented-functionality)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -37,6 +39,8 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 
 ## Milestones
 
+### Milestone 1: Evaluate arithmetic, comparison, and equality expressions
+
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
   * To try out the tokenizer in isolation and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2) (significant newline characters will be printed as newlines).
 - [x] Arithmetic expressions using `number` (double) can be evaluated.
@@ -57,6 +61,10 @@ Whitespace is semantically insignificant except for newline characters on non-bl
   - [x] Not equal to (`!=`)
   - [x] Logical not (`not`)
 - [x] Concatenation of `text` literals using `+` can be evaluated.
+
+### Milestone 2: Execute variable, control flow, and function statements
+
+- [x] Temporary `@out` statement can be executed.
 - [ ] Support variable declarations and assignments.
 - [ ] TODO (more milestones will be added here)
 
@@ -66,7 +74,7 @@ This section is for briefly demonstrating implemented functionality thus far and
 
 By inputing a **one-line expression** from either a file or via the REPL, the VM will interpret it and output the result.
 
-**Table 1: Valid user input**
+**Table 1: Valid user input (expressions)**
 
 | Example input              | Expected output | Expected precedence parsing   |
 |----------------------------|-----------------|-------------------------------|
@@ -78,7 +86,13 @@ By inputing a **one-line expression** from either a file or via the REPL, the VM
 | "he" + "llo" = "hello"     | true            | ("he" + "llo") = "hello"      |
 | "keep " + "on " + "coding" | keep on coding  | ("keep " + "on ") + "coding"  |
 
-**Table 2: Invalid user input**
+**Table 2: Valid user input (statements)**
+
+| Example input              | Expected output | Comment                       |
+|----------------------------|-----------------|-------------------------------|
+| @out "he" + "llo"          | "hello"         | Temporary statement until the built-in function is implemented |
+
+**Table 3: Invalid user input**
 
 | Example input | Error type | Expected error reason                           |
 |---------------|------------|-------------------------------------------------|
@@ -121,11 +135,13 @@ Usage: ./bin/cthusly [options] [path]
 ```
 
 **Interpret code from a file:**
+
 ```sh
 ./bin/cthusly path/to/your/file
 ```
 
 **Start the REPL (interactive prompt):**
+
 ```sh
 ./bin/cthusly
 ```
@@ -135,9 +151,9 @@ Example:
 ```
 $ ./bin/cthusly
 
-> "he" + "llo" = "hello"
+> @out "he" + "llo" = "hello"
 true
-> (1 + 2) * 3 / 4
+> @out (1 + 2) * 3 / 4
 2.25
 > 
 ```

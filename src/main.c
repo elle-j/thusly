@@ -28,6 +28,7 @@ static void run_repl() {
   while (true) {
     printf("> ");
     // Only handling single-line inputs.
+    // TODO: Provide alternative grammar for handling NEWLINE and single inputs.
     if (!fgets(line, sizeof(line), stdin)) {
       printf("\n");
       break;
