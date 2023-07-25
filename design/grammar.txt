@@ -44,18 +44,22 @@ STATEMENT RULES
 ------------------------------------------------------------------
 
 statement:
+	| blockStatement
 	| expressionStatement
 	| outStatement			# Temporary until built-in function
 	| varStatement
 
-varStatement:
-	| "var" IDENTIFIER ":" expression NEWLINE
+blockStatement:
+	| "block" NEWLINE statement* "end" NEWLINE
+
+expressionStatement:
+	| expression NEWLINE
 
 outStatement:
 	| "@out" expression NEWLINE
 
-expressionStatement:
-	| expression NEWLINE
+varStatement:
+	| "var" IDENTIFIER ":" expression NEWLINE
 
 ------------------------------------------------------------------
 EXPRESSION RULES

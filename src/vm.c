@@ -40,7 +40,7 @@ static void error(VM* vm, const char* message, ...) {
   int source_line = vm->program->source_lines[instruction_index];
 
   fprintf(stderr, "\n---------");
-  fprintf(stderr, "\n| ERROR |");
+  fprintf(stderr, "\n| error |");
   fprintf(stderr, "\n---------");
   fprintf(stderr, "\n\t> Line:\n\t\t%d", source_line);
   fprintf(stderr, "\n\t> What's wrong:\n\t\t");

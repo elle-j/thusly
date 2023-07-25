@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiler.h"
@@ -12,13 +13,33 @@
 #include "debug.h"
 #endif
 
+#define NOT_FOUND (-1)
+
 /// The compiler and parser - parses the tokens received by the tokenizer on demand
 /// (it controls the tokenizer) and writes the bytecode instructions for the VM in
 /// a single pass in the instruction format expected by the VM. (It performs top-down
 /// operator precedence parsing.)
 
-///
+/// A user-defined variable declared in the source code.
 typedef struct {
+  Token name;
+  // The depth/level at which the variable was declared.
+  int depth;
+} Variable;
+
+typedef struct {
+  // When a variable is declared in the source code, it gets added to this array.
+  // The order will coincide with how they end up on the VM's stack. Due to only
+  // supporting instructions using 1 byte for operands, the array count cannot exceed 256.
+  Variable variables[UINT8_MAX + 1];
+  // Number of variables currently in scope.
+  int variable_count;
+  // The current level of nesting (number of surrounding blocks).
+  int scope_depth;
+} Compiler;
+
+typedef struct {
+  Compiler* compiler;
   Environment* environment;
   Program* writable_program; // TODO: Modify
   Tokenizer tokenizer;
@@ -30,7 +51,7 @@ typedef struct {
 
 /// The levels of precedence from lowest to highest.
 typedef enum {
-  PRECEDENCE_IGNORE,      // E.g. `(`, `,`, or non-operator keywords.
+  PRECEDENCE_IGNORE,
   PRECEDENCE_ASSIGNMENT,
   PRECEDENCE_DISJUNCTION,
   PRECEDENCE_CONJUNCTION,
@@ -53,8 +74,11 @@ typedef struct {
 } ParseRule;
 
 static void parse_statement(Parser* parser);
+static void parse_block_statement(Parser* parser);
 static void parse_expression_statement(Parser* parser);
 static void parse_out_statement(Parser* parser);
+static void parse_var_statement(Parser* parser);
+
 static void parse_expression(Parser* parser);
 static void parse_binary(Parser* parser);
 static void parse_boolean(Parser* parser);
@@ -86,6 +110,8 @@ static ParseRule rules[] = {
 
   // Reserved keywords
   [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_BLOCK]                 = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_END]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
@@ -112,7 +138,13 @@ static ParseRule* get_rule(TokenType type) {
   return &rules[type];
 }
 
-static void parser_init(Parser* parser, Environment* environment, Program* writable_program) {
+static void compiler_init(Compiler* compiler) {
+  compiler->variable_count = 0;
+  compiler->scope_depth = 0;
+}
+
+static void parser_init(Parser* parser, Compiler* compiler, Environment* environment, Program* writable_program) {
+  parser->compiler = compiler;
   parser->environment = environment;
   parser->writable_program = writable_program;
   parser->saw_error = false;
@@ -133,7 +165,7 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   parser->saw_error = true;
 
   fprintf(stderr, "\n---------");
-  fprintf(stderr, "\n| ERROR |");
+  fprintf(stderr, "\n| error |");
   fprintf(stderr, "\n---------");
   fprintf(stderr, "\n\t> Line:\n\t\t%d", token->line);
   fprintf(stderr, "\n\t> Where:\n\t\t");
@@ -239,6 +271,15 @@ static byte make_constant(Parser* parser, ThuslyValue value) {
   return (byte)constant_index;
 }
 
+static byte make_identifier_constant(Parser* parser, Token* token) {
+  return make_constant(
+    parser,
+    FROM_C_OBJECT_PTR(
+      copy_c_string(parser->environment, token->lexeme, token->length)
+    )
+  );
+}
+
 static void write_instruction(Parser* parser, byte instruction) {
   program_write(get_writable_program(parser), instruction, parser->previous.line);
 }
@@ -256,14 +297,106 @@ static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
+static bool is_global_scope(Parser* parser) {
+  return parser->compiler->scope_depth == 0;
+}
+
+static bool is_in_innermost_scope(Parser* parser, Variable* variable) {
+  return variable->depth == parser->compiler->scope_depth;
+}
+
+static void create_scope(Parser* parser) {
+  parser->compiler->scope_depth++;
+}
+
+/// Discard the innermost scope along with the variables declared there.
+static void discard_scope(Parser* parser) {
+  Compiler* compiler = parser->compiler;
+
+  // Since variables are added as they appear in the source code, the variables
+  // in the innermost scope exist at the end of the array. When the depth of a
+  // variable no longer is the same as the current scope, all variables in the
+  // innermost scope have been discarded.
+  while (compiler->variable_count > 0 &&
+         is_in_innermost_scope(parser, &compiler->variables[compiler->variable_count - 1])) {
+    // TODO: Add OP_POPN instruction.
+    write_instruction(parser, OP_POP);
+    compiler->variable_count--;
+  }
+
+  // TODO: Can most likely remove the if-check (but keep the decrementing)
+  //       since `create_scope` will only be called when a block is encountered;
+  //       thus, `discard_scope` will only be called when depth > 0.
+  if (!is_global_scope(parser))
+    compiler->scope_depth--;
+}
+
+static bool is_same_name(Token* first, Token* second) {
+  if (first->length != second->length)
+    return false;
+
+  return memcmp(first->lexeme, second->lexeme, first->length) == 0;
+}
+
+static void add_variable(Parser* parser, Token name) {
+  bool has_reached_max_variables = parser->compiler->variable_count == UINT8_MAX + 1;
+  if (has_reached_max_variables) {
+    error(parser, "Too many variables are currently in scope.");
+    return;
+  }
+
+  Variable* variable = &parser->compiler->variables[parser->compiler->variable_count++];
+  variable->name = name;
+  variable->depth = parser->compiler->scope_depth;
+}
+
+static void declare_variable(Parser* parser) {
+  // All user-defined variables are resolved at compile time.
+  Token* name = &parser->previous;
+  for (int i = parser->compiler->variable_count - 1; i >= 0; i--) {
+    Variable* existing_variable = &parser->compiler->variables[i];
+    bool is_declared_in_different_scope =
+      existing_variable->depth != NOT_FOUND &&
+      existing_variable->depth < parser->compiler->scope_depth;
+
+    if (is_declared_in_different_scope)
+      break;
+
+    if (is_same_name(name, &existing_variable->name))
+      error(parser, "A variable with the same name has already been declared in this scope.");
+  }
+
+  add_variable(parser, *name);
+}
+
+static void define_variable(Parser* parser) {
+  // TODO
+}
+
 static void parse_statement(Parser* parser) {
-  if (match(parser, TOKEN_OUT))
+  if (match(parser, TOKEN_VAR))
+    parse_var_statement(parser);
+  else if (match(parser, TOKEN_OUT))
     parse_out_statement(parser);
+  else if (match(parser, TOKEN_BLOCK)) {
+    create_scope(parser);
+    parse_block_statement(parser);
+    discard_scope(parser);
+  }
   else
     parse_expression_statement(parser);
 
   if (parser->panic_mode)
     synchronize(parser);
+}
+
+static void parse_block_statement(Parser* parser) {
+  consume_newline(parser);
+  while (!check(parser, TOKEN_END) && !is_at_end(parser))
+    parse_statement(parser);
+
+  consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
+  consume_newline(parser);
 }
 
 static void parse_expression_statement(Parser* parser) {
@@ -278,13 +411,23 @@ static void parse_out_statement(Parser* parser) {
   write_instruction(parser, OP_OUT);
 }
 
+static void parse_var_statement(Parser* parser) {
+  consume(parser, TOKEN_IDENTIFIER, "A name for the variable is missing.");
+  declare_variable(parser);
+
+  consume(parser, TOKEN_COLON, "The variable is missing an initializer. Use ':' to assign a value to it.");
+  parse_expression(parser);
+  consume_newline(parser);
+  define_variable(parser);
+}
+
 static void parse_precedence(Parser* parser, Precedence min_precedence) {
   advance(parser);
 
   // All valid expressions must begin with a prefix token.
   ParseFunction prefix_rule = get_rule(parser->previous.type)->prefix;
   if (prefix_rule == NULL) {
-    error(parser, "Expected an expression.");
+    error(parser, "You must provide an expression.");
     return;
   }
   prefix_rule(parser);
@@ -417,7 +560,10 @@ static void end_compilation(Parser* parser) {
 
 bool compile(Environment* environment, const char* source, Program* out_program) {
   Parser parser;
-  parser_init(&parser, environment, out_program);
+  Compiler compiler;
+  compiler_init(&compiler);
+  parser_init(&parser, &compiler, environment, out_program);
+  // TODO: Refactor this into a call in `parser_init`.
   tokenizer_init(&parser.tokenizer, source);
 
   advance(&parser);
