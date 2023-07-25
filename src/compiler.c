@@ -87,6 +87,7 @@ static void parse_none(Parser* parser);
 static void parse_number(Parser* parser);
 static void parse_text(Parser* parser);
 static void parse_unary(Parser* parser);
+static void parse_variable(Parser* parser);
 
 /// The parse rules associated with each type of token.
 static ParseRule rules[] = {
@@ -122,7 +123,7 @@ static ParseRule rules[] = {
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Literals
-  [TOKEN_IDENTIFIER]            = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_IDENTIFIER]            = { parse_variable, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NUMBER]                = { parse_number, NULL, PRECEDENCE_IGNORE },
   [TOKEN_TEXT]                  = { parse_text, NULL, PRECEDENCE_IGNORE },
 
@@ -379,6 +380,35 @@ static void define_variable(Parser* parser) {
   // TODO
 }
 
+/// Resolve a variable by returning the location on the VM's stack that
+/// the variable's value exists. The value coincides with the variable
+/// that was declared lexically closest to where it is being accessed,
+/// going from the innermost scope outward.
+static int resolve(Parser* parser, Token* name) {
+  for (int i = parser->compiler->variable_count - 1; i >= 0; i--) {
+    Variable* existing_variable = &parser->compiler->variables[i];
+    if (is_same_name(name, &existing_variable->name))
+      // The order and position of the `variables` array will be
+      // identical to how they end up on the stack.
+      return i;
+  }
+
+  return NOT_FOUND;
+}
+
+static void access_or_assign_variable(Parser* parser, Token name) {
+  int variable_index = resolve(parser, &name);
+  if (variable_index == NOT_FOUND) {
+    error_at(parser, &name, "The variable has not been declared. Use 'var <name>: <value>' to declare it first.");
+  }
+
+  if (match(parser, TOKEN_COLON)) {
+    error(parser, "Not yet supporting assignment.");
+  }
+  else
+    write_instructions(parser, OP_GET_VAR, (byte)variable_index);
+}
+
 static void parse_statement(Parser* parser) {
   if (match(parser, TOKEN_VAR))
     parse_var_statement(parser);
@@ -553,6 +583,10 @@ static void parse_unary(Parser* parser) {
       // This should not be reachable.
       return;
   }
+}
+
+static void parse_variable(Parser* parser) {
+  access_or_assign_variable(parser, parser->previous);
 }
 
 static void end_compilation(Parser* parser) {

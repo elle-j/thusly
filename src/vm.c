@@ -128,6 +128,14 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_POP:
         pop(vm);
         break;
+      case OP_GET_VAR: {
+        byte slot = READ_BYTE();
+        // Since this is a stack-based VM, instructions will rely on values
+        // being at the top of stack. Therefore, the value at the given slot
+        // is also pushed to the top.
+        push(vm, vm->stack[slot]);
+        break;
+      }
       case OP_CONSTANT: {
         ThuslyValue constant = READ_CONSTANT();
         push(vm, constant);
