@@ -63,7 +63,7 @@ typedef enum {
 } Precedence;
 
 /// A function used for parsing an expression.
-typedef void (*ParseFunction)(Parser*);
+typedef void (*ParseFunction)(Parser*, bool should_parse_assignment);
 
 /// Holds the function used for parsing a prefix or infix expression based
 /// on the given precedence level.
@@ -80,14 +80,14 @@ static void parse_out_statement(Parser* parser);
 static void parse_var_statement(Parser* parser);
 
 static void parse_expression(Parser* parser);
-static void parse_binary(Parser* parser);
-static void parse_boolean(Parser* parser);
-static void parse_grouping(Parser* parser);
-static void parse_none(Parser* parser);
-static void parse_number(Parser* parser);
-static void parse_text(Parser* parser);
-static void parse_unary(Parser* parser);
-static void parse_variable(Parser* parser);
+static void parse_binary(Parser* parser, bool _);
+static void parse_boolean(Parser* parser, bool _);
+static void parse_grouping(Parser* parser, bool _);
+static void parse_none(Parser* parser, bool _);
+static void parse_number(Parser* parser, bool _);
+static void parse_text(Parser* parser, bool _);
+static void parse_unary(Parser* parser, bool _);
+static void parse_variable(Parser* parser, bool should_parse_assignment);
 
 /// The parse rules associated with each type of token.
 static ParseRule rules[] = {
@@ -396,17 +396,18 @@ static int resolve(Parser* parser, Token* name) {
   return NOT_FOUND;
 }
 
-static void access_or_assign_variable(Parser* parser, Token name) {
-  int variable_index = resolve(parser, &name);
-  if (variable_index == NOT_FOUND) {
-    error_at(parser, &name, "The variable has not been declared. Use 'var <name>: <value>' to declare it first.");
+static void access_or_assign_variable(Parser* parser, Token name, bool should_parse_assignment) {
+  int stack_slot = resolve(parser, &name);
+  if (stack_slot == NOT_FOUND) {
+    error_at(parser, &name, "The variable has not been declared. Use 'var <name> : <value>' to declare it first.");
   }
 
-  if (match(parser, TOKEN_COLON)) {
-    error(parser, "Not yet supporting assignment.");
+  if (should_parse_assignment && match(parser, TOKEN_COLON)) {
+    parse_expression(parser);
+    write_instructions(parser, OP_SET_VAR, (byte)stack_slot);
   }
   else
-    write_instructions(parser, OP_GET_VAR, (byte)variable_index);
+    write_instructions(parser, OP_GET_VAR, (byte)stack_slot);
 }
 
 static void parse_statement(Parser* parser) {
@@ -466,13 +467,32 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
     error(parser, "You must provide an expression.");
     return;
   }
-  prefix_rule(parser);
+
+  // Assignments have the lowest precedence of the expressions; thus, if
+  // an assignment is encountered, it should only continue parsing it if
+  // the surrounding expression is of the same or lower precedence.
+  // - Examples of when to continue parsing:
+  //   x : y : 1        // Expected parsing:  x : (y : 1)
+  //   x + (y : z + 1)  // Expected parsing:  x + (y : (z + 1))
+  // - Examples of when not to continue parsing:
+  //   x + y : 1        // '+' has higher precedence. Expected parsing:  (x + y) : 1
+  //   -x : 1           // '-' has higher precedence. Expected parsing:  (-x) : 1
+  bool should_parse_assignment = compare(parser, TOKEN_COLON) && min_precedence <= PRECEDENCE_ASSIGNMENT;
+  prefix_rule(parser, should_parse_assignment);
 
   // Keep parsing expressions as long as the precedence level is high enough.
   while (get_rule(parser->current.type)->precedence >= min_precedence) {
     advance(parser);
     ParseFunction infix_rule = get_rule(parser->previous.type)->infix;
-    infix_rule(parser);
+    infix_rule(parser, should_parse_assignment);
+  }
+
+  // If there was an assignment but the precedence of the surrounding expression
+  // was too high, the assignment and its corresponding `:` will not have been
+  // parsed by `access_or_assign_variable()`. This means the target was invalid.
+  bool was_invalid_assignment_target = !should_parse_assignment && match(parser, TOKEN_COLON);
+  if (was_invalid_assignment_target) {
+    error(parser, "You are trying to assign a value to an invalid target.");
   }
 }
 
@@ -481,7 +501,7 @@ static void parse_expression(Parser* parser) {
   parse_precedence(parser, PRECEDENCE_ASSIGNMENT);
 }
 
-static void parse_binary(Parser* parser) {
+static void parse_binary(Parser* parser, bool _) {
   TokenType operator = parser->previous.type;
   ParseRule* rule = get_rule(operator);
   // Parse the right-hand operand using one precedence level above the current one
@@ -530,7 +550,7 @@ static void parse_binary(Parser* parser) {
   }
 }
 
-static void parse_boolean(Parser* parser) {
+static void parse_boolean(Parser* parser, bool _) {
   switch (parser->previous.type) {
     case TOKEN_FALSE:
       write_instruction(parser, OP_CONSTANT_FALSE);
@@ -544,21 +564,21 @@ static void parse_boolean(Parser* parser) {
   }
 }
 
-static void parse_grouping(Parser* parser) {
+static void parse_grouping(Parser* parser, bool _) {
   parse_expression(parser);
   consume(parser, TOKEN_CLOSE_PAREN, "A closing parenthesis ')' is missing.");
 }
 
-static void parse_none(Parser* parser) {
+static void parse_none(Parser* parser, bool _) {
   write_instruction(parser, OP_CONSTANT_NONE);
 }
 
-static void parse_number(Parser* parser) {
+static void parse_number(Parser* parser, bool _) {
   double value = strtod(parser->previous.lexeme, NULL);
   write_constant_instruction(parser, FROM_C_DOUBLE(value));
 }
 
-static void parse_text(Parser* parser) {
+static void parse_text(Parser* parser, bool _) {
   write_constant_instruction(
     parser,
     FROM_C_OBJECT_PTR(
@@ -568,7 +588,7 @@ static void parse_text(Parser* parser) {
   );
 }
 
-static void parse_unary(Parser* parser) {
+static void parse_unary(Parser* parser, bool _) {
   TokenType operator = parser->previous.type;
   parse_precedence(parser, PRECEDENCE_UNARY);
 
@@ -585,8 +605,8 @@ static void parse_unary(Parser* parser) {
   }
 }
 
-static void parse_variable(Parser* parser) {
-  access_or_assign_variable(parser, parser->previous);
+static void parse_variable(Parser* parser, bool should_parse_assignment) {
+  access_or_assign_variable(parser, parser->previous, should_parse_assignment);
 }
 
 static void end_compilation(Parser* parser) {

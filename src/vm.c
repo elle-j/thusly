@@ -136,6 +136,13 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, vm->stack[slot]);
         break;
       }
+      case OP_SET_VAR: {
+        byte slot = READ_BYTE();
+        // An assignment expression evaluates to the assigned value.
+        // Therefore, the value is not popped from the stack.
+        vm->stack[slot] = peek(vm, 0);
+        break;
+      }
       case OP_CONSTANT: {
         ThuslyValue constant = READ_CONSTANT();
         push(vm, constant);

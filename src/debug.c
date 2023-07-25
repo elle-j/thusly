@@ -22,8 +22,11 @@ static int print_constant(const char* op_name, Program* program, int offset) {
 }
 
 static int print_variable(const char* op_name, Program* program, int offset) {
+  // This currently only prints the stack slot of the variable as the
+  // names of the variables are not stored in the program. (Only the
+  // values exist on the stack.)
   byte variable_slot = program->instructions[offset + 1];
-  printf("op[%s] slot[%d] name[TODO]\n", op_name, variable_slot);
+  printf("op[%s] slot[%d]\n", op_name, variable_slot);
 
   return offset + 2;
 }
@@ -49,6 +52,7 @@ void disassemble_program(Program* program, const char* name) {
   printf("\n");
 }
 
+/// Disassemble the instruction and return the offset to the next instruction.
 int disassemble_instruction(Program* program, int offset) {
   printf("offset[%04d] ", offset);
 
@@ -64,6 +68,8 @@ int disassemble_instruction(Program* program, int offset) {
       return print_opcode("OP_POP", offset);
     case OP_GET_VAR:
       return print_variable("OP_GET_VAR", program, offset);
+    case OP_SET_VAR:
+      return print_variable("OP_SET_VAR", program, offset);
     case OP_CONSTANT:
       return print_constant("OP_CONSTANT", program, offset);
     case OP_CONSTANT_FALSE:
