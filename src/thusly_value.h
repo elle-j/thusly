@@ -25,12 +25,6 @@ typedef struct {
   } to;
 } ThuslyValue;
 
-typedef struct {
-  ThuslyValue* values;
-  int count;
-  int capacity;
-} ConstantPool;
-
 #define IS_BOOLEAN(thusly_value)      ((thusly_value).type == TYPE_BOOLEAN)
 #define IS_NONE(thusly_value)         ((thusly_value).type == TYPE_NONE)
 #define IS_NUMBER(thusly_value)       ((thusly_value).type == TYPE_NUMBER)
@@ -45,9 +39,6 @@ typedef struct {
 #define FROM_C_DOUBLE(c_value)        ((ThuslyValue){ TYPE_NUMBER, { .c_double = c_value } })
 #define FROM_C_OBJECT_PTR(c_ptr)      ((ThuslyValue){ TYPE_GC_OBJECT, { .c_object_ptr = (GCObject*)c_ptr } })
 
-void constant_pool_init(ConstantPool* pool);
-void constant_pool_free(ConstantPool* pool);
-void constant_pool_add(ConstantPool* pool, ThuslyValue value);
 bool values_are_equal(ThuslyValue a, ThuslyValue b);
 void print_value(ThuslyValue value);
 
