@@ -190,7 +190,8 @@ static void error(Parser* parser, const char* message) {
   error_at(parser, &parser->previous, message);
 }
 
-static bool check(Parser* parser, TokenType type) {
+/// Compare the type of the current token being parsed with a given type.
+static bool compare(Parser* parser, TokenType type) {
   return parser->current.type == type;
 }
 
@@ -207,8 +208,10 @@ static void advance(Parser* parser) {
   }
 }
 
-static void consume(Parser* parser, TokenType type, const char* err_message) {
-  if (check(parser, type)) {
+/// Compare the type of the current token being parsed with the expected type,
+/// and advance if they match or generate an error.
+static void consume(Parser* parser, TokenType expected_type, const char* err_message) {
+  if (compare(parser, expected_type)) {
     advance(parser);
     return;
   }
@@ -217,7 +220,7 @@ static void consume(Parser* parser, TokenType type, const char* err_message) {
 }
 
 static void consume_newline(Parser* parser) {
-  if (check(parser, TOKEN_NEWLINE)) {
+  if (compare(parser, TOKEN_NEWLINE)) {
     advance(parser);
     return;
   }
@@ -225,8 +228,10 @@ static void consume_newline(Parser* parser) {
   error_at(parser, &parser->current, "The statement must end with a newline.");
 }
 
+/// Compare the type of the current token being parsed with a given type,
+/// and advance the parser if they match.
 static bool match(Parser* parser, TokenType type) {
-  if (!check(parser, type))
+  if (!compare(parser, type))
     return false;
 
   advance(parser);
@@ -392,7 +397,7 @@ static void parse_statement(Parser* parser) {
 
 static void parse_block_statement(Parser* parser) {
   consume_newline(parser);
-  while (!check(parser, TOKEN_END) && !is_at_end(parser))
+  while (!compare(parser, TOKEN_END) && !is_at_end(parser))
     parse_statement(parser);
 
   consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
