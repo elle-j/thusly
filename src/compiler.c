@@ -14,6 +14,7 @@
 #endif
 
 #define NOT_FOUND (-1)
+#define UNINITIALIZED (-1)
 
 /// The compiler and parser - parses the tokens received by the tokenizer on demand
 /// (it controls the tokenizer) and writes the bytecode instructions for the VM in
@@ -349,7 +350,20 @@ static void add_variable(Parser* parser, Token name) {
 
   Variable* variable = &parser->compiler->variables[parser->compiler->variable_count++];
   variable->name = name;
-  variable->depth = parser->compiler->scope_depth;
+  // When variables are declared, they are only marked as initialized once the
+  // entire initializer has been compiled.
+  variable->depth = UNINITIALIZED;
+}
+
+/// Mark the last variable added as initialized; i.e. the initializer has
+/// been compiled. This is denoted by having a depth != -1.
+static void mark_initialized(Parser* parser) {
+  Compiler* compiler = parser->compiler;
+  compiler->variables[compiler->variable_count - 1].depth = compiler->scope_depth;
+}
+
+static bool is_initialized(Variable* variable) {
+  return variable->depth != UNINITIALIZED;
 }
 
 static void declare_variable(Parser* parser) {
@@ -358,7 +372,7 @@ static void declare_variable(Parser* parser) {
   for (int i = parser->compiler->variable_count - 1; i >= 0; i--) {
     Variable* existing_variable = &parser->compiler->variables[i];
     bool is_declared_in_different_scope =
-      existing_variable->depth != NOT_FOUND &&
+      is_initialized(existing_variable) &&
       existing_variable->depth < parser->compiler->scope_depth;
 
     if (is_declared_in_different_scope)
@@ -372,7 +386,7 @@ static void declare_variable(Parser* parser) {
 }
 
 static void define_variable(Parser* parser) {
-  // TODO
+  mark_initialized(parser);
 }
 
 /// Resolve a variable by returning the location on the VM's stack that
@@ -382,10 +396,21 @@ static void define_variable(Parser* parser) {
 static int resolve(Parser* parser, Token* name) {
   for (int i = parser->compiler->variable_count - 1; i >= 0; i--) {
     Variable* existing_variable = &parser->compiler->variables[i];
-    if (is_same_name(name, &existing_variable->name))
+    if (is_same_name(name, &existing_variable->name)) {
+      // When variables are declared, they are only marked as initialized once the
+      // entire initializer has been compiled. This prevents ambiguous use of the
+      // same variable name in the initializer as the one being declared. E.g.:
+      //  var x: 1
+      //  block
+      //    var x: x + 1
+      //  end
+      if (!is_initialized(existing_variable))
+        error(parser, "You cannot use the variable's name being declared in its initializer.");
+
       // The order and position of the `variables` array will be
       // identical to how they end up on the stack.
       return i;
+    }
   }
 
   return NOT_FOUND;
