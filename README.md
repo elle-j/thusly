@@ -102,7 +102,8 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | Example input              | Expected output |
 |----------------------------|-----------------|
 | `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full`<br>          | Jane Doe         |
-| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end"`<br><br>`@out x`<br>          | global<br>local<br>changed global         |
+| `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z`<br>          | 2<br>2         |
+| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x`<br>          | global<br>local<br>changed global         |
 
 **Table 3: Invalid user input**
 
@@ -112,6 +113,7 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `"one" < 2`     | Runtime    | `<` operates on `number` only                   |
 | `!true`         | Comptime   | `!` is only allowed in `!=` (use `not`)         |
 | `x: 1`          | Comptime   | `x` has not been declared                       |
+| `var x: 1`<br>`1 + x: 2` | Comptime   | `1 + x` is an invalid assignment target<br>(`+` has higher precedence than `:`)  |
 
 ## Getting Started
 
