@@ -257,6 +257,8 @@ ErrorReport interpret(VM* vm, const char* source) {
   vm->next_instruction = program.instructions;
   ErrorReport report = decode_and_execute(vm);
 
+  // TODO: Since instructions of the program are freed after each
+  //       `interpret`, variables used in the REPL will not be usable.
   program_free(&program);
 
   return report;

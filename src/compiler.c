@@ -304,10 +304,6 @@ static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
-static bool is_global_scope(Parser* parser) {
-  return parser->compiler->scope_depth == 0;
-}
-
 static bool is_in_innermost_scope(Parser* parser, Variable* variable) {
   return variable->depth == parser->compiler->scope_depth;
 }
@@ -331,11 +327,10 @@ static void discard_scope(Parser* parser) {
     compiler->variable_count--;
   }
 
-  // TODO: Can most likely remove the if-check (but keep the decrementing)
-  //       since `create_scope` will only be called when a block is encountered;
-  //       thus, `discard_scope` will only be called when depth > 0.
-  if (!is_global_scope(parser))
-    compiler->scope_depth--;
+  // No need to check if it is in the global scope before decrementing.
+  // `create_scope()` will only be called when a block is encountered.
+  // Thus, `discard_scope()` will only be called when depth > 0.
+  compiler->scope_depth--;
 }
 
 static bool is_same_name(Token* first, Token* second) {
@@ -400,6 +395,7 @@ static void access_or_assign_variable(Parser* parser, Token name, bool should_pa
   int stack_slot = resolve(parser, &name);
   if (stack_slot == NOT_FOUND) {
     error_at(parser, &name, "The variable has not been declared. Use 'var <name> : <value>' to declare it first.");
+    // return;
   }
 
   if (should_parse_assignment && match(parser, TOKEN_COLON)) {
@@ -452,7 +448,7 @@ static void parse_var_statement(Parser* parser) {
   consume(parser, TOKEN_IDENTIFIER, "A name for the variable is missing.");
   declare_variable(parser);
 
-  consume(parser, TOKEN_COLON, "The variable is missing an initializer. Use ':' to assign a value to it.");
+  consume(parser, TOKEN_COLON, "The variable is missing an initializer. Use ':' to initialize it with a value.");
   parse_expression(parser);
   consume_newline(parser);
   define_variable(parser);
