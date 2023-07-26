@@ -40,7 +40,7 @@ static void error(VM* vm, const char* message, ...) {
   int source_line = vm->program->source_lines[instruction_index];
 
   fprintf(stderr, "\n---------");
-  fprintf(stderr, "\n| ERROR |");
+  fprintf(stderr, "\n| error |");
   fprintf(stderr, "\n---------");
   fprintf(stderr, "\n\t> Line:\n\t\t%d", source_line);
   fprintf(stderr, "\n\t> What's wrong:\n\t\t");
@@ -128,6 +128,21 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_POP:
         pop(vm);
         break;
+      case OP_GET_VAR: {
+        byte slot = READ_BYTE();
+        // Since this is a stack-based VM, instructions will rely on values
+        // being at the top of stack. Therefore, the value at the given slot
+        // is also pushed to the top.
+        push(vm, vm->stack[slot]);
+        break;
+      }
+      case OP_SET_VAR: {
+        byte slot = READ_BYTE();
+        // An assignment expression evaluates to the assigned value.
+        // Therefore, the value is not popped from the stack.
+        vm->stack[slot] = peek(vm, 0);
+        break;
+      }
       case OP_CONSTANT: {
         ThuslyValue constant = READ_CONSTANT();
         push(vm, constant);
@@ -242,6 +257,8 @@ ErrorReport interpret(VM* vm, const char* source) {
   vm->next_instruction = program.instructions;
   ErrorReport report = decode_and_execute(vm);
 
+  // TODO: Since instructions of the program are freed after each
+  //       `interpret`, variables used in the REPL will not be usable.
   program_free(&program);
 
   return report;

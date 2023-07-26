@@ -21,6 +21,16 @@ static int print_constant(const char* op_name, Program* program, int offset) {
   return offset + 2;
 }
 
+static int print_variable(const char* op_name, Program* program, int offset) {
+  // This currently only prints the stack slot of the variable as the
+  // names of the variables are not stored in the program. (Only the
+  // values exist on the stack.)
+  byte variable_slot = program->instructions[offset + 1];
+  printf("op[%s] slot[%d]\n", op_name, variable_slot);
+
+  return offset + 2;
+}
+
 void disassemble_stack(VM* vm) {
   printf("                        stack[");
   for (ThuslyValue* stack_elem_ptr = vm->stack; stack_elem_ptr < vm->next_stack_top; stack_elem_ptr++) {
@@ -42,11 +52,12 @@ void disassemble_program(Program* program, const char* name) {
   printf("\n");
 }
 
+/// Disassemble the instruction and return the offset to the next instruction.
 int disassemble_instruction(Program* program, int offset) {
   printf("offset[%04d] ", offset);
 
-  bool same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
-  if (same_line_as_previous)
+  bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
+  if (is_same_line_as_previous)
     printf("           ");
   else
     printf("line[%4d] ", program->source_lines[offset]);
@@ -55,6 +66,10 @@ int disassemble_instruction(Program* program, int offset) {
   switch (instruction) {
     case OP_POP:
       return print_opcode("OP_POP", offset);
+    case OP_GET_VAR:
+      return print_variable("OP_GET_VAR", program, offset);
+    case OP_SET_VAR:
+      return print_variable("OP_SET_VAR", program, offset);
     case OP_CONSTANT:
       return print_constant("OP_CONSTANT", program, offset);
     case OP_CONSTANT_FALSE:

@@ -162,6 +162,10 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       return search_keyword(tokenizer, 1, "out", 3, TOKEN_OUT);
     case 'a':
       return search_keyword(tokenizer, 1, "nd", 2, TOKEN_AND);
+    case 'b':
+      return search_keyword(tokenizer, 1, "lock", 4, TOKEN_BLOCK);
+    case 'e':
+      return search_keyword(tokenizer, 1, "nd", 2, TOKEN_END);
     case 'f':
       return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
     case 'm':

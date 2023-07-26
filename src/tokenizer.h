@@ -25,9 +25,10 @@ typedef enum {
 
   // Reserved keywords
   TOKEN_AND,
+  TOKEN_BLOCK,
   // TOKEN_CONST,
   // TOKEN_ELSE,
-  // TOKEN_END,
+  TOKEN_END,
   TOKEN_FALSE,
   // TOKEN_FUN,
   // TOKEN_IF,
@@ -46,7 +47,6 @@ typedef enum {
   TOKEN_TEXT,
 
   // Formatting
-  // TOKEN_BLOCK,
   TOKEN_FILE_END,
   TOKEN_NEWLINE,
 

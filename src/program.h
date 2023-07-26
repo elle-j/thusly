@@ -14,6 +14,7 @@ typedef enum {
   // ----
   OP_DIVIDE,
   OP_EQUALS,
+  OP_GET_VAR,
   OP_GREATER_THAN,
   OP_GREATER_THAN_EQUALS,
   OP_LESS_THAN,
@@ -26,6 +27,7 @@ typedef enum {
   OP_OUT,
   OP_POP,
   OP_RETURN,
+  OP_SET_VAR,
   OP_SUBTRACT,
 } Opcode;
 
