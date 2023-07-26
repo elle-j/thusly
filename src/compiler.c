@@ -63,7 +63,7 @@ typedef enum {
 } Precedence;
 
 /// A function used for parsing an expression.
-typedef void (*ParseFunction)(Parser*, bool should_parse_assignment);
+typedef void (*ParseFunction)(Parser*, bool is_assignable);
 
 /// Holds the function used for parsing a prefix or infix expression based
 /// on the given precedence level.
@@ -87,7 +87,7 @@ static void parse_none(Parser* parser, bool _);
 static void parse_number(Parser* parser, bool _);
 static void parse_text(Parser* parser, bool _);
 static void parse_unary(Parser* parser, bool _);
-static void parse_variable(Parser* parser, bool should_parse_assignment);
+static void parse_variable(Parser* parser, bool is_assignable);
 
 /// The parse rules associated with each type of token.
 static ParseRule rules[] = {
@@ -391,14 +391,14 @@ static int resolve(Parser* parser, Token* name) {
   return NOT_FOUND;
 }
 
-static void access_or_assign_variable(Parser* parser, Token name, bool should_parse_assignment) {
+static void access_or_assign_variable(Parser* parser, Token name, bool is_assignable) {
   int stack_slot = resolve(parser, &name);
   if (stack_slot == NOT_FOUND) {
     error_at(parser, &name, "The variable has not been declared. Use 'var <name> : <value>' to declare it first.");
     // return;
   }
 
-  if (should_parse_assignment && match(parser, TOKEN_COLON)) {
+  if (is_assignable && match(parser, TOKEN_COLON)) {
     parse_expression(parser);
     write_instructions(parser, OP_SET_VAR, (byte)stack_slot);
   }
@@ -473,21 +473,22 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
   // - Examples of when not to continue parsing:
   //   x + y : 1        // '+' has higher precedence. Expected parsing:  (x + y) : 1
   //   -x : 1           // '-' has higher precedence. Expected parsing:  (-x) : 1
-  bool should_parse_assignment = compare(parser, TOKEN_COLON) && min_precedence <= PRECEDENCE_ASSIGNMENT;
-  prefix_rule(parser, should_parse_assignment);
+  bool is_assignable = compare(parser, TOKEN_COLON) && min_precedence <= PRECEDENCE_ASSIGNMENT;
+  prefix_rule(parser, is_assignable);
 
   // Keep parsing expressions as long as the precedence level is high enough.
   while (get_rule(parser->current.type)->precedence >= min_precedence) {
     advance(parser);
     ParseFunction infix_rule = get_rule(parser->previous.type)->infix;
-    infix_rule(parser, should_parse_assignment);
+    infix_rule(parser, is_assignable);
   }
 
   // If there was an assignment but the precedence of the surrounding expression
   // was too high, the assignment and its corresponding `:` will not have been
   // parsed by `access_or_assign_variable()`. This means the target was invalid.
-  bool was_invalid_assignment_target = !should_parse_assignment && match(parser, TOKEN_COLON);
-  if (was_invalid_assignment_target) {
+  // Generate the error after the `prefix_rule()` call in order for resolution
+  // errors to be displayed first.
+  if (!is_assignable && match(parser, TOKEN_COLON)) {
     error(parser, "You are trying to assign a value to an invalid target.");
   }
 }
@@ -601,8 +602,8 @@ static void parse_unary(Parser* parser, bool _) {
   }
 }
 
-static void parse_variable(Parser* parser, bool should_parse_assignment) {
-  access_or_assign_variable(parser, parser->previous, should_parse_assignment);
+static void parse_variable(Parser* parser, bool is_assignable) {
+  access_or_assign_variable(parser, parser->previous, is_assignable);
 }
 
 static void end_compilation(Parser* parser) {
