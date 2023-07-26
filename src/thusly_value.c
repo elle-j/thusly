@@ -2,7 +2,37 @@
 #include <string.h>
 
 #include "gc_object.h"
+#include "memory.h"
 #include "thusly_value.h"
+
+void constant_pool_init(ConstantPool* pool) {
+  pool->values = NULL;
+  pool->count = 0;
+  pool->capacity = 0;
+}
+
+void constant_pool_free(ConstantPool* pool) {
+  // -- TEMPORARY --
+  #ifdef DEBUG_EXECUTION
+    printf("FREEING CONSTANT POOL..\n");
+  #endif
+  // ---------------
+
+  FREE_ARRAY(ThuslyValue, pool->values, pool->capacity);
+  constant_pool_init(pool);
+}
+
+void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
+  bool max_capacity_reached = pool->count + 1 > pool->capacity;
+  if (max_capacity_reached) {
+    int old_capacity = pool->capacity;
+    pool->capacity = GROW_CAPACITY(old_capacity);
+    pool->values = GROW_ARRAY(ThuslyValue, pool->values, old_capacity, pool->capacity);
+  }
+
+  pool->values[pool->count] = value;
+  pool->count++;
+}
 
 bool values_are_equal(ThuslyValue a, ThuslyValue b) {
   if (a.type != b.type)
