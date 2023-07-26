@@ -248,6 +248,7 @@ static bool is_at_end(Parser* parser) {
 static bool is_at_start_of_statement(Parser* parser) {
   switch (parser->current.type) {
     // TODO: Add synchronization points as these are added to the language.
+    case TOKEN_BLOCK:
     case TOKEN_OUT:
     case TOKEN_VAR:
       return true;
