@@ -1,6 +1,6 @@
 # Thusly
 
-A general-purpose programming language coming to life through a one-pass compiler and a stack-based virtual machine.
+A general-purpose programming language coming to life through a custom one-pass compiler and a stack-based virtual machine.
 
 > The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
 
@@ -65,7 +65,18 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 ### Milestone 2: Execute variable, control flow, and function statements
 
 - [x] Temporary `@out` statement can be executed.
-- [ ] Support variable declarations and assignments.
+- [x] Global and local variables can be defined and used.
+  - [x] Declaration and initialization (`var <name> : <expression>`)
+  - [x] Assignment expression (`<name> : <expression>`)
+- [x] Variables adhere to lexical scope.
+  - [x] Standalone block
+    ```
+    block
+      <statements>
+    end
+    ```
+- [ ] Can execute control flow
+- [ ] Can call functions
 - [ ] TODO (more milestones will be added here)
 
 ### Implemented Functionality
@@ -76,29 +87,31 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 
 **Table 1: Valid user input (expressions)**
 
-| Example input              | Expected output | Expected precedence parsing   |
-|----------------------------|-----------------|-------------------------------|
-| 1 + 2 * 3 / 4              | 2.5             | 1 + ((2 * 3) / 4)             |
-| (1 + 2) * 3 / 4            | 2.25            | ((1 + 2) * 3) / 4             |
-| 1 + -2 - -3                | 2               | (1 + (-2)) - (-3)             |
-| 1 > 2 = 3 > 4              | true            | (1 > 2) = (3 > 4)             |
-| false != not(1 + 2 >= 3)   | false           | false != (not((1 + 2) >= 3))  |
-| "he" + "llo" = "hello"     | true            | ("he" + "llo") = "hello"      |
-| "keep " + "on " + "coding" | keep on coding  | ("keep " + "on ") + "coding"  |
+| Example input                | Expected output | Expected precedence parsing   |
+|------------------------------|-----------------|-------------------------------|
+| `1 + 2 * 3 / 4`              | 2.5             | 1 + ((2 * 3) / 4)             |
+| `(1 + 2) * 3 / 4`            | 2.25            | ((1 + 2) * 3) / 4             |
+| `1 + -2 - -3`                | 2               | (1 + (-2)) - (-3)             |
+| `1 > 2 = 3 > 4`              | true            | (1 > 2) = (3 > 4)             |
+| `false != not(1 + 2 >= 3)`   | false           | false != (not((1 + 2) >= 3))  |
+| `"he" + "llo" = "hello"`     | true            | ("he" + "llo") = "hello"      |
+| `"keep " + "on " + "coding"` | keep on coding  | ("keep " + "on ") + "coding"  |
 
 **Table 2: Valid user input (statements)**
 
-| Example input              | Expected output | Comment                       |
-|----------------------------|-----------------|-------------------------------|
-| @out "he" + "llo"          | "hello"         | Temporary statement until the built-in function is implemented |
+| Example input              | Expected output |
+|----------------------------|-----------------|
+| `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full`<br>          | Jane Doe         |
+| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end"`<br><br>`@out x`<br>          | global<br>local<br>changed global         |
 
 **Table 3: Invalid user input**
 
-| Example input | Error type | Expected error reason                           |
-|---------------|------------|-------------------------------------------------|
-| "one" + 2     | Runtime    | `+` operates on `number` only or `text` only    |
-| "one" < 2     | Runtime    | `<` operates on `number` only                   |
-| !true         | Comptime   | `!` is only allowed in `!=` (use `not`)         |
+| Example input   | Error type | Expected error reason                           |
+|-----------------|------------|-------------------------------------------------|
+| `"one" + 2`     | Runtime    | `+` operates on `number` only or `text` only    |
+| `"one" < 2`     | Runtime    | `<` operates on `number` only                   |
+| `!true`         | Comptime   | `!` is only allowed in `!=` (use `not`)         |
+| `x: 1`          | Comptime   | `x` has not been declared                       |
 
 ## Getting Started
 
