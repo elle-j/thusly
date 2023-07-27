@@ -42,7 +42,6 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 ### Milestone 1: Evaluate arithmetic, comparison, and equality expressions
 
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
-  * To try out the tokenizer in isolation and get printouts of the tokens produced use [PR #2](https://github.com/elle-j/thusly/pull/2) (significant newline characters will be printed as newlines).
 - [x] Arithmetic expressions using `number` (double) can be evaluated.
   - [x] Addition (`+`)
   - [x] Subtraction (`-`)
