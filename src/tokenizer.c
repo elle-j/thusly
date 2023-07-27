@@ -73,13 +73,14 @@ static bool match(Tokenizer* tokenizer, char expected) {
   return true;
 }
 
-static inline bool is_whitespace(char character, bool is_blank_line) {
-  // TODO: Double check '\r' (and '\r\n'?)
-  return character == ' ' || character == '\t' || character == '\r' || (is_blank_line && character == '\n');
+static inline bool is_whitespace(Tokenizer* tokenizer) {
+  // TODO: Double check '\r' and '\r\n'.
+  char character = peek(tokenizer);
+  return character == ' ' || character == '\t' || character == '\r' || (tokenizer->is_blank_line && character == '\n');
 }
 
 static void skip_whitespace(Tokenizer* tokenizer) {
-  while (is_whitespace(peek(tokenizer), tokenizer->is_blank_line)) {
+  while (is_whitespace(tokenizer)) {
     if (peek(tokenizer) == '\n')
       tokenizer->line++;
 
@@ -87,9 +88,13 @@ static void skip_whitespace(Tokenizer* tokenizer) {
   }
 }
 
+static bool is_comment(Tokenizer* tokenizer) {
+  return peek(tokenizer) == '/' && peek_next(tokenizer) == '/';
+}
+
 static void skip_comment(Tokenizer* tokenizer) {
   char character = peek(tokenizer);
-  if (character == '/' && peek_next(tokenizer) == '/') {
+  if (is_comment(tokenizer)) {
     while (character != '\n' && !is_at_end(tokenizer)) {
       advance(tokenizer);
       character = peek(tokenizer);
@@ -101,6 +106,13 @@ static void skip_comment(Tokenizer* tokenizer) {
       tokenizer->line++;
       advance(tokenizer);
     }
+  }
+}
+
+static void skip_insignificant(Tokenizer* tokenizer) {
+  while (is_whitespace(tokenizer) || is_comment(tokenizer)) {
+    skip_whitespace(tokenizer);
+    skip_comment(tokenizer);
   }
 }
 
@@ -202,8 +214,7 @@ static Token consume_keyword_or_identifier(Tokenizer* tokenizer) {
 }
 
 Token tokenize(Tokenizer* tokenizer) {
-  skip_whitespace(tokenizer);
-  skip_comment(tokenizer);
+  skip_insignificant(tokenizer);
 
   tokenizer->is_blank_line = false;
   tokenizer->start = tokenizer->current;
