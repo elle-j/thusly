@@ -257,13 +257,17 @@ static bool is_at_start_of_statement(Parser* parser) {
   }
 }
 
+static bool is_at_end_of_block(Parser* parser) {
+  return compare(parser, TOKEN_END);
+}
+
 /// Synchronize the parsing when the parser has entered panic mode. This
-/// synchronizes to the next statement encountered and is performed in order
-/// to minimize cascaded and falsely reported errors.
+/// synchronizes to the next statement encountered or to the end of a block
+/// and is performed in order to minimize cascaded and falsely reported errors.
 static void synchronize(Parser* parser) {
   parser->panic_mode = false;
 
-  while (!is_at_end(parser) && !is_at_start_of_statement(parser)) {
+  while (!(is_at_start_of_statement(parser) || is_at_end_of_block(parser) || is_at_end(parser))) {
     advance(parser);
   }
 }
@@ -451,7 +455,7 @@ static void parse_statement(Parser* parser) {
 
 static void parse_block_statement(Parser* parser) {
   consume_newline(parser);
-  while (!compare(parser, TOKEN_END) && !is_at_end(parser))
+  while (!is_at_end_of_block(parser) && !is_at_end(parser))
     parse_statement(parser);
 
   consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
