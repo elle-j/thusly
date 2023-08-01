@@ -34,7 +34,7 @@ START RULES
 ------------------------------------------------------------------
 
 file:
-	| statement* FILE_END
+	| statement* EOF
 
 repl:
 	| statementRepl			# TODO
@@ -135,5 +135,5 @@ NEWLINE:
 	| "\r"
 	| "\r\n"
 
-FILE_END:
+EOF:
 	| <end of file>

@@ -47,7 +47,7 @@ typedef enum {
   TOKEN_TEXT,
 
   // Formatting
-  TOKEN_FILE_END,
+  TOKEN_EOF,
   TOKEN_NEWLINE,
 
   // Errors

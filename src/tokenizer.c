@@ -220,7 +220,7 @@ Token tokenize(Tokenizer* tokenizer) {
   tokenizer->start = tokenizer->current;
 
   if (is_at_end(tokenizer))
-    return make_token(tokenizer, TOKEN_FILE_END);
+    return make_token(tokenizer, TOKEN_EOF);
 
   char character = advance(tokenizer);
   switch (character) {

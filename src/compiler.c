@@ -129,7 +129,7 @@ static ParseRule rules[] = {
   [TOKEN_TEXT]                  = { parse_text, NULL, PRECEDENCE_IGNORE },
 
   // Formatting
-  [TOKEN_FILE_END]              = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_EOF]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NEWLINE]               = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Errors
@@ -171,7 +171,7 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   fprintf(stderr, "\n---------");
   fprintf(stderr, "\n\t> Line:\n\t\t%d", token->line);
   fprintf(stderr, "\n\t> Where:\n\t\t");
-  if (token->type == TOKEN_FILE_END)
+  if (token->type == TOKEN_EOF)
     fprintf(stderr, "At the end of the file");
   else if (token->type == TOKEN_NEWLINE)
     fprintf(stderr, "At the end of the line");
@@ -241,8 +241,8 @@ static bool match(Parser* parser, TokenType type) {
   return true;
 }
 
-static bool is_at_end(Parser* parser) {
-  return parser->current.type == TOKEN_FILE_END;
+static bool is_at_end_of_file(Parser* parser) {
+  return parser->current.type == TOKEN_EOF;
 }
 
 static bool is_at_start_of_statement(Parser* parser) {
@@ -267,7 +267,7 @@ static bool is_at_end_of_block(Parser* parser) {
 static void synchronize(Parser* parser) {
   parser->panic_mode = false;
 
-  while (!(is_at_start_of_statement(parser) || is_at_end_of_block(parser) || is_at_end(parser))) {
+  while (!(is_at_start_of_statement(parser) || is_at_end_of_block(parser) || is_at_end_of_file(parser))) {
     advance(parser);
   }
 }
@@ -455,7 +455,7 @@ static void parse_statement(Parser* parser) {
 
 static void parse_block_statement(Parser* parser) {
   consume_newline(parser);
-  while (!is_at_end_of_block(parser) && !is_at_end(parser))
+  while (!is_at_end_of_block(parser) && !is_at_end_of_file(parser))
     parse_statement(parser);
 
   consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
@@ -655,7 +655,7 @@ bool compile(Environment* environment, const char* source, Program* out_program)
 
   advance(&parser);
 
-  while (!match(&parser, TOKEN_FILE_END)) {
+  while (!match(&parser, TOKEN_EOF)) {
     parse_statement(&parser);
   }
 
