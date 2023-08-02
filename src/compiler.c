@@ -13,6 +13,8 @@
 #include "debug.h"
 #endif
 
+#define VARIABLES_MAX (UINT8_MAX + 1)
+#define CONSTANTS_MAX (UINT8_MAX + 1)
 #define NOT_FOUND (-1)
 #define UNINITIALIZED (-1)
 
@@ -32,7 +34,7 @@ typedef struct {
   // When a variable is declared in the source code, it gets added to this array.
   // The order will coincide with how they end up on the VM's stack. Due to only
   // supporting instructions using 1 byte for operands, the array count cannot exceed 256.
-  Variable variables[UINT8_MAX + 1];
+  Variable variables[VARIABLES_MAX];
   // Number of variables currently in scope.
   int variable_count;
   // The current level of nesting (number of surrounding blocks).
@@ -275,8 +277,8 @@ static void synchronize(Parser* parser) {
 static byte make_constant(Parser* parser, ThuslyValue value) {
   unsigned int constant_index = program_add_constant(get_writable_program(parser), value);
   // The operand to the OP_CONSTANT instruction (i.e. the index of the constant)
-  // currently only supports 1 byte.
-  if (constant_index > UINT8_MAX) {
+  // currently only supports 1 byte (256 constants).
+  if (constant_index > CONSTANTS_MAX - 1) {
     error(parser, "Too many constants have been used.");
     return 0;
   }
@@ -354,7 +356,7 @@ static bool is_same_name(Token* first, Token* second) {
 }
 
 static void add_variable(Parser* parser, Token name) {
-  bool has_reached_max_variables = parser->compiler->variable_count == UINT8_MAX + 1;
+  bool has_reached_max_variables = parser->compiler->variable_count == VARIABLES_MAX;
   if (has_reached_max_variables) {
     error(parser, "Too many variables are currently in scope.");
     return;
