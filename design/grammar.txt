@@ -46,6 +46,7 @@ STATEMENT RULES
 statement:
 	| blockStatement
 	| expressionStatement
+	| ifStatement
 	| outStatement			# Temporary until built-in function
 	| varStatement
 
@@ -55,11 +56,21 @@ blockStatement:
 expressionStatement:
 	| expression NEWLINE
 
+ifStatement:
+	| "if" expression danglingBlock ( "elseif" expression danglingBlock )* ( "else" danglingBlock )? "end" NEWLINE
+
 outStatement:
 	| "@out" expression NEWLINE
 
 varStatement:
 	| "var" IDENTIFIER ":" expression NEWLINE
+
+------------------------------------------------------------------
+HELPER RULES
+------------------------------------------------------------------
+
+danglingBlock:
+	| NEWLINE statement+
 
 ------------------------------------------------------------------
 EXPRESSION RULES
