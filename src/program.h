@@ -38,10 +38,6 @@ typedef struct {
   int capacity;
 } ConstantPool;
 
-void constant_pool_init(ConstantPool* pool);
-void constant_pool_free(ConstantPool* pool);
-void constant_pool_add(ConstantPool* pool, ThuslyValue value);
-
 typedef struct {
   ConstantPool constant_pool;
   int* source_lines; // Mirrors the `instructions`

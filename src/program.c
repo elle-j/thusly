@@ -4,13 +4,13 @@
 #include "memory.h"
 #include "program.h"
 
-void constant_pool_init(ConstantPool* pool) {
+static void constant_pool_init(ConstantPool* pool) {
   pool->values = NULL;
   pool->count = 0;
   pool->capacity = 0;
 }
 
-void constant_pool_free(ConstantPool* pool) {
+static void constant_pool_free(ConstantPool* pool) {
   // -- TEMPORARY --
   #ifdef DEBUG_EXECUTION
     printf("FREEING CONSTANT POOL..\n");
@@ -21,7 +21,7 @@ void constant_pool_free(ConstantPool* pool) {
   constant_pool_init(pool);
 }
 
-void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
+static void constant_pool_add(ConstantPool* pool, ThuslyValue value) {
   bool max_capacity_reached = pool->count + 1 > pool->capacity;
   if (max_capacity_reached) {
     int old_capacity = pool->capacity;
