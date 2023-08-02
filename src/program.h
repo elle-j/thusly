@@ -26,6 +26,7 @@ typedef enum {
   OP_NOT_EQUALS,
   OP_OUT,
   OP_POP,
+  OP_POPN,
   OP_RETURN,
   OP_SET_VAR,
   OP_SUBTRACT,

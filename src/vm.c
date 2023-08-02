@@ -68,6 +68,12 @@ static ThuslyValue pop(VM* vm) {
   // TODO: Check empty
 }
 
+static ThuslyValue pop_n(VM* vm, int n) {
+  vm->next_stack_top -= n;
+
+  return *vm->next_stack_top;
+}
+
 static ThuslyValue peek(VM* vm, int offset) {
   // The current stack top is 1 before next_stack_top. Thus, if the offset passed
   // is 0, this should peek at next_stack_top[-1].
@@ -128,6 +134,14 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_POP:
         pop(vm);
         break;
+      case OP_POPN: {
+        byte n = READ_BYTE();
+        // `N` in `POPN` is treated as "the number to pop minus 1" in order to allow
+        // popping the maximum number of variables supported on the stack (UINT8_MAX + 1,
+        // i.e. 256). Therefore, it is incremented by 1 here.
+        pop_n(vm, n + 1);
+        break;
+      }
       case OP_GET_VAR: {
         byte slot = READ_BYTE();
         // Since this is a stack-based VM, instructions will rely on values

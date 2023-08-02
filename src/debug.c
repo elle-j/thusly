@@ -11,6 +11,14 @@ static int print_opcode(const char* op_name, int offset) {
   return offset + 1;
 }
 
+static int print_pop_n(const char* op_name, Program* program, int offset) {
+  byte number = program->instructions[offset + 1];
+  // See `compiler.discard_scope()` for comments regarding `number + 1`.
+  printf("op[%s] count[%d]\n", op_name, number + 1);
+
+  return offset + 2;
+}
+
 static int print_constant(const char* op_name, Program* program, int offset) {
   byte constant_index = program->instructions[offset + 1]; 
   // printf("op[%-16s] index[%4d] value[", op_name, constant_index);
@@ -66,6 +74,8 @@ int disassemble_instruction(Program* program, int offset) {
   switch (instruction) {
     case OP_POP:
       return print_opcode("OP_POP", offset);
+    case OP_POPN:
+      return print_pop_n("OP_POPN", program, offset);
     case OP_GET_VAR:
       return print_variable("OP_GET_VAR", program, offset);
     case OP_SET_VAR:

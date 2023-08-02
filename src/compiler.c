@@ -326,12 +326,19 @@ static void discard_scope(Parser* parser) {
   // in the innermost scope exist at the end of the array. When the depth of a
   // variable no longer is the same as the current scope, all variables in the
   // innermost scope have been discarded.
+  int variable_count_before = compiler->variable_count;
   while (compiler->variable_count > 0 &&
          is_in_innermost_scope(parser, &compiler->variables[compiler->variable_count - 1])) {
-    // TODO: Add OP_POPN instruction.
-    write_instruction(parser, OP_POP);
     compiler->variable_count--;
   }
+  int variables_to_discard = variable_count_before - compiler->variable_count;
+  if (variables_to_discard > 1)
+    // `N` in `POPN` is treated as "the number to pop minus 1" in order to allow
+    // popping the maximum number of variables supported on the stack (UINT8_MAX + 1,
+    // i.e. 256). Otherwise, casting 256 to a byte results in 0 due to overflow.
+    write_instructions(parser, OP_POPN, (byte)(variables_to_discard - 1));
+  else if (variables_to_discard == 1)
+    write_instruction(parser, OP_POP);
 
   // No need to check if it is in the global scope before decrementing.
   // `create_scope()` will only be called when a block is encountered.

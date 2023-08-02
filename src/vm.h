@@ -5,7 +5,7 @@
 #include "table.h"
 #include "thusly_value.h"
 
-#define STACK_MAX 256
+#define STACK_MAX (UINT8_MAX + 1)
 
 struct VM;
 
