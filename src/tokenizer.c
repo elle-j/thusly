@@ -180,6 +180,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       return search_keyword(tokenizer, 1, "nd", 2, TOKEN_END);
     case 'f':
       return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
+    case 'i':
+      return search_keyword(tokenizer, 1, "f", 1, TOKEN_IF);
     case 'm':
       return search_keyword(tokenizer, 1, "od", 2, TOKEN_MOD);
     case 'n':
