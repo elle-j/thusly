@@ -529,23 +529,24 @@ static void parse_dangling_block(Parser* parser) {
 static void parse_if_statement(Parser* parser) {
   // Parse the condition.
   parse_expression(parser);
-
-  // If the if-condition is falsey, the VM should jump over the if-clause instructions.
-  // The placeholder offset returned here will later be backpatched at the exact point
-  // it should jump to.
+  // If the if-condition is false, the VM should jump over the if-clause. The placeholder
+  // offset returned here will later be backpatched at the exact point it should jump to.
   int placeholder_jump_over_if = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
-  // Pop the if-condition value if it was truthy.
+
+  // --- If-condition is true: ---
+
+  // Pop the if-condition value.
   write_instruction(parser, OP_POP);
   // Parse the if-then branch.
   parse_dangling_block(parser);
-
-  // Jump over the else-then branch if the if-branch was already taken.
+  // Jump over the else-then branch.
   int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
 
-  // If the if-condition was falsey, the VM should jump to here.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
+  // --- If-condition is false: ---
 
-  // Pop the if-condition value if it was falsey.
+  // The VM should jump to this point when the condition is false.
+  patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
+  // Pop the if-condition value.
   write_instruction(parser, OP_POP);
 
   // Parse the potential else-then branch.
@@ -554,7 +555,9 @@ static void parse_if_statement(Parser* parser) {
 
   consume_end_of_block(parser);
 
-  // If the else-clause was jumped over, the VM should jump to here.
+  // --- Jump here from if-then branch: ---
+
+  // The VM should jump to this point after the if-then branch is taken.
   patch_jump_fwd_instruction(parser, placeholder_jump_over_else);
 }
 
