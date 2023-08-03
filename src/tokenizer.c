@@ -177,7 +177,15 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
     case 'b':
       return search_keyword(tokenizer, 1, "lock", 4, TOKEN_BLOCK);
     case 'e':
-      return search_keyword(tokenizer, 1, "nd", 2, TOKEN_END);
+      if (lexeme_length > 1) {
+        switch (tokenizer->start[1]) {
+          case 'l':
+            return search_keyword(tokenizer, 2, "se", 2, TOKEN_ELSE);
+          case 'n':
+            return search_keyword(tokenizer, 2, "d", 1, TOKEN_END);
+        }
+      }
+      break;
     case 'f':
       return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
     case 'i':

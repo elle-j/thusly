@@ -27,7 +27,7 @@ typedef enum {
   TOKEN_AND,
   TOKEN_BLOCK,
   // TOKEN_CONST,
-  // TOKEN_ELSE,
+  TOKEN_ELSE,
   TOKEN_END,
   TOKEN_FALSE,
   // TOKEN_FUN,
