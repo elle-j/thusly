@@ -68,6 +68,10 @@ void program_write(Program* program, byte instruction, int source_line) {
   program->count++;
 }
 
+void program_overwrite(Program* program, int offset, byte updated_instruction) {
+  program->instructions[offset] = updated_instruction;
+}
+
 int program_add_constant(Program* program, ThuslyValue value) {
   constant_pool_add(&program->constant_pool, value);
 
