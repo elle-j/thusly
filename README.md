@@ -74,8 +74,19 @@ Whitespace is semantically insignificant except for newline characters on non-bl
       <statements>
     end
     ```
-- [ ] Can execute control flow
-- [ ] Can call functions
+- [ ] Control flow statements can be executed.
+  - [ ] Selection
+    - [x] `if`
+    - [ ] `elseif`
+    - [x] `else`
+  - [ ] Loops
+    - [ ] Bounded (`foreach`)
+    - [ ] Unbounded (`while`)
+- [ ] Logical operators can be evaluated.
+  - [ ] Conjunction (`and`)
+  - [ ] Disjunction (`or`)
+- [ ] Range comparison expression (`in`) can be evaluated.
+- [ ] Functions can be defined and invoked.
 - [ ] TODO (more milestones will be added here)
 
 ### Implemented Functionality
@@ -100,9 +111,10 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 
 | Example input              | Expected output |
 |----------------------------|-----------------|
-| `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full`<br>          | Jane Doe         |
-| `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z`<br>          | 2<br>2         |
-| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x`<br>          | global<br>local<br>changed global         |
+| `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full` | Jane Doe         |
+| `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z` | 2<br>2         |
+| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
+| `var x: 0`<br>`if x < 10`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
 
 **Table 3: Invalid user input**
 

@@ -39,6 +39,13 @@ static int print_variable(const char* op_name, Program* program, int offset) {
   return offset + 2;
 }
 
+static int print_jump(const char* op_name, Program* program, int sign, int offset) {
+  uint16_t jump_offset = (uint16_t)((program->instructions[offset + 1] << 8) | program->instructions[offset + 2]);
+  printf("op[%s] from[%d] to[%d]\n", op_name, offset, offset + 3 + sign * jump_offset);
+
+  return offset + 3;
+}
+
 void disassemble_stack(VM* vm) {
   printf("                        stack[");
   for (ThuslyValue* stack_elem_ptr = vm->stack; stack_elem_ptr < vm->next_stack_top; stack_elem_ptr++) {
@@ -116,6 +123,10 @@ int disassemble_instruction(Program* program, int offset) {
       return print_opcode("OP_NOT", offset);
     case OP_OUT:
       return print_opcode("OP_OUT", offset);
+    case OP_JUMP_FWD:
+      return print_jump("OP_JUMP_FWD", program, 1, offset);
+    case OP_JUMP_FWD_IF_FALSE:
+      return print_jump("OP_JUMP_FWD_IF_FALSE", program, 1, offset);
     case OP_RETURN:
       return print_opcode("OP_RETURN", offset);
     default:

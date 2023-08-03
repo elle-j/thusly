@@ -17,6 +17,8 @@ typedef enum {
   OP_GET_VAR,
   OP_GREATER_THAN,
   OP_GREATER_THAN_EQUALS,
+  OP_JUMP_FWD,
+  OP_JUMP_FWD_IF_FALSE,
   OP_LESS_THAN,
   OP_LESS_THAN_EQUALS,
   OP_MODULO,
@@ -49,6 +51,7 @@ typedef struct {
 void program_init(Program* program);
 void program_free(Program* program);
 void program_write(Program* program, byte instruction, int source_line);
+void program_overwrite(Program* program, int offset, byte updated_instruction);
 int program_add_constant(Program* program, ThuslyValue value);
 
 #endif
