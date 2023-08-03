@@ -57,7 +57,7 @@ expressionStatement:
 	| expression NEWLINE
 
 ifStatement:
-	| "if" expression danglingBlock ( "elseif" expression danglingBlock )* ( "else" danglingBlock )? "end" NEWLINE
+	| "if" expression danglingBlock ( "else" danglingBlock )? "end" NEWLINE
 
 outStatement:
 	| "@out" expression NEWLINE
