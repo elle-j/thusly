@@ -119,6 +119,7 @@ static ParseRule rules[] = {
   [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_BLOCK]                 = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_END]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_ELSE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_IF]                    = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
