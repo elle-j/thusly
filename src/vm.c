@@ -101,8 +101,9 @@ static void concatenate(VM* vm) {
 }
 
 static ErrorReport decode_and_execute(VM* vm) {
-  #define READ_BYTE() (*vm->next_instruction++)
-
+  #define READ_BYTE()     (*vm->next_instruction++)
+  // Moves the instruction pointer past the jump operand (2 bytes) and returns it as unsigned.
+  #define READ_SHORT()    (vm->next_instruction += 2, (uint16_t)((vm->next_instruction[-2] << 8) | vm->next_instruction[-1]))
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
 
   #define DO_BINARY_OP(from_c_value, operator, operator_string)                             \
@@ -246,6 +247,17 @@ static ErrorReport decode_and_execute(VM* vm) {
         print_value(pop(vm));
         printf("\n");
         break;
+      case OP_JUMP_FWD: {
+        uint16_t offset = READ_SHORT();
+        vm->next_instruction += offset;
+        break;
+      }
+      case OP_JUMP_FWD_IF_FALSE: {
+        uint16_t offset = READ_SHORT();
+        if (!is_truthy(peek(vm, 0)))
+          vm->next_instruction += offset;
+        break;
+      }
       case OP_RETURN: {
         return REPORT_NO_ERROR;
       }
@@ -253,6 +265,7 @@ static ErrorReport decode_and_execute(VM* vm) {
   }
 
   #undef READ_BYTE
+  #undef READ_SHORT
   #undef READ_CONSTANT
   #undef DO_BINARY_OP
 }
