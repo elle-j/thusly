@@ -15,6 +15,8 @@
 
 #define VARIABLES_MAX (UINT8_MAX + 1)
 #define CONSTANTS_MAX (UINT8_MAX + 1)
+#define JUMP_MAX UINT16_MAX
+#define PLACEHOLDER_JUMP_TARGET 0xff
 #define NOT_FOUND (-1)
 #define UNINITIALIZED (-1)
 
@@ -79,6 +81,7 @@ typedef struct {
 static void parse_statement(Parser* parser);
 static void parse_block_statement(Parser* parser);
 static void parse_expression_statement(Parser* parser);
+static void parse_if_statement(Parser* parser);
 static void parse_out_statement(Parser* parser);
 static void parse_var_statement(Parser* parser);
 
@@ -117,6 +120,7 @@ static ParseRule rules[] = {
   [TOKEN_BLOCK]                 = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_END]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_IF]                    = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NOT]                   = { parse_unary, NULL, PRECEDENCE_IGNORE },
@@ -157,6 +161,10 @@ static void parser_init(Parser* parser, Compiler* compiler, Environment* environ
 
 static Program* get_writable_program(Parser* parser) {
   return parser->writable_program;
+}
+
+static int get_current_instruction_offset(Parser* parser) {
+  return get_writable_program(parser)->count;
 }
 
 static void error_at(Parser* parser, Token* token, const char* message) {
@@ -224,12 +232,12 @@ static void consume(Parser* parser, TokenType expected_type, const char* err_mes
 }
 
 static void consume_newline(Parser* parser) {
-  if (compare(parser, TOKEN_NEWLINE)) {
-    advance(parser);
-    return;
-  }
+  consume(parser, TOKEN_NEWLINE, "The line has not been terminated. Add a newline at the end of the line.");
+}
 
-  error_at(parser, &parser->current, "The statement must end with a newline.");
+static void consume_end_of_block(Parser* parser) {
+  consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
+  consume_newline(parser);
 }
 
 /// Compare the type of the current token being parsed with a given type,
@@ -295,6 +303,10 @@ static byte make_identifier_constant(Parser* parser, Token* token) {
   );
 }
 
+static void overwrite_instruction(Parser* parser, int offset, byte updated_instruction) {
+  program_overwrite(get_writable_program(parser), offset, updated_instruction);
+}
+
 static void write_instruction(Parser* parser, byte instruction) {
   program_write(get_writable_program(parser), instruction, parser->previous.line);
 }
@@ -306,6 +318,31 @@ static void write_instructions(Parser* parser, byte instruction1, byte instructi
 
 static void write_constant_instruction(Parser* parser, ThuslyValue value) {
   write_instructions(parser, OP_CONSTANT, make_constant(parser, value));
+}
+
+/// Write an instruction to jump forward. This uses a 16-bit placeholder jump offset
+/// and returns where that placeholder starts which should be used for backpatching it.
+static int write_jump_fwd_instruction(Parser* parser, byte instruction) {
+  write_instruction(parser, instruction);
+  write_instructions(parser, PLACEHOLDER_JUMP_TARGET, PLACEHOLDER_JUMP_TARGET);
+
+  int jump_operand_bytes = 2;
+  int placeholder_start = get_current_instruction_offset(parser) - jump_operand_bytes;
+
+  return placeholder_start;
+}
+
+/// Backpatch a previously written jump forward instruction by overwriting the
+/// placeholder offset with the now-correct jump target offset. This assumes the
+/// function is called immediately before the instruction to jump to is written.
+static void patch_jump_fwd_instruction(Parser* parser, int placeholder_start) {
+  int jump_operand_bytes = 2;
+  int jump_size = get_current_instruction_offset(parser) - placeholder_start - jump_operand_bytes;
+  if (jump_size > JUMP_MAX)
+    error(parser, "The amount of code to jump over is more than what is currently supported.");
+
+  overwrite_instruction(parser, placeholder_start, (jump_size >> 8) & PLACEHOLDER_JUMP_TARGET);
+  overwrite_instruction(parser, placeholder_start + 1, jump_size & PLACEHOLDER_JUMP_TARGET);
 }
 
 static void write_return_instruction(Parser* parser) {
@@ -445,11 +482,17 @@ static void access_or_assign_variable(Parser* parser, Token name, bool is_assign
     write_instructions(parser, OP_GET_VAR, (byte)stack_slot);
 }
 
+// ---------------------------------------------------
+// STATEMENTS
+// ---------------------------------------------------
+
 static void parse_statement(Parser* parser) {
   if (match(parser, TOKEN_VAR))
     parse_var_statement(parser);
   else if (match(parser, TOKEN_OUT))
     parse_out_statement(parser);
+  else if (match(parser, TOKEN_IF))
+    parse_if_statement(parser);
   else if (match(parser, TOKEN_BLOCK)) {
     create_scope(parser);
     parse_block_statement(parser);
@@ -467,14 +510,52 @@ static void parse_block_statement(Parser* parser) {
   while (!is_at_end_of_block(parser) && !is_at_end_of_file(parser))
     parse_statement(parser);
 
-  consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
-  consume_newline(parser);
+  consume_end_of_block(parser);
 }
 
 static void parse_expression_statement(Parser* parser) {
   parse_expression(parser);
   consume_newline(parser);
   write_instruction(parser, OP_POP);
+}
+
+/// A dangling block does not include the 'end' keyword in the grammar. Instead,
+/// 'end' and NEWLINE are assumed to be consumed correctly by the caller.
+static void parse_dangling_block(Parser* parser) {
+  consume_newline(parser);
+  parse_statement(parser);
+}
+
+static void parse_if_statement(Parser* parser) {
+  // Parse the condition.
+  parse_expression(parser);
+
+  // If the if-condition is falsey, the VM should jump over the if-clause instructions.
+  // The placeholder offset returned here will later be backpatched at the exact point
+  // it should jump to.
+  int placeholder_jump_over_if = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+  // Pop the if-condition value if it was truthy.
+  write_instruction(parser, OP_POP);
+  // Parse the if-then branch.
+  parse_dangling_block(parser);
+
+  // Jump over the else-then branch if the if-branch was already taken.
+  int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
+
+  // If the if-condition was falsey, the VM should jump to here.
+  patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
+
+  // Pop the if-condition value if it was falsey.
+  write_instruction(parser, OP_POP);
+
+  // Parse the potential else-then branch.
+  if (match(parser, TOKEN_ELSE))
+    parse_dangling_block(parser);
+
+  consume_end_of_block(parser);
+
+  // If the else-clause was jumped over, the VM should jump to here.
+  patch_jump_fwd_instruction(parser, placeholder_jump_over_else);
 }
 
 static void parse_out_statement(Parser* parser) {
@@ -492,6 +573,10 @@ static void parse_var_statement(Parser* parser) {
   consume_newline(parser);
   define_variable(parser);
 }
+
+// ---------------------------------------------------
+// EXPRESSIONS
+// ---------------------------------------------------
 
 static void parse_precedence(Parser* parser, Precedence min_precedence) {
   advance(parser);
