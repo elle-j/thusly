@@ -51,13 +51,13 @@ statement:
 	| varStatement
 
 blockStatement:
-	| "block" NEWLINE statement* "end" NEWLINE
+	| "block" standardBlock
 
 expressionStatement:
 	| expression NEWLINE
 
 ifStatement:
-	| "if" expression danglingBlock ( "else" danglingBlock )? "end" NEWLINE
+	| "if" expression selectionBlock ( "else" selectionBlock )? "end" NEWLINE
 
 outStatement:
 	| "@out" expression NEWLINE
@@ -69,8 +69,11 @@ varStatement:
 HELPER RULES
 ------------------------------------------------------------------
 
-danglingBlock:
-	| NEWLINE statement+
+standardBlock:
+	| NEWLINE statement* "end" NEWLINE
+
+selectionBlock:
+	| NEWLINE statement*
 
 ------------------------------------------------------------------
 EXPRESSION RULES
