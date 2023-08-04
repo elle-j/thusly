@@ -92,6 +92,7 @@ static void parse_boolean(Parser* parser, bool _);
 static void parse_grouping(Parser* parser, bool _);
 static void parse_none(Parser* parser, bool _);
 static void parse_number(Parser* parser, bool _);
+static void parse_or(Parser* parser, bool _);
 static void parse_text(Parser* parser, bool _);
 static void parse_unary(Parser* parser, bool _);
 static void parse_variable(Parser* parser, bool is_assignable);
@@ -126,7 +127,7 @@ static ParseRule rules[] = {
   [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
   [TOKEN_NOT]                   = { parse_unary, NULL, PRECEDENCE_IGNORE },
-  [TOKEN_OR]                    = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_OR]                    = { NULL, parse_or, PRECEDENCE_DISJUNCTION },
   [TOKEN_OUT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_TRUE]                  = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
@@ -717,6 +718,21 @@ static void parse_none(Parser* parser, bool _) {
 static void parse_number(Parser* parser, bool _) {
   double value = strtod(parser->previous.lexeme, NULL);
   write_constant_instruction(parser, FROM_C_DOUBLE(value));
+}
+
+static void parse_or(Parser* parser, bool _) {
+  // Jump to the end if the left condition is true.
+  int placeholder_jump_to_end = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_TRUE);
+
+  // Pop the left condition and continue parsing the right-hand side.
+  write_instruction(parser, OP_POP);
+  parse_precedence(parser, PRECEDENCE_DISJUNCTION);
+
+  // Jump lands here if the left condition is true.
+  patch_jump_fwd_instruction(parser, placeholder_jump_to_end);
+
+  // The last value left on the stack is the result of the expression and
+  // should therefore not be popped.
 }
 
 static void parse_text(Parser* parser, bool _) {
