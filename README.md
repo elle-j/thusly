@@ -12,7 +12,7 @@ A general-purpose programming language coming to life through a custom one-pass 
 - [Milestones](#milestones)
     - [Milestone 1 - Expressions](#milestone-1-support-arithmetic-comparison-and-equality-operations)
     - [Milestone 2 - Variables and Control Flow](#milestone-2-support-variables-and-control-flow)
-    - [Milestone 3 - Functions](#milestone-2-support-functions)
+    - [Milestone 3 - First-Class Functions](#milestone-3-support-first-class-functions)
     - [Example Input](#example-input)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
