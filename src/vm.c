@@ -264,6 +264,11 @@ static ErrorReport decode_and_execute(VM* vm) {
           vm->next_instruction += offset;
         break;
       }
+      case OP_JUMP_BWD: {
+        uint16_t offset = READ_SHORT();
+        vm->next_instruction -= offset;
+        break;
+      }
       case OP_RETURN: {
         return REPORT_NO_ERROR;
       }
