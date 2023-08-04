@@ -1,8 +1,8 @@
-# Thusly
+# The Thusly Programming Language
 
 A general-purpose programming language coming to life through a custom one-pass compiler and a stack-based virtual machine.
 
-> The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
+> 👉️ The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
 
 ## Table of Contents
 
@@ -83,15 +83,15 @@ Whitespace is semantically insignificant except for newline characters on non-bl
     - [x] `if`
     - [ ] `elseif`
     - [x] `else`
-      ```
-      if <expression>
-        <statements>
-      elseif <expression>
-        <statements>
-      else
-        <statements>
-      end
-      ```
+    ```
+    if <expression>
+      <statements>
+    elseif <expression>
+      <statements>
+    else
+      <statements>
+    end
+    ```
   - [ ] Loops
     - [ ] Bounded (`foreach`)
     - [ ] Unbounded (`while`)
@@ -131,7 +131,7 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 |----------------------------|-----------------|
 | `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full` | Jane Doe         |
 | `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z` | 2<br>2         |
-| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br><br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
+| `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
 | `var x: 0`<br>`if x < 10`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
 
 **Table 3: Invalid user input**
