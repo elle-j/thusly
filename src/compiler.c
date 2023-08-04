@@ -16,7 +16,7 @@
 #define VARIABLES_MAX (UINT8_MAX + 1)
 #define CONSTANTS_MAX (UINT8_MAX + 1)
 #define JUMP_MAX UINT16_MAX
-#define PLACEHOLDER_JUMP_TARGET 0xff
+#define PLACEHOLDER_JUMP_TARGET 0xff  // Note: Keep the 0xff value!
 #define NOT_FOUND (-1)
 #define UNINITIALIZED (-1)
 
@@ -84,6 +84,7 @@ static void parse_expression_statement(Parser* parser);
 static void parse_if_statement(Parser* parser);
 static void parse_out_statement(Parser* parser);
 static void parse_var_statement(Parser* parser);
+static void parse_while_statement(Parser* parser);
 
 static void parse_expression(Parser* parser);
 static void parse_and(Parser* parser, bool _);
@@ -131,6 +132,7 @@ static ParseRule rules[] = {
   [TOKEN_OUT]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_TRUE]                  = { parse_boolean, NULL, PRECEDENCE_IGNORE },
   [TOKEN_VAR]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_WHILE]                 = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Literals
   [TOKEN_IDENTIFIER]            = { parse_variable, NULL, PRECEDENCE_IGNORE },
@@ -323,6 +325,17 @@ static void write_constant_instruction(Parser* parser, ThuslyValue value) {
   write_instructions(parser, OP_CONSTANT, make_constant(parser, value));
 }
 
+static void write_jump_bwd_instruction(Parser* parser, int target_offset) {
+  write_instruction(parser, OP_JUMP_BWD);
+
+  int jump_operand_bytes = 2;
+  int jump_size = get_current_instruction_offset(parser) - target_offset + jump_operand_bytes;
+  if (jump_size > JUMP_MAX)
+    error(parser, "The amount of code to jump over is more than what is currently supported.");
+
+  write_instructions(parser, (jump_size >> 8) & PLACEHOLDER_JUMP_TARGET, jump_size & PLACEHOLDER_JUMP_TARGET);
+}
+
 /// Write an instruction to jump forward. This uses a 16-bit placeholder jump offset
 /// and returns where that placeholder starts which should be used for backpatching it.
 static int write_jump_fwd_instruction(Parser* parser, byte instruction) {
@@ -498,6 +511,8 @@ static void parse_statement(Parser* parser) {
     parse_if_statement(parser);
   else if (match(parser, TOKEN_BLOCK))
     parse_block_statement(parser);
+  else if (match(parser, TOKEN_WHILE))
+    parse_while_statement(parser);
   else
     parse_expression_statement(parser);
 
@@ -554,15 +569,11 @@ static void parse_if_statement(Parser* parser) {
   // offset returned here will later be backpatched at the exact point it should jump to.
   int placeholder_jump_over_if = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
-  // --- if-condition is true: ---
-
   // Pop the if-condition value and continue parsing the if-then branch.
   write_instruction(parser, OP_POP);
   parse_selection_block(parser);
   // Jump over the else-then branch.
   int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
-
-  // --- if-condition is false: ---
 
   // Jump lands here if the condition is false.
   patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
@@ -591,6 +602,26 @@ static void parse_var_statement(Parser* parser) {
   parse_expression(parser);
   consume_newline(parser);
   define_variable(parser);
+}
+
+static void parse_while_statement(Parser* parser) {
+  // Jump lands back here once the body of the loop has been executed.
+  int while_start_offset = get_current_instruction_offset(parser);
+  // Parse the condition.
+  parse_expression(parser);
+  // Jump over the while loop if the condition is false.
+  int placeholder_jump_over_while = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+
+  // Pop the condition value and continue parsing the loop body.
+  write_instruction(parser, OP_POP);
+  parse_standard_block_with_scope(parser);
+  // Jump to the start of the loop to re-evaluate the condition.
+  write_jump_bwd_instruction(parser, while_start_offset);
+
+  // Jump lands here if the condition is false.
+  patch_jump_fwd_instruction(parser, placeholder_jump_over_while);
+  // Pop the condition value.
+  write_instruction(parser, OP_POP);
 }
 
 // ---------------------------------------------------
