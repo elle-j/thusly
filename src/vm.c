@@ -258,6 +258,12 @@ static ErrorReport decode_and_execute(VM* vm) {
           vm->next_instruction += offset;
         break;
       }
+      case OP_JUMP_FWD_IF_TRUE: {
+        uint16_t offset = READ_SHORT();
+        if (is_truthy(peek(vm, 0)))
+          vm->next_instruction += offset;
+        break;
+      }
       case OP_RETURN: {
         return REPORT_NO_ERROR;
       }
