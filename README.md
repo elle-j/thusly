@@ -94,7 +94,12 @@ Whitespace is semantically insignificant except for newline characters on non-bl
     ```
   - [ ] Loops
     - [ ] Bounded (`foreach`)
-    - [ ] Unbounded (`while`)
+    - [x] Unbounded (`while`)
+    ```
+    while <expression>
+      <statements>
+    end
+    ```
 - [ ] Range comparison expression (`in`) can be evaluated.
 - [ ] TODO (more milestones will be added here)
 
@@ -132,7 +137,8 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `var first: "Jane"`<br>`var last: "Doe"`<br>`var full: first + " " + last`<br>`@out full` | Jane Doe         |
 | `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z` | 2<br>2         |
 | `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
-| `var x: 0`<br>`if x < 10`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
+| `var x: 0`<br>`if x < 5`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
+| `var x: 0`<br>`while x < 5`<br>`  @out x`<br>`  x: x + 1`<br>`end` | 0<br>1<br>2<br>3<br>4   |
 
 **Table 3: Invalid user input**
 
