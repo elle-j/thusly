@@ -127,6 +127,8 @@ int disassemble_instruction(Program* program, int offset) {
       return print_jump("OP_JUMP_FWD", program, 1, offset);
     case OP_JUMP_FWD_IF_FALSE:
       return print_jump("OP_JUMP_FWD_IF_FALSE", program, 1, offset);
+    case OP_JUMP_FWD_IF_TRUE:
+      return print_jump("OP_JUMP_FWD_IF_TRUE", program, 1, offset);
     case OP_RETURN:
       return print_opcode("OP_RETURN", offset);
     default:
