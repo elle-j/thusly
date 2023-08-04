@@ -325,7 +325,7 @@ static void write_constant_instruction(Parser* parser, ThuslyValue value) {
   write_instructions(parser, OP_CONSTANT, make_constant(parser, value));
 }
 
-static void write_jump_bwd_instruction(Parser* parser, int target_offset) {
+static void write_jump_backward_instruction(Parser* parser, int target_offset) {
   write_instruction(parser, OP_JUMP_BWD);
 
   int jump_operand_bytes = 2;
@@ -338,7 +338,7 @@ static void write_jump_bwd_instruction(Parser* parser, int target_offset) {
 
 /// Write an instruction to jump forward. This uses a 16-bit placeholder jump offset
 /// and returns where that placeholder starts which should be used for backpatching it.
-static int write_jump_fwd_instruction(Parser* parser, byte instruction) {
+static int write_jump_forward_instruction(Parser* parser, byte instruction) {
   write_instruction(parser, instruction);
   write_instructions(parser, PLACEHOLDER_JUMP_TARGET, PLACEHOLDER_JUMP_TARGET);
 
@@ -567,13 +567,13 @@ static void parse_if_statement(Parser* parser) {
   parse_expression(parser);
   // If the if-condition is false, the VM should jump over the if-clause. The placeholder
   // offset returned here will later be backpatched at the exact point it should jump to.
-  int placeholder_jump_over_if = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+  int placeholder_jump_over_if = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
   // Pop the if-condition value and continue parsing the if-then branch.
   write_instruction(parser, OP_POP);
   parse_selection_block(parser);
   // Jump over the else-then branch.
-  int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
+  int placeholder_jump_over_else = write_jump_forward_instruction(parser, OP_JUMP_FWD);
 
   // Jump lands here if the condition is false.
   patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
@@ -610,13 +610,13 @@ static void parse_while_statement(Parser* parser) {
   // Parse the condition.
   parse_expression(parser);
   // Jump over the while loop if the condition is false.
-  int placeholder_jump_over_while = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+  int placeholder_jump_over_while = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
   // Pop the condition value and continue parsing the loop body.
   write_instruction(parser, OP_POP);
   parse_standard_block_with_scope(parser);
   // Jump to the start of the loop to re-evaluate the condition.
-  write_jump_bwd_instruction(parser, while_start_offset);
+  write_jump_backward_instruction(parser, while_start_offset);
 
   // Jump lands here if the condition is false.
   patch_jump_fwd_instruction(parser, placeholder_jump_over_while);
@@ -674,7 +674,7 @@ static void parse_expression(Parser* parser) {
 
 static void parse_and(Parser* parser, bool _) {
   // Jump to the end if the left condition is false.
-  int placeholder_jump_over_and = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+  int placeholder_jump_over_and = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
   // Pop the left condition and continue parsing the right-hand side.
   write_instruction(parser, OP_POP);
@@ -766,7 +766,7 @@ static void parse_number(Parser* parser, bool _) {
 
 static void parse_or(Parser* parser, bool _) {
   // Jump to the end if the left condition is true.
-  int placeholder_jump_over_or = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_TRUE);
+  int placeholder_jump_over_or = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_TRUE);
 
   // Pop the left condition and continue parsing the right-hand side.
   write_instruction(parser, OP_POP);
