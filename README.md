@@ -10,9 +10,10 @@ A general-purpose programming language coming to life through a custom one-pass 
     - [Characteristics](#characteristics)
     - [Syntax](#syntax)
 - [Milestones](#milestones)
-    - [Milestone 1 - Expressions](#milestone-1-evaluate-arithmetic-comparison-and-equality-expressions)
-    - [Milestone 2 - Statements](#milestone-2-execute-variable-control-flow-and-function-statements)
-    - [Implemented Functionality](#implemented-functionality)
+    - [Milestone 1 - Expressions](#milestone-1-support-arithmetic-comparison-and-equality-operations)
+    - [Milestone 2 - Variables and Control Flow](#milestone-2-support-variables-and-control-flow)
+    - [Milestone 3 - Functions](#milestone-2-support-functions)
+    - [Example Input](#example-input)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Building the Project](#building-the-project)
@@ -39,7 +40,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
 
 ## Milestones
 
-### Milestone 1: Evaluate arithmetic, comparison, and equality expressions
+### Milestone 1: Support arithmetic, comparison, and equality operations
 
 - [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
 - [x] Arithmetic expressions using `number` (double) can be evaluated.
@@ -61,7 +62,7 @@ Whitespace is semantically insignificant except for newline characters on non-bl
   - [x] Logical not (`not`)
 - [x] Concatenation of `text` literals using `+` can be evaluated.
 
-### Milestone 2: Execute variable, control flow, and function statements
+### Milestone 2: Support variables and control flow
 
 - [x] Temporary `@out` statement can be executed.
 - [x] Global and local variables can be defined and used.
@@ -74,22 +75,37 @@ Whitespace is semantically insignificant except for newline characters on non-bl
       <statements>
     end
     ```
+- [x] Logical operators can be evaluated.
+  - [x] Conjunction (`and`)
+  - [x] Disjunction (`or`)
 - [ ] Control flow statements can be executed.
   - [ ] Selection
     - [x] `if`
     - [ ] `elseif`
     - [x] `else`
+      ```
+      if <expression>
+        <statements>
+      elseif <expression>
+        <statements>
+      else
+        <statements>
+      end
+      ```
   - [ ] Loops
     - [ ] Bounded (`foreach`)
     - [ ] Unbounded (`while`)
-- [ ] Logical operators can be evaluated.
-  - [ ] Conjunction (`and`)
-  - [ ] Disjunction (`or`)
 - [ ] Range comparison expression (`in`) can be evaluated.
-- [ ] Functions can be defined and invoked.
 - [ ] TODO (more milestones will be added here)
 
-### Implemented Functionality
+### Milestone 3: Support first-class functions
+
+- [ ] Functions can be defined and invoked.
+- [ ] Closures are supported.
+- [ ] Functions are first-class citizens.
+- [ ] TODO (more milestones will be added here)
+
+### Example Input
 
 This section is for briefly demonstrating implemented functionality thus far and expected behavior when [running your code](#getting-started).
 
@@ -106,6 +122,8 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `false != not(1 + 2 >= 3)`   | false           | false != (not((1 + 2) >= 3))  |
 | `"he" + "llo" = "hello"`     | true            | ("he" + "llo") = "hello"      |
 | `"keep " + "on " + "coding"` | keep on coding  | ("keep " + "on ") + "coding"  |
+| `false and false or true`    | true            | (false and false) or true     |
+| `true or true and false`     | true            | true or (true and false)      |
 
 **Table 2: Valid user input (statements)**
 
