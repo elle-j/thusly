@@ -538,9 +538,8 @@ static void parse_if_statement(Parser* parser) {
 
   // --- if-condition is true: ---
 
-  // Pop the if-condition value.
+  // Pop the if-condition value and continue parsing the if-then branch.
   write_instruction(parser, OP_POP);
-  // Parse the if-then branch.
   parse_dangling_block(parser);
   // Jump over the else-then branch.
   int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
@@ -549,9 +548,8 @@ static void parse_if_statement(Parser* parser) {
 
   // Jump lands here if the condition is false.
   patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
-  // Pop the if-condition value.
+  // Pop the if-condition value and continue parsing the potential else-then branch.
   write_instruction(parser, OP_POP);
-  // Parse the potential else-then branch.
   if (match(parser, TOKEN_ELSE))
     parse_dangling_block(parser);
 
