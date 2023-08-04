@@ -86,6 +86,7 @@ static void parse_out_statement(Parser* parser);
 static void parse_var_statement(Parser* parser);
 
 static void parse_expression(Parser* parser);
+static void parse_and(Parser* parser, bool _);
 static void parse_binary(Parser* parser, bool _);
 static void parse_boolean(Parser* parser, bool _);
 static void parse_grouping(Parser* parser, bool _);
@@ -116,7 +117,7 @@ static ParseRule rules[] = {
   [TOKEN_STAR]                  = { NULL, parse_binary, PRECEDENCE_FACTOR },
 
   // Reserved keywords
-  [TOKEN_AND]                   = { NULL, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_AND]                   = { NULL, parse_and, PRECEDENCE_CONJUNCTION },
   [TOKEN_BLOCK]                 = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_END]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_ELSE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
@@ -624,6 +625,21 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
 static void parse_expression(Parser* parser) {
   // Lowest precedence = PRECEDENCE_ASSIGNMENT
   parse_precedence(parser, PRECEDENCE_ASSIGNMENT);
+}
+
+static void parse_and(Parser* parser, bool _) {
+  // Jump to the end if the left condition is false.
+  int placeholder_jump_to_end = write_jump_fwd_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+
+  // Pop the left condition and continue parsing the right-hand side.
+  write_instruction(parser, OP_POP);
+  parse_precedence(parser, PRECEDENCE_CONJUNCTION);
+
+  // Jump lands here if the left condition is false.
+  patch_jump_fwd_instruction(parser, placeholder_jump_to_end);
+
+  // The last value left on the stack is the result of the expression and
+  // should therefore not be popped.
 }
 
 static void parse_binary(Parser* parser, bool _) {
