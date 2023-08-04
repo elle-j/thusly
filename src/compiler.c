@@ -508,7 +508,7 @@ static void parse_statement(Parser* parser) {
     synchronize(parser);
 }
 
-static void parse_block_statement(Parser* parser) {
+static void parse_standard_block(Parser* parser) {
   consume_newline(parser);
   while (!is_at_end_of_block(parser) && !is_at_end_of_file(parser))
     parse_statement(parser);
@@ -516,17 +516,23 @@ static void parse_block_statement(Parser* parser) {
   consume_end_of_block(parser);
 }
 
+/// A selection block (used in `if`, `elseif`, `else`) does not include the 'end' keyword in
+/// the grammar. Instead, 'end' and NEWLINE are assumed to be consumed correctly by the caller.
+static void parse_selection_block(Parser* parser) {
+  consume_newline(parser);
+  // TODO: Also check against TOKEN_ELSEIF when it's added.
+  while (!compare(parser, TOKEN_ELSE) && !is_at_end_of_block(parser) && !is_at_end_of_file(parser))
+    parse_statement(parser);
+}
+
+static void parse_block_statement(Parser* parser) {
+  parse_standard_block(parser);
+}
+
 static void parse_expression_statement(Parser* parser) {
   parse_expression(parser);
   consume_newline(parser);
   write_instruction(parser, OP_POP);
-}
-
-/// A dangling block does not include the 'end' keyword in the grammar. Instead,
-/// 'end' and NEWLINE are assumed to be consumed correctly by the caller.
-static void parse_dangling_block(Parser* parser) {
-  consume_newline(parser);
-  parse_statement(parser);
 }
 
 static void parse_if_statement(Parser* parser) {
@@ -540,7 +546,7 @@ static void parse_if_statement(Parser* parser) {
 
   // Pop the if-condition value and continue parsing the if-then branch.
   write_instruction(parser, OP_POP);
-  parse_dangling_block(parser);
+  parse_selection_block(parser);
   // Jump over the else-then branch.
   int placeholder_jump_over_else = write_jump_fwd_instruction(parser, OP_JUMP_FWD);
 
@@ -551,7 +557,7 @@ static void parse_if_statement(Parser* parser) {
   // Pop the if-condition value and continue parsing the potential else-then branch.
   write_instruction(parser, OP_POP);
   if (match(parser, TOKEN_ELSE))
-    parse_dangling_block(parser);
+    parse_selection_block(parser);
 
   consume_end_of_block(parser);
 
