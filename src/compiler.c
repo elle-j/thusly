@@ -351,7 +351,7 @@ static int write_jump_forward_instruction(Parser* parser, byte instruction) {
 /// Backpatch a previously written jump forward instruction by overwriting the
 /// placeholder offset with the now-correct jump target offset. This assumes the
 /// function is called immediately before the instruction to jump to is written.
-static void patch_jump_fwd_instruction(Parser* parser, int placeholder_start) {
+static void patch_jump_forward_instruction(Parser* parser, int placeholder_start) {
   int jump_operand_bytes = 2;
   int jump_size = get_current_instruction_offset(parser) - placeholder_start - jump_operand_bytes;
   if (jump_size > JUMP_MAX)
@@ -576,7 +576,7 @@ static void parse_if_statement(Parser* parser) {
   int placeholder_jump_over_else = write_jump_forward_instruction(parser, OP_JUMP_FWD);
 
   // Jump lands here if the condition is false.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_if);
+  patch_jump_forward_instruction(parser, placeholder_jump_over_if);
   // Pop the if-condition value and continue parsing the potential else-then branch.
   write_instruction(parser, OP_POP);
   if (match(parser, TOKEN_ELSE))
@@ -585,7 +585,7 @@ static void parse_if_statement(Parser* parser) {
   consume_end_of_block(parser);
 
   // Jump lands here after the if-then branch is taken.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_else);
+  patch_jump_forward_instruction(parser, placeholder_jump_over_else);
 }
 
 static void parse_out_statement(Parser* parser) {
@@ -619,7 +619,7 @@ static void parse_while_statement(Parser* parser) {
   write_jump_backward_instruction(parser, while_start_offset);
 
   // Jump lands here if the condition is false.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_while);
+  patch_jump_forward_instruction(parser, placeholder_jump_over_while);
   // Pop the condition value.
   write_instruction(parser, OP_POP);
 }
@@ -681,7 +681,7 @@ static void parse_and(Parser* parser, bool _) {
   parse_precedence(parser, PRECEDENCE_CONJUNCTION);
 
   // Jump lands here if the left condition is false.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_and);
+  patch_jump_forward_instruction(parser, placeholder_jump_over_and);
 
   // The last value left on the stack is the result of the expression and
   // should therefore not be popped.
@@ -773,7 +773,7 @@ static void parse_or(Parser* parser, bool _) {
   parse_precedence(parser, PRECEDENCE_DISJUNCTION);
 
   // Jump lands here if the left condition is true.
-  patch_jump_fwd_instruction(parser, placeholder_jump_over_or);
+  patch_jump_forward_instruction(parser, placeholder_jump_over_or);
 
   // The last value left on the stack is the result of the expression and
   // should therefore not be popped.
