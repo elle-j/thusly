@@ -496,11 +496,8 @@ static void parse_statement(Parser* parser) {
     parse_out_statement(parser);
   else if (match(parser, TOKEN_IF))
     parse_if_statement(parser);
-  else if (match(parser, TOKEN_BLOCK)) {
-    create_scope(parser);
+  else if (match(parser, TOKEN_BLOCK))
     parse_block_statement(parser);
-    discard_scope(parser);
-  }
   else
     parse_expression_statement(parser);
 
@@ -508,7 +505,10 @@ static void parse_statement(Parser* parser) {
     synchronize(parser);
 }
 
-static void parse_standard_block(Parser* parser) {
+/// A standard block includes the full block from NEWLINE to 'end' and NEWLINE.
+/// Use `_without_scope()` if the caller has already created a scope, e.g. for
+/// functions and `foreach` loops to account for arguments and loop variables.
+static void parse_standard_block_without_scope(Parser* parser) {
   consume_newline(parser);
   while (!is_at_end_of_block(parser) && !is_at_end_of_file(parser))
     parse_statement(parser);
@@ -516,17 +516,29 @@ static void parse_standard_block(Parser* parser) {
   consume_end_of_block(parser);
 }
 
+/// A standard block includes the full block from NEWLINE to 'end' and NEWLINE.
+/// Use `_with_scope()` if the caller has not already created a scope, e.g. for
+/// standalone `block` statements or `while` loops.
+static void parse_standard_block_with_scope(Parser* parser) {
+  create_scope(parser);
+  parse_standard_block_without_scope(parser);
+  discard_scope(parser);
+}
+
 /// A selection block (used in `if`, `elseif`, `else`) does not include the 'end' keyword in
 /// the grammar. Instead, 'end' and NEWLINE are assumed to be consumed correctly by the caller.
 static void parse_selection_block(Parser* parser) {
+  create_scope(parser);
   consume_newline(parser);
   // TODO: Also check against TOKEN_ELSEIF when it's added.
   while (!compare(parser, TOKEN_ELSE) && !is_at_end_of_block(parser) && !is_at_end_of_file(parser))
     parse_statement(parser);
+
+  discard_scope(parser);
 }
 
 static void parse_block_statement(Parser* parser) {
-  parse_standard_block(parser);
+  parse_standard_block_with_scope(parser);
 }
 
 static void parse_expression_statement(Parser* parser) {
