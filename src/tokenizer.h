@@ -40,6 +40,7 @@ typedef enum {
   // TOKEN_RETURN,
   TOKEN_TRUE,
   TOKEN_VAR,
+  TOKEN_WHILE,
 
   // Literals
   TOKEN_IDENTIFIER,

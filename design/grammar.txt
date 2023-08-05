@@ -49,6 +49,7 @@ statement:
 	| ifStatement
 	| outStatement			# Temporary until built-in function
 	| varStatement
+	| whileStatement
 
 blockStatement:
 	| "block" standardBlock
@@ -64,6 +65,9 @@ outStatement:
 
 varStatement:
 	| "var" IDENTIFIER ":" expression NEWLINE
+
+whileStatement:
+	| "while" expression standardBlock
 
 ------------------------------------------------------------------
 HELPER RULES

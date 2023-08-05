@@ -202,6 +202,7 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
               case 't':
                 return search_keyword(tokenizer, 3, "", 0, TOKEN_NOT);
             }
+            break;
         }
       }
       break;
@@ -211,6 +212,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       return search_keyword(tokenizer, 1, "rue", 3, TOKEN_TRUE);
     case 'v':
       return search_keyword(tokenizer, 1, "ar", 2, TOKEN_VAR);
+    case 'w':
+      return search_keyword(tokenizer, 1, "hile", 4, TOKEN_WHILE);
   }
 
   return TOKEN_IDENTIFIER;
