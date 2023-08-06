@@ -30,6 +30,7 @@ typedef enum {
   TOKEN_ELSE,
   TOKEN_END,
   TOKEN_FALSE,
+  TOKEN_FOREACH,
   // TOKEN_FUN,
   TOKEN_IF,
   TOKEN_MOD,

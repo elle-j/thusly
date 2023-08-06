@@ -187,7 +187,15 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       }
       break;
     case 'f':
-      return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
+      if (lexeme_length > 1) {
+        switch (tokenizer->start[1]) {
+          case 'a':
+            return search_keyword(tokenizer, 2, "lse", 3, TOKEN_FALSE);
+          case 'o':
+            return search_keyword(tokenizer, 2, "reach", 5, TOKEN_FOREACH);
+        }
+      }
+      break;
     case 'i':
       return search_keyword(tokenizer, 1, "f", 1, TOKEN_IF);
     case 'm':
