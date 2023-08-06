@@ -46,6 +46,7 @@ STATEMENT RULES
 statement:
 	| blockStatement
 	| expressionStatement
+	| foreachStatement
 	| ifStatement
 	| outStatement			# Temporary until built-in function
 	| varStatement
@@ -56,6 +57,9 @@ blockStatement:
 
 expressionStatement:
 	| expression NEWLINE
+
+foreachStatement:
+	| "foreach" IDENTIFIER "in" expression ".." expression ( "step" expression )? standardBlock
 
 ifStatement:
 	| "if" expression selectionBlock ( "else" selectionBlock )? "end" NEWLINE
