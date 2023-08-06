@@ -572,77 +572,83 @@ static void parse_expression_statement(Parser* parser) {
 
 /// Grammar: `"foreach" IDENTIFIER "in" expression ".." expression ( "step" expression )? standardBlock`
 static void parse_foreach_statement(Parser* parser) {
+  // Create a scope in order to scope the loop variable.
   create_scope(parser);
 
-  // --- declaration: ---
+  // --- Implicit declaration: ---
   consume(parser, TOKEN_IDENTIFIER, "A name for the variable in the loop is missing. Add a name between 'foreach' and 'in'.");
-  declare_variable(parser); // (adds it to the variables array) // implicit declaration
-  Token loop_variable_name = parser->previous; // save the previous token (the just-added variable) (not resolving here since it should be done after being defined, and it should be defined after its initializer has been parsed in order to prevent use of it in the implicit initializer (left-hand side of '..'))
+  declare_variable(parser);
+  Token loop_variable_name = parser->previous;
 
-  // --- initialization: ---
+  // --- Initialization: ---
   consume(parser, TOKEN_IN, "You must use the 'in' keyword after the variable name.");
-  parse_expression(parser); // initial value (this is now the same index on the stack as the variables array)
+  parse_expression(parser);
+  // The variable must be defined After the initializer has been parsed in order to prevent
+  // use of it in the implicit initializer (left-hand side of `..`).
   define_variable(parser);
   byte loop_variable_slot = (byte)resolve(parser, &loop_variable_name);
   consume(parser, TOKEN_DOT_DOT, "You must use '..' with two surrounding expressions for the loop range. (E.g. '0..3')");
 
-  // --- condition: ---
+  // --- Condition: ---
   int condition_start_offset = get_current_instruction_offset(parser);
+  // Parse the right-hand side (rhs) of `..` and compare it against the loop variable (i.e. `variable <= rhs`).
   write_instructions(parser, OP_GET_VAR, loop_variable_slot);
-  parse_expression(parser); // this is the right-hand value of '..'
+  parse_expression(parser);
   write_instruction(parser, OP_LESS_THAN_EQUALS);
+  // Always jump over the `step` part.
   int placeholder_jump_to_body = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_TRUE);
-  int placeholder_jump_to_end = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE); // in both the true and false cases, we need to jump over the 'step' part
+  int placeholder_jump_to_end = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
-  // --- step: ---
+  // --- Step: ---
   int step_start_offset = get_current_instruction_offset(parser);
-  write_instructions(parser, OP_GET_VAR, loop_variable_slot); // get var before 'step' in order to treat the later addition as 'var' + 'step'
+  // Get the loop variable before the `step` to enforce the addition order `variable + step`.
+  write_instructions(parser, OP_GET_VAR, loop_variable_slot);
   if (match(parser, TOKEN_STEP))
     parse_expression(parser);
   else
-    write_constant_instruction(parser, FROM_C_DOUBLE(1)); // implicit step value
+    // If `step` is omitted, there is an implicit `step` of 1.
+    write_constant_instruction(parser, FROM_C_DOUBLE(1));
 
+  // Add the two previous values and assign it to the loop variable (i.e. `variable: variable + step`).
   write_instruction(parser, OP_ADD);
-  write_instructions(parser, OP_SET_VAR, loop_variable_slot); // (mimics: value: value + step) (don't call access_or_assign_variable() directly since it also parses an expression)
-  write_instruction(parser, OP_POP); // (pop the assignment value)
+  write_instructions(parser, OP_SET_VAR, loop_variable_slot);
+  // Pop the assignment value.
+  write_instruction(parser, OP_POP);
   write_jump_backward_instruction(parser, condition_start_offset);
 
-  // --- body: ---
+  // --- Body: ---
   patch_jump_forward_instruction(parser, placeholder_jump_to_body);
-  write_instruction(parser, OP_POP); // (pop the condition value)
+  // Pop the condition value.
+  write_instruction(parser, OP_POP);
   parse_standard_block_without_scope(parser);
   write_jump_backward_instruction(parser, step_start_offset);
 
-  // --- end: ---
+  // --- End: ---
   patch_jump_forward_instruction(parser, placeholder_jump_to_end);
-  write_instruction(parser, OP_POP); // (pop the condition value)
-
+  // Pop the condition value.
+  write_instruction(parser, OP_POP);
   discard_scope(parser);
 }
 
 static void parse_if_statement(Parser* parser) {
-  // Parse the condition.
+  // --- If-condition: ---
   parse_expression(parser);
-  // If the if-condition is false, the VM should jump over the if-clause. The placeholder
-  // offset returned here will later be backpatched at the exact point it should jump to.
   int placeholder_jump_over_if = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
-  // Pop the if-condition value and continue parsing the if-then branch.
+  // --- If-then body: ---
   write_instruction(parser, OP_POP);
   parse_selection_block(parser);
-  // Jump over the else-then branch.
   int placeholder_jump_over_else = write_jump_forward_instruction(parser, OP_JUMP_FWD);
 
-  // Jump lands here if the condition is false.
+  // --- Else-then body: ---
   patch_jump_forward_instruction(parser, placeholder_jump_over_if);
-  // Pop the if-condition value and continue parsing the potential else-then branch.
+  // Pop the if-condition value.
   write_instruction(parser, OP_POP);
   if (match(parser, TOKEN_ELSE))
     parse_selection_block(parser);
-
   consume_end_of_block(parser);
 
-  // Jump lands here after the if-then branch is taken.
+  // --- End: ---
   patch_jump_forward_instruction(parser, placeholder_jump_over_else);
 }
 
@@ -663,20 +669,18 @@ static void parse_var_statement(Parser* parser) {
 }
 
 static void parse_while_statement(Parser* parser) {
-  // Jump lands back here once the body of the loop has been executed.
+  // --- Condition: ---
   int while_start_offset = get_current_instruction_offset(parser);
-  // Parse the condition.
   parse_expression(parser);
-  // Jump over the while loop if the condition is false.
   int placeholder_jump_over_while = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
-  // Pop the condition value and continue parsing the loop body.
+  // --- Body: ---
+  // Pop the condition value.
   write_instruction(parser, OP_POP);
   parse_standard_block_with_scope(parser);
-  // Jump to the start of the loop to re-evaluate the condition.
   write_jump_backward_instruction(parser, while_start_offset);
 
-  // Jump lands here if the condition is false.
+  // --- End: ---
   patch_jump_forward_instruction(parser, placeholder_jump_over_while);
   // Pop the condition value.
   write_instruction(parser, OP_POP);
