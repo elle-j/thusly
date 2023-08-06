@@ -224,6 +224,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       break;
     case 'o':
       return search_keyword(tokenizer, 1, "r", 1, TOKEN_OR);
+    case 's':
+      return search_keyword(tokenizer, 1, "tep", 3, TOKEN_STEP);
     case 't':
       return search_keyword(tokenizer, 1, "rue", 3, TOKEN_TRUE);
     case 'v':
