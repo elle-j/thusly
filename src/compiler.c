@@ -217,7 +217,8 @@ static void advance(Parser* parser) {
   parser->current = tokenize(&parser->tokenizer);
 
   // Whenever the tokenizer encounters an error it produces a token of type
-  // `TOKEN_LEXICAL_ERROR`. Loop past (and report) these until the next valid token.
+  // `TOKEN_LEXICAL_ERROR`. Loop past these until the next valid token.
+  // (Only the first error will be reported since panic mode will kick in.)
   while (parser->current.type == TOKEN_LEXICAL_ERROR) {
     // Lexical error tokens store the error message on the lexeme field.
     error_at(parser, &parser->current, parser->current.lexeme);
@@ -560,6 +561,51 @@ static void parse_expression_statement(Parser* parser) {
   parse_expression(parser);
   consume_newline(parser);
   write_instruction(parser, OP_POP);
+}
+
+/// Grammar: `"foreach" IDENTIFIER "in" expression ".." expression ( "step" expression )? standardBlock`
+static void parse_foreach_statement(Parser* parser) {
+  // create scope
+
+  // --- declaration: ---
+  // consume identifier
+  // declare variable (adds it to the variables array) // implicit declaration
+  // save the previous token (the just-added variable) (not resolving here since it should be done after being defined, and it should be defined after its initializer has been parsed in order to prevent use of it in the implicit initializer (left-hand side of '..'))
+
+  // --- initialization: ---
+  // consume 'in'
+  // parse expression // initial value (this is now the same index on the stack as the variables array)
+  // define variable
+  // int slot = resolve the saved token
+  // consume '..'
+
+  // --- condition: ---
+  // write get var instruction of the exact slot
+  // parse expression // this is the right-hand value of '..'
+  // write less than or equal to instruction
+  // jump to body if true
+  // jump to end if false // in both the true and false cases, we need to jump over the 'step' part
+
+  // --- step: ---
+  // write get var instruction of the exact slot // get var before 'step' in order to treat the later addition as 'var' + 'step'
+  // if match 'step'
+  //    parse expression
+  // else
+  //    write constant 1  // implicit step value
+  // write add instruction
+  // write set var instruction of the exact slot (mimics: value: value + step) (don't call access_or_assign_variable() directly since it also parses an expression)
+  // write pop instruction (pop the assignment value)
+  // jump to condition
+
+  // --- body: ---
+  // write pop instruction (pop the condition value)
+  // parse standard block without scope
+  // jump to step
+
+  // --- end: ---
+  // write pop instruction (pop the condition value)
+
+  // discard scope
 }
 
 static void parse_if_statement(Parser* parser) {
