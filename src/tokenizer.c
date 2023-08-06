@@ -197,7 +197,15 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       }
       break;
     case 'i':
-      return search_keyword(tokenizer, 1, "f", 1, TOKEN_IF);
+      if (lexeme_length > 1) {
+        switch (tokenizer->start[1]) {
+          case 'f':
+            return search_keyword(tokenizer, 2, "", 0, TOKEN_IF);
+          case 'n':
+            return search_keyword(tokenizer, 2, "", 0, TOKEN_IN);
+        }
+      }
+      break;
     case 'm':
       return search_keyword(tokenizer, 1, "od", 2, TOKEN_MOD);
     case 'n':

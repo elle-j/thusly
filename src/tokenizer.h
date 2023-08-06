@@ -34,6 +34,7 @@ typedef enum {
   TOKEN_FOREACH,
   // TOKEN_FUN,
   TOKEN_IF,
+  TOKEN_IN,
   TOKEN_MOD,
   TOKEN_NONE,
   TOKEN_NOT,
