@@ -187,9 +187,25 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       }
       break;
     case 'f':
-      return search_keyword(tokenizer, 1, "alse", 4, TOKEN_FALSE);
+      if (lexeme_length > 1) {
+        switch (tokenizer->start[1]) {
+          case 'a':
+            return search_keyword(tokenizer, 2, "lse", 3, TOKEN_FALSE);
+          case 'o':
+            return search_keyword(tokenizer, 2, "reach", 5, TOKEN_FOREACH);
+        }
+      }
+      break;
     case 'i':
-      return search_keyword(tokenizer, 1, "f", 1, TOKEN_IF);
+      if (lexeme_length > 1) {
+        switch (tokenizer->start[1]) {
+          case 'f':
+            return search_keyword(tokenizer, 2, "", 0, TOKEN_IF);
+          case 'n':
+            return search_keyword(tokenizer, 2, "", 0, TOKEN_IN);
+        }
+      }
+      break;
     case 'm':
       return search_keyword(tokenizer, 1, "od", 2, TOKEN_MOD);
     case 'n':
@@ -208,6 +224,8 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
       break;
     case 'o':
       return search_keyword(tokenizer, 1, "r", 1, TOKEN_OR);
+    case 's':
+      return search_keyword(tokenizer, 1, "tep", 3, TOKEN_STEP);
     case 't':
       return search_keyword(tokenizer, 1, "rue", 3, TOKEN_TRUE);
     case 'v':
@@ -281,6 +299,12 @@ Token tokenize(Tokenizer* tokenizer) {
       return token.type == TOKEN_OUT
         ? token
         : make_error_token(tokenizer, "'@' is only allowed in names of the built-in functionality.");
+    }
+    // TODO: Move this condition earlier once TOKEN_DOT is added.
+    case '.': {
+      if (match(tokenizer, '.'))
+        return make_token(tokenizer, TOKEN_DOT_DOT);
+      return make_error_token(tokenizer, "You have included an illegal character: . (This character is only allowed as `..`.)");
     }
     default:
       if (is_alpha(character))
