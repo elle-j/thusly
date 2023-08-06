@@ -81,6 +81,7 @@ typedef struct {
 static void parse_statement(Parser* parser);
 static void parse_block_statement(Parser* parser);
 static void parse_expression_statement(Parser* parser);
+static void parse_foreach_statement(Parser* parser);
 static void parse_if_statement(Parser* parser);
 static void parse_out_statement(Parser* parser);
 static void parse_var_statement(Parser* parser);
@@ -124,6 +125,7 @@ static ParseRule rules[] = {
   [TOKEN_END]                   = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_ELSE]                  = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_FALSE]                 = { parse_boolean, NULL, PRECEDENCE_IGNORE },
+  [TOKEN_FOREACH]               = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_IF]                    = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_MOD]                   = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_NONE]                  = { parse_none, NULL, PRECEDENCE_IGNORE },
@@ -187,9 +189,9 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   fprintf(stderr, "\n\t> Line:\n\t\t%d", token->line);
   fprintf(stderr, "\n\t> Where:\n\t\t");
   if (token->type == TOKEN_EOF)
-    fprintf(stderr, "At the end of the file");
+    fprintf(stderr, "At the end of the file.");
   else if (token->type == TOKEN_NEWLINE)
-    fprintf(stderr, "At the end of the line");
+    fprintf(stderr, "At the end of the line.");
   else if (token->type == TOKEN_LEXICAL_ERROR) {
     // The error message for `TOKEN_LEXICAL_ERROR` was stored as the `lexeme`
     // and has been passed in as the `message` via `advance()`. Therefore,
@@ -263,10 +265,13 @@ static bool is_at_end_of_file(Parser* parser) {
 
 static bool is_at_start_of_statement(Parser* parser) {
   switch (parser->current.type) {
-    // TODO: Add synchronization points as these are added to the language.
-    case TOKEN_BLOCK:
-    case TOKEN_OUT:
+    // TODO: Add synchronization points if new statements are added to the language.
     case TOKEN_VAR:
+    case TOKEN_OUT:
+    case TOKEN_IF:
+    case TOKEN_BLOCK:
+    case TOKEN_FOREACH:
+    case TOKEN_WHILE:
       return true;
     default:
       return false;
@@ -512,6 +517,8 @@ static void parse_statement(Parser* parser) {
     parse_if_statement(parser);
   else if (match(parser, TOKEN_BLOCK))
     parse_block_statement(parser);
+  else if (match(parser, TOKEN_FOREACH))
+    parse_foreach_statement(parser);
   else if (match(parser, TOKEN_WHILE))
     parse_while_statement(parser);
   else
@@ -565,47 +572,52 @@ static void parse_expression_statement(Parser* parser) {
 
 /// Grammar: `"foreach" IDENTIFIER "in" expression ".." expression ( "step" expression )? standardBlock`
 static void parse_foreach_statement(Parser* parser) {
-  // create scope
+  create_scope(parser);
 
   // --- declaration: ---
-  // consume identifier
-  // declare variable (adds it to the variables array) // implicit declaration
-  // save the previous token (the just-added variable) (not resolving here since it should be done after being defined, and it should be defined after its initializer has been parsed in order to prevent use of it in the implicit initializer (left-hand side of '..'))
+  consume(parser, TOKEN_IDENTIFIER, "A name for the variable in the loop is missing. Add a name between 'foreach' and 'in'.");
+  declare_variable(parser); // (adds it to the variables array) // implicit declaration
+  Token loop_variable_name = parser->previous; // save the previous token (the just-added variable) (not resolving here since it should be done after being defined, and it should be defined after its initializer has been parsed in order to prevent use of it in the implicit initializer (left-hand side of '..'))
 
   // --- initialization: ---
-  // consume 'in'
-  // parse expression // initial value (this is now the same index on the stack as the variables array)
-  // define variable
-  // int slot = resolve the saved token
-  // consume '..'
+  consume(parser, TOKEN_IN, "You must use the 'in' keyword after the variable name.");
+  parse_expression(parser); // initial value (this is now the same index on the stack as the variables array)
+  define_variable(parser);
+  byte loop_variable_slot = (byte)resolve(parser, &loop_variable_name);
+  consume(parser, TOKEN_DOT_DOT, "You must use '..' with two surrounding expressions for the loop range. (E.g. '0..3')");
 
   // --- condition: ---
-  // write get var instruction of the exact slot
-  // parse expression // this is the right-hand value of '..'
-  // write less than or equal to instruction
-  // jump to body if true
-  // jump to end if false // in both the true and false cases, we need to jump over the 'step' part
+  int condition_start_offset = get_current_instruction_offset(parser);
+  write_instructions(parser, OP_GET_VAR, loop_variable_slot);
+  parse_expression(parser); // this is the right-hand value of '..'
+  write_instruction(parser, OP_LESS_THAN_EQUALS);
+  int placeholder_jump_to_body = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_TRUE);
+  int placeholder_jump_to_end = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE); // in both the true and false cases, we need to jump over the 'step' part
 
   // --- step: ---
-  // write get var instruction of the exact slot // get var before 'step' in order to treat the later addition as 'var' + 'step'
-  // if match 'step'
-  //    parse expression
-  // else
-  //    write constant 1  // implicit step value
-  // write add instruction
-  // write set var instruction of the exact slot (mimics: value: value + step) (don't call access_or_assign_variable() directly since it also parses an expression)
-  // write pop instruction (pop the assignment value)
-  // jump to condition
+  int step_start_offset = get_current_instruction_offset(parser);
+  write_instructions(parser, OP_GET_VAR, loop_variable_slot); // get var before 'step' in order to treat the later addition as 'var' + 'step'
+  if (match(parser, TOKEN_STEP))
+    parse_expression(parser);
+  else
+    write_constant_instruction(parser, FROM_C_DOUBLE(1)); // implicit step value
+
+  write_instruction(parser, OP_ADD);
+  write_instructions(parser, OP_SET_VAR, loop_variable_slot); // (mimics: value: value + step) (don't call access_or_assign_variable() directly since it also parses an expression)
+  write_instruction(parser, OP_POP); // (pop the assignment value)
+  write_jump_backward_instruction(parser, condition_start_offset);
 
   // --- body: ---
-  // write pop instruction (pop the condition value)
-  // parse standard block without scope
-  // jump to step
+  patch_jump_forward_instruction(parser, placeholder_jump_to_body);
+  write_instruction(parser, OP_POP); // (pop the condition value)
+  parse_standard_block_without_scope(parser);
+  write_jump_backward_instruction(parser, step_start_offset);
 
   // --- end: ---
-  // write pop instruction (pop the condition value)
+  patch_jump_forward_instruction(parser, placeholder_jump_to_end);
+  write_instruction(parser, OP_POP); // (pop the condition value)
 
-  // discard scope
+  discard_scope(parser);
 }
 
 static void parse_if_statement(Parser* parser) {
