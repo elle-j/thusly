@@ -290,6 +290,12 @@ Token tokenize(Tokenizer* tokenizer) {
         ? token
         : make_error_token(tokenizer, "'@' is only allowed in names of the built-in functionality.");
     }
+    // TODO: Move this condition earlier once TOKEN_DOT is added.
+    case '.': {
+      if (match(tokenizer, '.'))
+        return make_token(tokenizer, TOKEN_DOT_DOT);
+      return make_error_token(tokenizer, "You have included an illegal character: . (This character is only allowed as `..`.)");
+    }
     default:
       if (is_alpha(character))
         return consume_keyword_or_identifier(tokenizer);
