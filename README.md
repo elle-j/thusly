@@ -2,7 +2,7 @@
 
 A general-purpose programming language coming to life through a custom one-pass compiler and a stack-based virtual machine.
 
-> 👉️ The language is currently being developed but has a working initial implementation of a small subset (see [Milestones](#milestones)). This README is also in development.
+> 👉️ The language is currently being developed, but the implemented features can be seen in [Milestones](#milestones). This README is also in development.
 
 ## Table of Contents
 
@@ -84,22 +84,65 @@ Whitespace is semantically insignificant except for newline characters on non-bl
     - [ ] `elseif`
     - [x] `else`
     ```
-    if <expression>
+    if <condition>
       <statements>
-    elseif <expression>
+    elseif <condition>
       <statements>
     else
       <statements>
     end
     ```
-  - [ ] Loops
-    - [ ] Bounded (`foreach`)
-    - [x] Unbounded (`while`)
+  - [x] Loops
+    - [x] Bounded (`foreach`)
     ```
-    while <expression>
+    foreach <name> in <start>..<end> step <change>
       <statements>
     end
     ```
+    <details>
+    <summary>Example 1</summary>
+
+    ```
+    // `step` value is implicitly 1
+    foreach value in 0..10
+      @out value
+    end
+    ```
+
+    </details>
+
+    <details>
+    <summary>Example 2</summary>
+
+    ```
+    var a: 0
+    var b: 10
+    var c: 2
+    foreach value in a..b step c
+      @out value
+    end
+    ```
+
+    </details>
+
+    - [x] Unbounded (`while`)
+    ```
+    while <condition>
+      <statements>
+    end
+    ```
+    <details>
+    <summary>Example</summary>
+
+    ```
+    var x: 0
+    while x < 10
+      @out x
+      x: x + 1
+    end
+    ```
+
+    </details>
 - [ ] Range comparison expression (`in`) can be evaluated.
 - [ ] TODO (more milestones will be added here)
 
@@ -118,17 +161,17 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 
 **Table 1: Valid user input (expressions)**
 
-| Example input                | Expected output | Expected precedence parsing   |
-|------------------------------|-----------------|-------------------------------|
-| `1 + 2 * 3 / 4`              | 2.5             | 1 + ((2 * 3) / 4)             |
-| `(1 + 2) * 3 / 4`            | 2.25            | ((1 + 2) * 3) / 4             |
-| `1 + -2 - -3`                | 2               | (1 + (-2)) - (-3)             |
-| `1 > 2 = 3 > 4`              | true            | (1 > 2) = (3 > 4)             |
-| `false != not(1 + 2 >= 3)`   | false           | false != (not((1 + 2) >= 3))  |
-| `"he" + "llo" = "hello"`     | true            | ("he" + "llo") = "hello"      |
-| `"keep " + "on " + "coding"` | keep on coding  | ("keep " + "on ") + "coding"  |
-| `false and false or true`    | true            | (false and false) or true     |
-| `true or true and false`     | true            | true or (true and false)      |
+| Example input                | Expected output | Expected precedence parsing     |
+|------------------------------|-----------------|---------------------------------|
+| `1 + 2 * 3 / 4`              | 2.5             | `1 + ((2 * 3) / 4)`             |
+| `(1 + 2) * 3 / 4`            | 2.25            | `((1 + 2) * 3) / 4`             |
+| `1 + -2 - -3`                | 2               | `(1 + (-2)) - (-3)`             |
+| `1 > 2 = 3 > 4`              | true            | `(1 > 2) = (3 > 4)`             |
+| `false != not(1 + 2 >= 3)`   | false           | `false != (not((1 + 2) >= 3))`  |
+| `"he" + "llo" = "hello"`     | true            | `("he" + "llo") = "hello"`      |
+| `"keep " + "on " + "coding"` | keep on coding  | `("keep " + "on ") + "coding"`  |
+| `false and false or true`    | true            | `(false and false) or true`     |
+| `true or true and false`     | true            | `true or (true and false)`      |
 
 **Table 2: Valid user input (statements)**
 
@@ -139,6 +182,8 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
 | `var x: 0`<br>`if x < 5`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
 | `var x: 0`<br>`while x < 5`<br>`  @out x`<br>`  x: x + 1`<br>`end` | 0<br>1<br>2<br>3<br>4   |
+| `foreach value in 0..2`<br>`  @out value`<br>`end` | 0<br>1<br>2   |
+| `var a: 0`<br>`var b: 2`<br>`var c: 0.5`<br>`foreach value in a..b step c`<br>`  @out value`<br>`end` | 0<br>0.5<br>1<br>1.5<br>2   |
 
 **Table 3: Invalid user input**
 
