@@ -34,9 +34,47 @@ A general-purpose programming language coming to life through a custom one-pass 
 
 The development of both the language and the surrounding documentation is currently on-going, but the following is a subset of the language:
 
-<img src="design/code-snippet.svg" width="600" alt="A snippet of Thusly code.">
+#### Variables, Data Types, and Literals
 
-Whitespace is semantically insignificant except for newline characters on non-blank lines.
+<a href="design/snippets/snippets.md#variables-data-types-and-literals">
+  <img src="design/snippets/thusly-snippet-variables01.svg" width="600" alt="Variable declarations in the Thusly programming language.">
+</a>
+
+#### Selection
+
+<a href="design/snippets/snippets.md#selection">
+  <img src="design/snippets/thusly-snippet-if01.svg" width="600" alt="An if-statement in the Thusly programming language.">
+</a>
+
+<br>
+
+<a href="design/snippets/snippets.md#selection">
+  <img src="design/snippets/thusly-snippet-if02.svg" width="600" alt="An if-statement in the Thusly programming language.">
+</a>
+
+#### Loop
+
+<a href="design/snippets/snippets.md#loop">
+  <img src="design/snippets/thusly-snippet-foreach01.svg" width="600" alt="A foreach-loop in the Thusly programming language.">
+</a>
+
+<br>
+
+<a href="design/snippets/snippets.md#loop">
+  <img src="design/snippets/thusly-snippet-foreach02.svg" width="600" alt="A foreach-loop in the Thusly programming language.">
+</a>
+
+<br>
+
+<a href="design/snippets/snippets.md#loop">
+  <img src="design/snippets/thusly-snippet-while01.svg" width="600" alt="A while-loop in the Thusly programming language.">
+</a>
+
+<br>
+
+> **Whitespace:**
+>
+> Whitespace is semantically insignificant except for newline characters on non-blank lines.
 
 ## Milestones
 
