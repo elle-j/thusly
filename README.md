@@ -226,9 +226,9 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `var x: 1`<br>`var y: 2`<br>`var z: x: y`<br>`@out x`<br>`@out z` | 2<br>2         |
 | `var x: "global"`<br>`@out x`<br><br>`block`<br>`  x: "changed global"`<br>`  var x: "local"`<br>`  @out x`<br>`end`<br><br>`@out x` | global<br>local<br>changed global         |
 | `var x: 0`<br>`if x < 5`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
-| `var x: 0`<br>`while x < 5`<br>`  @out x`<br>`  x: x + 1`<br>`end` | 0<br>1<br>2<br>3<br>4   |
 | `foreach value in 0..2`<br>`  @out value`<br>`end` | 0<br>1<br>2   |
 | `var a: 0`<br>`var b: 2`<br>`var c: 0.5`<br>`foreach value in a..b step c`<br>`  @out value`<br>`end` | 0<br>0.5<br>1<br>1.5<br>2   |
+| `var x: 0`<br>`while x < 4 {x: x + 1}`<br>`  @out x`<br>`end` | 0<br>1<br>2<br>3   |
 
 **Table 3: Invalid user input**
 
