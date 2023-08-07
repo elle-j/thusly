@@ -71,6 +71,7 @@ The development of both the language and the surrounding documentation is curren
 </a>
 
 <br>
+<br>
 
 > **Whitespace:**
 >
@@ -181,7 +182,13 @@ The development of both the language and the surrounding documentation is curren
     ```
 
     </details>
-- [ ] Range comparison expression (`in`) can be evaluated.
+- [ ] Augmented assignment expressions can be evaluated.
+  - [ ] Addition and assignment (`+:`)
+  - [ ] Subtraction and assignment (`-:`)
+  - [ ] Multiplication and assignment (`*:`)
+  - [ ] Division and assignment (`/:`)
+  - [ ] Modulo and assignment (`mod:`)
+- [ ] Range comparison expression can be evaluated (`<value> in <min>..<max>`)
 - [ ] TODO (more milestones will be added here)
 
 ### Milestone 3: Support first-class functions
