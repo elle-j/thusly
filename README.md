@@ -142,7 +142,7 @@ The development of both the language and the surrounding documentation is curren
     <summary>Example 1</summary>
 
     ```
-    // `step` value is implicitly 1
+    // `<change>` expression is implicitly 1
     foreach value in 0..10
       @out value
     end
@@ -166,7 +166,7 @@ The development of both the language and the surrounding documentation is curren
 
     - [x] Unbounded (`while`)
     ```
-    while <condition>
+    while <condition> { <change> }
       <statements>
     end
     ```
@@ -174,10 +174,10 @@ The development of both the language and the surrounding documentation is curren
     <summary>Example</summary>
 
     ```
-    var x: 0
-    while x < 10
-      @out x
-      x: x + 1
+    // `<change>` expression is optional
+    var i: 0
+    while i < 10 {i: i + 1}
+      @out i
     end
     ```
 
