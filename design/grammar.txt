@@ -71,7 +71,7 @@ varStatement:
 	| "var" IDENTIFIER ":" expression NEWLINE
 
 whileStatement:
-	| "while" expression standardBlock
+	| "while" expression ( "{" expression "}" )? standardBlock
 
 ------------------------------------------------------------------
 HELPER RULES

@@ -105,6 +105,7 @@ static ParseRule rules[] = {
   // [TOKEN_TYPE]               = { PREFIX_RULE, INFIX_RULE, PRECEDENCE_LEVEL }
 
   // Punctuation and non-keyword operators
+  [TOKEN_CLOSE_BRACE]           = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_CLOSE_PAREN]           = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_COLON]                 = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_EQUALS]                = { NULL, parse_binary, PRECEDENCE_EQUALITY },
@@ -114,6 +115,7 @@ static ParseRule rules[] = {
   [TOKEN_LESS_THAN]             = { NULL, parse_binary, PRECEDENCE_COMPARISON },
   [TOKEN_LESS_THAN_EQUALS]      = { NULL, parse_binary, PRECEDENCE_COMPARISON },
   [TOKEN_MINUS]                 = { parse_unary, parse_binary, PRECEDENCE_TERM },
+  [TOKEN_OPEN_BRACE]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OPEN_PAREN]            = { parse_grouping, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PLUS]                  = { NULL, parse_binary, PRECEDENCE_TERM },
   [TOKEN_SLASH]                 = { NULL, parse_binary, PRECEDENCE_FACTOR },
@@ -575,7 +577,7 @@ static void parse_foreach_statement(Parser* parser) {
   // Create a scope in order to scope the loop variable.
   create_scope(parser);
 
-  // --- Implicit declaration: ---
+  // --- Implicit Declaration: ---
   consume(parser, TOKEN_IDENTIFIER, "A name for the variable in the loop is missing. Add a name between 'foreach' and 'in'.");
   declare_variable(parser);
   Token loop_variable_name = parser->previous;
@@ -631,16 +633,16 @@ static void parse_foreach_statement(Parser* parser) {
 }
 
 static void parse_if_statement(Parser* parser) {
-  // --- If-condition: ---
+  // --- If-Condition: ---
   parse_expression(parser);
   int placeholder_jump_over_if = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
 
-  // --- If-then body: ---
+  // --- If-Then Body: ---
   write_instruction(parser, OP_POP);
   parse_selection_block(parser);
   int placeholder_jump_over_else = write_jump_forward_instruction(parser, OP_JUMP_FWD);
 
-  // --- Else-then body: ---
+  // --- Else-Then Body: ---
   patch_jump_forward_instruction(parser, placeholder_jump_over_if);
   // Pop the if-condition value.
   write_instruction(parser, OP_POP);
@@ -668,20 +670,35 @@ static void parse_var_statement(Parser* parser) {
   define_variable(parser);
 }
 
+/// Grammar: `"while" expression ( "{" expression "}" )? standardBlock`
 static void parse_while_statement(Parser* parser) {
   // --- Condition: ---
-  int while_start_offset = get_current_instruction_offset(parser);
+  int condition_start_offset = get_current_instruction_offset(parser);
   parse_expression(parser);
-  int placeholder_jump_over_while = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+  // Always jump over the modification part.
+  int placeholder_jump_to_body = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_TRUE);
+  int placeholder_jump_to_end = write_jump_forward_instruction(parser, OP_JUMP_FWD_IF_FALSE);
+
+  // --- Optional Modification: ---
+  int modification_start_offset = get_current_instruction_offset(parser);
+  bool has_modification_expr = match(parser, TOKEN_OPEN_BRACE);
+  if (has_modification_expr) {
+    parse_expression(parser);
+    // Pop the modification expression value.
+    write_instruction(parser, OP_POP);
+    consume(parser, TOKEN_CLOSE_BRACE, "The expression must be enclosed in `{ }`. Add `}` to terminate it.");
+    write_jump_backward_instruction(parser, condition_start_offset);
+  }
 
   // --- Body: ---
+  patch_jump_forward_instruction(parser, placeholder_jump_to_body);
   // Pop the condition value.
   write_instruction(parser, OP_POP);
   parse_standard_block_with_scope(parser);
-  write_jump_backward_instruction(parser, while_start_offset);
+  write_jump_backward_instruction(parser, has_modification_expr ? modification_start_offset : condition_start_offset);
 
   // --- End: ---
-  patch_jump_forward_instruction(parser, placeholder_jump_over_while);
+  patch_jump_forward_instruction(parser, placeholder_jump_to_end);
   // Pop the condition value.
   write_instruction(parser, OP_POP);
 }

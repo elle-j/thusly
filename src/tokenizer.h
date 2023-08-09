@@ -7,6 +7,7 @@
 
 typedef enum {
   // Punctuation and non-keyword operators
+  TOKEN_CLOSE_BRACE,
   TOKEN_CLOSE_PAREN,
   TOKEN_COLON,
   // TOKEN_COMMA,
@@ -19,6 +20,7 @@ typedef enum {
   TOKEN_LESS_THAN,
   TOKEN_LESS_THAN_EQUALS,
   TOKEN_MINUS,
+  TOKEN_OPEN_BRACE,
   TOKEN_OPEN_PAREN,
   TOKEN_PLUS,
   TOKEN_SLASH,
