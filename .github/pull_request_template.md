@@ -1,6 +1,12 @@
-## Additions / Changes
+## 🛠 Additions / Changes
 
-TODO: ADD DESCRIPTION
+### Description
+
+TODO_ADD_DESCRIPTION
+
+### Semantics
+
+TODO_ADD_SEMANTICS
 
 ### Examples of Expected Behavior
 
@@ -8,9 +14,9 @@ TODO: ADD DESCRIPTION
 |-------------------------|-------------------|-------------------------------|
 |                         |                   |                               |
 
-## Checklist
+## 🗒️ Checklist
 
 | Item                                                | Done | Not Applicable |
-|-----------------------------------------------------|------|----------------|
+|:----------------------------------------------------|:----:|:--------------:|
 | Updated the README                                  |      |                |
 | Added the new statement as a synchronization point  |      |                |
