@@ -270,7 +270,9 @@ Token tokenize(Tokenizer* tokenizer) {
     case ')':
       return make_token(tokenizer, TOKEN_CLOSE_PAREN);
     case '+':
-      return make_token(tokenizer, TOKEN_PLUS);
+      return match(tokenizer, ':')
+        ? make_token(tokenizer, TOKEN_PLUS_COLON)
+        : make_token(tokenizer, TOKEN_PLUS);
     case '-':
       return make_token(tokenizer, TOKEN_MINUS);
     case '*':
