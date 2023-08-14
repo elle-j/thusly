@@ -504,12 +504,12 @@ static bool is_assignment_operator(Token* token) {
 }
 
 /// Assign a value to the variable at the given stack slot.
-/// (This function assumes that it has been verified that the current token is an
-/// assignment operator.)
+/// (Callers should have verified that the current token is an assignment operator.)
 static void assign_variable(Parser* parser, byte stack_slot) {
   advance(parser);
-  TokenType operator = parser->previous.type;
-  if (operator == TOKEN_COLON) {
+  Token operator = parser->previous;
+  TokenType type = operator.type;
+  if (type == TOKEN_COLON) {
     parse_expression(parser);
     write_instructions(parser, OP_SET_VAR, stack_slot);
   }
@@ -519,8 +519,10 @@ static void assign_variable(Parser* parser, byte stack_slot) {
     write_instructions(parser, OP_GET_VAR, stack_slot);
     parse_expression(parser);
 
-    // TODO: Add `if-elseif`s checking the `operator` when supporting more augmented assignments.
-    write_instruction(parser, OP_ADD);
+    if (type == TOKEN_PLUS_COLON)
+      write_instruction(parser, OP_ADD);
+    else
+      error_at(parser, &operator, "Internal error. Expected an assignment operator.");
 
     write_instructions(parser, OP_SET_VAR, stack_slot);
   }
