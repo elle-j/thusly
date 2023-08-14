@@ -174,16 +174,16 @@ The development of both the language and the surrounding documentation is curren
     <summary>Example</summary>
 
     ```
-    // `<change>` expression is optional
+    // `{ <change> }` expression is optional
     var i: 0
-    while i < 10 {i: i + 1}
+    while i < 10 {i +: 1}
       @out i
     end
     ```
 
     </details>
 - [ ] Augmented assignment expressions can be evaluated.
-  - [ ] Addition and assignment (`+:`)
+  - [x] Addition and assignment (`+:`)
   - [ ] Subtraction and assignment (`-:`)
   - [ ] Multiplication and assignment (`*:`)
   - [ ] Division and assignment (`/:`)
@@ -228,7 +228,7 @@ By inputting code from either a file or via the REPL, the VM will interpret it a
 | `var x: 0`<br>`if x < 5`<br>`  @out "in if"`<br>`else`<br>`  @out "in else"`<br>`end` | in if   |
 | `foreach value in 0..2`<br>`  @out value`<br>`end` | 0<br>1<br>2   |
 | `var a: 0`<br>`var b: 2`<br>`var c: 0.5`<br>`foreach value in a..b step c`<br>`  @out value`<br>`end` | 0<br>0.5<br>1<br>1.5<br>2   |
-| `var x: 0`<br>`while x < 4 {x: x + 1}`<br>`  @out x`<br>`end` | 0<br>1<br>2<br>3   |
+| `var x: 0`<br>`while x < 4 {x +: 1}`<br>`  @out x`<br>`end` | 0<br>1<br>2<br>3   |
 
 **Table 3: Invalid user input**
 
