@@ -118,6 +118,7 @@ static ParseRule rules[] = {
   [TOKEN_OPEN_BRACE]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OPEN_PAREN]            = { parse_grouping, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PLUS]                  = { NULL, parse_binary, PRECEDENCE_TERM },
+  [TOKEN_PLUS_COLON]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_SLASH]                 = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_STAR]                  = { NULL, parse_binary, PRECEDENCE_FACTOR },
 
@@ -491,17 +492,47 @@ static int resolve(Parser* parser, Token* name) {
   return NOT_FOUND;
 }
 
+/// Check wether a given token is an assignment operator.
+static bool is_assignment_operator(Token* token) {
+  switch (token->type) {
+    case TOKEN_COLON:
+    case TOKEN_PLUS_COLON:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/// Assign a value to the variable at the given stack slot.
+/// (This function assumes that it has been verified that the current token is an
+/// assignment operator.)
+static void assign_variable(Parser* parser, byte stack_slot) {
+  advance(parser);
+  TokenType operator = parser->previous.type;
+  if (operator == TOKEN_COLON) {
+    parse_expression(parser);
+    write_instructions(parser, OP_SET_VAR, stack_slot);
+  }
+  // Augmented assignments.
+  else {
+    // Add the variable's value to the stack first to ensure correct order of operation.
+    write_instructions(parser, OP_GET_VAR, stack_slot);
+    parse_expression(parser);
+
+    // TODO: Add `if-elseif`s checking the `operator` when supporting more augmented assignments.
+    write_instruction(parser, OP_ADD);
+
+    write_instructions(parser, OP_SET_VAR, stack_slot);
+  }
+}
+
 static void access_or_assign_variable(Parser* parser, Token name, bool is_assignable) {
   int stack_slot = resolve(parser, &name);
-  if (stack_slot == NOT_FOUND) {
+  if (stack_slot == NOT_FOUND)
     error_at(parser, &name, "The variable has not been declared. Use 'var <name> : <value>' to declare it first.");
-    // return;
-  }
 
-  if (is_assignable && match(parser, TOKEN_COLON)) {
-    parse_expression(parser);
-    write_instructions(parser, OP_SET_VAR, (byte)stack_slot);
-  }
+  if (is_assignable)
+    assign_variable(parser, (byte)stack_slot);
   else
     write_instructions(parser, OP_GET_VAR, (byte)stack_slot);
 }
@@ -726,7 +757,7 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
   // - Examples of when not to continue parsing:
   //   x + y : 1        // '+' has higher precedence. Expected parsing:  (x + y) : 1
   //   -x : 1           // '-' has higher precedence. Expected parsing:  (-x) : 1
-  bool is_assignable = compare(parser, TOKEN_COLON) && min_precedence <= PRECEDENCE_ASSIGNMENT;
+  bool is_assignable = is_assignment_operator(&parser->current) && min_precedence <= PRECEDENCE_ASSIGNMENT;
   prefix_rule(parser, is_assignable);
 
   // Keep parsing expressions as long as the precedence level is high enough.
@@ -741,7 +772,8 @@ static void parse_precedence(Parser* parser, Precedence min_precedence) {
   // parsed by `access_or_assign_variable()`. This means the target was invalid.
   // Generate the error after the `prefix_rule()` call in order for resolution
   // errors to be displayed first.
-  if (!is_assignable && match(parser, TOKEN_COLON)) {
+  if (!is_assignable && is_assignment_operator(&parser->current)) {
+    advance(parser);
     error(parser, "You are trying to assign a value to an invalid target.");
   }
 }
