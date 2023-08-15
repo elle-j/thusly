@@ -93,7 +93,7 @@ expression:
 
 # TODO: Prefix with `( call "." )?` when adding calls
 assignment:
-	| IDENTIFIER ( ":" | "+:" | "-:" ) expression
+	| IDENTIFIER ( ":" | "+:" | "-:" | "*:" ) expression
 
 disjunction:
 	| conjunction ( "or" conjunction )*
