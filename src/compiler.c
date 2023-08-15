@@ -115,6 +115,7 @@ static ParseRule rules[] = {
   [TOKEN_LESS_THAN]             = { NULL, parse_binary, PRECEDENCE_COMPARISON },
   [TOKEN_LESS_THAN_EQUALS]      = { NULL, parse_binary, PRECEDENCE_COMPARISON },
   [TOKEN_MINUS]                 = { parse_unary, parse_binary, PRECEDENCE_TERM },
+  [TOKEN_MINUS_COLON]           = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OPEN_BRACE]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_OPEN_PAREN]            = { parse_grouping, NULL, PRECEDENCE_IGNORE },
   [TOKEN_PLUS]                  = { NULL, parse_binary, PRECEDENCE_TERM },
@@ -496,6 +497,7 @@ static int resolve(Parser* parser, Token* name) {
 static bool is_assignment_operator(Token* token) {
   switch (token->type) {
     case TOKEN_COLON:
+    case TOKEN_MINUS_COLON:
     case TOKEN_PLUS_COLON:
       return true;
     default:
@@ -511,7 +513,6 @@ static void assign_variable(Parser* parser, byte stack_slot) {
   TokenType type = operator.type;
   if (type == TOKEN_COLON) {
     parse_expression(parser);
-    write_instructions(parser, OP_SET_VAR, stack_slot);
   }
   // Augmented assignments.
   else {
@@ -521,11 +522,12 @@ static void assign_variable(Parser* parser, byte stack_slot) {
 
     if (type == TOKEN_PLUS_COLON)
       write_instruction(parser, OP_ADD);
+    else if (type == TOKEN_MINUS_COLON)
+      write_instruction(parser, OP_SUBTRACT);
     else
       error_at(parser, &operator, "Internal error. Expected an assignment operator.");
-
-    write_instructions(parser, OP_SET_VAR, stack_slot);
   }
+  write_instructions(parser, OP_SET_VAR, stack_slot);
 }
 
 static void access_or_assign_variable(Parser* parser, Token name, bool is_assignable) {
