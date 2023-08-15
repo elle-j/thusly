@@ -274,7 +274,9 @@ Token tokenize(Tokenizer* tokenizer) {
         ? make_token(tokenizer, TOKEN_PLUS_COLON)
         : make_token(tokenizer, TOKEN_PLUS);
     case '-':
-      return make_token(tokenizer, TOKEN_MINUS);
+      return match(tokenizer, ':')
+        ? make_token(tokenizer, TOKEN_MINUS_COLON)
+        : make_token(tokenizer, TOKEN_MINUS);
     case '*':
       return make_token(tokenizer, TOKEN_STAR);
     case '/':
@@ -282,9 +284,9 @@ Token tokenize(Tokenizer* tokenizer) {
     case '=':
       return make_token(tokenizer, TOKEN_EQUALS);
     case '!':
-      if (match(tokenizer, '='))
-        return make_token(tokenizer, TOKEN_EXCLAMATION_EQUALS);
-      return make_error_token(tokenizer, "You have included an illegal character: ! (This character is only allowed in `!=`. Did you mean `not`?)");
+      return match(tokenizer, '=')
+        ? make_token(tokenizer, TOKEN_EXCLAMATION_EQUALS)
+        : make_error_token(tokenizer, "You have included an illegal character: ! (This character is only allowed in `!=`. Did you mean `not`?)");
     case '<':
       return match(tokenizer, '=')
         ? make_token(tokenizer, TOKEN_LESS_THAN_EQUALS)
