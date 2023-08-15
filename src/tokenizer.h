@@ -27,6 +27,7 @@ typedef enum {
   TOKEN_PLUS_COLON,
   TOKEN_SLASH,
   TOKEN_STAR,
+  TOKEN_STAR_COLON,
 
   // Reserved keywords
   TOKEN_AND,
