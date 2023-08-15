@@ -184,7 +184,7 @@ The development of both the language and the surrounding documentation is curren
     </details>
 - [ ] Augmented assignment expressions can be evaluated.
   - [x] Addition and assignment (`+:`)
-  - [ ] Subtraction and assignment (`-:`)
+  - [x] Subtraction and assignment (`-:`)
   - [ ] Multiplication and assignment (`*:`)
   - [ ] Division and assignment (`/:`)
   - [ ] Modulo and assignment (`mod:`)
