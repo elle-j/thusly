@@ -122,6 +122,7 @@ static ParseRule rules[] = {
   [TOKEN_PLUS_COLON]            = { NULL, NULL, PRECEDENCE_IGNORE },
   [TOKEN_SLASH]                 = { NULL, parse_binary, PRECEDENCE_FACTOR },
   [TOKEN_STAR]                  = { NULL, parse_binary, PRECEDENCE_FACTOR },
+  [TOKEN_STAR_COLON]            = { NULL, NULL, PRECEDENCE_IGNORE },
 
   // Reserved keywords
   [TOKEN_AND]                   = { NULL, parse_and, PRECEDENCE_CONJUNCTION },
@@ -497,8 +498,9 @@ static int resolve(Parser* parser, Token* name) {
 static bool is_assignment_operator(Token* token) {
   switch (token->type) {
     case TOKEN_COLON:
-    case TOKEN_MINUS_COLON:
     case TOKEN_PLUS_COLON:
+    case TOKEN_MINUS_COLON:
+    case TOKEN_STAR_COLON:
       return true;
     default:
       return false;
@@ -524,6 +526,8 @@ static void assign_variable(Parser* parser, byte stack_slot) {
       write_instruction(parser, OP_ADD);
     else if (type == TOKEN_MINUS_COLON)
       write_instruction(parser, OP_SUBTRACT);
+    else if (type == TOKEN_STAR_COLON)
+      write_instruction(parser, OP_MULTIPLY);
     else
       error_at(parser, &operator, "Internal error. Expected an assignment operator.");
   }

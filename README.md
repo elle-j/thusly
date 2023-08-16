@@ -185,7 +185,7 @@ The development of both the language and the surrounding documentation is curren
 - [ ] Augmented assignment expressions can be evaluated.
   - [x] Addition and assignment (`+:`)
   - [x] Subtraction and assignment (`-:`)
-  - [ ] Multiplication and assignment (`*:`)
+  - [x] Multiplication and assignment (`*:`)
   - [ ] Division and assignment (`/:`)
   - [ ] Modulo and assignment (`mod:`)
 - [ ] Range comparison expression can be evaluated (`<value> in <min>..<max>`)

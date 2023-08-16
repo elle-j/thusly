@@ -278,7 +278,9 @@ Token tokenize(Tokenizer* tokenizer) {
         ? make_token(tokenizer, TOKEN_MINUS_COLON)
         : make_token(tokenizer, TOKEN_MINUS);
     case '*':
-      return make_token(tokenizer, TOKEN_STAR);
+      return match(tokenizer, ':')
+        ? make_token(tokenizer, TOKEN_STAR_COLON)
+        : make_token(tokenizer, TOKEN_STAR);
     case '/':
       return make_token(tokenizer, TOKEN_SLASH);
     case '=':
