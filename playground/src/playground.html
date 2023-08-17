@@ -74,9 +74,22 @@
     </div>
     <hr/>
     <textarea class="emscripten" id="output" rows="8"></textarea>
+    <button id="run">Run</button>
     <hr>
 
-    <script src="wasm_setup.js" type='text/javascript'></script>
+    <script src="wasm_setup.js" type="text/javascript"></script>
+
+    <script>
+      const code = "var x: 1";
+      document.getElementById("run").addEventListener("click", () => {
+        const result = Module.ccall(
+          "run_source",   // C function name
+          "int",          // Return type
+          ["string"],     // Argument types
+          [code],         // Arguments
+        );
+    });
+    </script>
 
     {{{ SCRIPT }}}
 

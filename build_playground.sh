@@ -15,7 +15,18 @@ mkdir dist
 echo "Done!"
 
 echo -e "\nCompiling to Wasm and generating distribution files..."
-emcc -o dist/index.html src/main_wasm.c -O3 --shell-file src/playground.html
+# Flags:
+# -o:
+#   To where the compiler should output the JavaScript glue code and HTML.
+# -03:
+#   Enables the highest optimization.
+#   (Levels: -O0 (no optimization), -O1, -O2, -Os, -Oz, -Og, and -O3)
+# --shell-file:
+#   The path to the HTML template to use to create the distributed HTML.
+# -s NO_EXIT_RUNTIME=1:
+#   Prevents the runtime from shutting down when `main()` exits,
+#   which would invalidate calls to compiled code.
+emcc src/main_wasm.c -o dist/index.html -O3 --shell-file src/playground.html -s NO_EXIT_RUNTIME=1 -s "EXPORTED_RUNTIME_METHODS=['ccall']"
 cp src/*.js dist
 echo "Done!"
 

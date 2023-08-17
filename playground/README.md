@@ -17,7 +17,7 @@ An interactive playground in the browser for the Thusly programming language.
 
 ### Building the Project
 
-Run the below command to compile the C source code to Wasm and generate browser distribution files to `playground/dist`.
+Run the below command to compile the C source code to WebAssembly and generate browser distribution files to `playground/dist`.
 
 ```sh
 ./build_playground.sh
