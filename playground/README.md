@@ -17,10 +17,11 @@ Run the below commands to compile the C source code to Wasm and a corresponding 
 ```sh
 cd playground
 mkdir build
-emcc -o build/index.html src/main-wasm.c -O3 --shell-file src/playground.html
+emcc -o build/index.html src/main_wasm.c -O3 --shell-file src/playground.html
+cp src/*.js build
 ```
 
-### Running Code
+### Starting the Playground
 
 Once you have [built](#building-the-project) the project you can open `playground/build/index.html` in a browser via an HTTP server.
 
