@@ -9,21 +9,26 @@ An interactive playground in the browser for the Thusly programming language.
 ### Prerequisites
 
 * [Emscripten](https://emscripten.org/docs/getting_started/downloads.html#download-and-install)
+  * Download the recommended emsdk.
+  * Don't forget to activate PATH and other environment variables in your terminal after installing it.
+    ```sh
+    source path/to/emsdk_env.sh
+    ```
 
 ### Building the Project
 
-Run the below commands to compile the C source code to Wasm and a corresponding HTML and JS file.
+Run the below command to compile the C source code to Wasm and generate browser distribution files to `playground/dist`.
 
 ```sh
-cd playground
-mkdir build
-emcc -o build/index.html src/main_wasm.c -O3 --shell-file src/playground.html
-cp src/*.js build
+./build_playground.sh
 ```
+
+> **If permission is denied**, first add executable permission to the build script by running:
+> `chmod +x build_playground.sh`.
 
 ### Starting the Playground
 
-Once you have [built](#building-the-project) the project you can open `playground/build/index.html` in a browser via an HTTP server.
+Once you have [built](#building-the-project) the project you can open `playground/dist/index.html` in a browser via an HTTP server.
 
 > **HTTP Server:**
 >

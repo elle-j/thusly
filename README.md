@@ -255,7 +255,7 @@ Run the below command to make Thusly come to life. It will create a top-level `b
 ./build.sh
 ```
 
-> If permission is denied, first add executable permission to the build script by running:
+> **If permission is denied**, first add executable permission to the build script by running:
 > `chmod +x build.sh`.
 
 ### Running Code
