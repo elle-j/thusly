@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "common.h"
 #include "memory.h"
 #include "program.h"
 
@@ -12,8 +13,9 @@ static void constant_pool_init(ConstantPool* pool) {
 
 static void constant_pool_free(ConstantPool* pool) {
   // -- TEMPORARY --
-  #ifdef DEBUG_EXECUTION
-    printf("FREEING CONSTANT POOL..\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("FREEING CONSTANT POOL..\n");
   #endif
   // ---------------
 
@@ -43,8 +45,9 @@ void program_init(Program* program) {
 
 void program_free(Program* program) {
   // -- TEMPORARY --
-  #ifdef DEBUG_EXECUTION
-    printf("FREEING PROGRAM..\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("FREEING PROGRAM..\n");
   #endif
   // ---------------
 

@@ -9,7 +9,7 @@
 #include "thusly_value.h"
 #include "tokenizer.h"
 
-#ifdef DEBUG_COMPILATION
+#ifdef DEBUG_MODE
 #include "debug.h"
 #endif
 
@@ -932,8 +932,8 @@ static void parse_variable(Parser* parser, bool is_assignable) {
 static void end_compilation(Parser* parser) {
   write_return_instruction(parser);
 
-  #ifdef DEBUG_COMPILATION
-    if (!parser->saw_error)
+  #ifdef DEBUG_MODE
+    if (flag_debug_compilation && !parser->saw_error)
       disassemble_program(get_writable_program(parser), "Program");
   #endif
 }

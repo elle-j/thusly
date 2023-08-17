@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "common.h"
 #include "gc_object.h"
 #include "memory.h"
 #include "table.h"
@@ -17,8 +18,9 @@ void table_init(Table* table) {
 
 void table_free(Table* table) {
   // -- TEMPORARY --
-  #ifdef DEBUG_EXECUTION
-    printf("FREEING TABLE..\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("FREEING TABLE..\n");
   #endif
   // ---------------
 

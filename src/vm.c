@@ -24,8 +24,9 @@ void vm_init(VM* vm) {
 
 void vm_free(VM* vm) {
   // -- TEMPORARY --
-  #ifdef DEBUG_EXECUTION
-    printf("FREEING VM..\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("FREEING VM..\n");
   #endif
   // ---------------
 
@@ -117,17 +118,18 @@ static ErrorReport decode_and_execute(VM* vm) {
       push(vm, from_c_value(a operator b));                                                 \
     } while (false)
 
-  #ifdef DEBUG_EXECUTION
-  printf("========== Execution ==========\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("========== Execution ==========\n");
   #endif
 
   while (true) {
-    #ifdef DEBUG_EXECUTION
-    {
-      disassemble_stack(vm);
-      int offset = (int)(vm->next_instruction - vm->program->instructions);
-      disassemble_instruction(vm->program, offset);
-    }
+    #ifdef DEBUG_MODE
+      if (flag_debug_execution) {
+        disassemble_stack(vm);
+        int offset = (int)(vm->next_instruction - vm->program->instructions);
+        disassemble_instruction(vm->program, offset);
+      }
     #endif
 
     byte instruction = READ_BYTE();

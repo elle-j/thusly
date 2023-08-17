@@ -262,17 +262,24 @@ Run the below command to make Thusly come to life. It will create a top-level `b
 
 Once you have [built](#building-the-project) the project you can go ahead and feed it some code to interpret thusly (..get it?):
 
-**Usage example** (use the flag `-h` or `--help`):
+**Usage example:**
 
 ```
 $ ./bin/cthusly --help
 
 Usage: ./bin/cthusly [options] [path]
 
-    REPL (interactive prompt) starts if no [path] is provided
+    The REPL (interactive prompt) starts if no path is provided
 
-    -h, --help                Show usage
+    -h,     --help           Show usage
+    -d,     --debug          Enable all debug flags below
+    -dcomp, --debug-comp     Show compiler output (bytecode)
+    -dexec, --debug-exec     Show VM execution trace
 ```
+
+> **Flags:**
+>
+> Currently, only 1 flag may be provided.
 
 **Interpret code from a file:**
 
@@ -286,6 +293,10 @@ Usage: ./bin/cthusly [options] [path]
 ./bin/cthusly
 ```
 
+> **Exit REPL:**
+>
+> Press `Cmd + D` (Mac) or `Ctrl + D` (Windows).
+
 Example:
 
 ```
@@ -297,16 +308,6 @@ true
 2.25
 > 
 ```
-
-> **Enable/disable debug output:**
->
-> Comment or uncomment the following macros in [src/common.h](src/common.h) to disable or enable printouts (then [rebuild](#building-the-project) the project):
->
-> **DEBUG_COMPILATION**
->   - Prints the entire bytecode produced by the compiler.
->
-> **DEBUG_EXECUTION**
->   - Prints the VM execution steps including its stack state.
 
 ## License
 
