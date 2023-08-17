@@ -12,7 +12,7 @@ An interactive playground in the browser for the Thusly programming language.
 
 ### Building the Project
 
-Run the below command to compile the C source code to Wasm and a corresponding HTML and JS file.
+Run the below commands to compile the C source code to Wasm and a corresponding HTML and JS file.
 
 ```sh
 cd playground
@@ -22,7 +22,7 @@ emcc -o build/index.html src/main-wasm.c -O3 --shell-file src/playground.html
 
 ### Running Code
 
-Once you have [built](#building-the-project) the project you can, you can open `playground/build/index.html` in a browser via an HTTP server.
+Once you have [built](#building-the-project) the project you can open `playground/build/index.html` in a browser via an HTTP server.
 
 > **HTTP Server:**
 >
