@@ -35,8 +35,9 @@ static void free_object(GCObject* object) {
 
 void free_objects(Environment* environment) {
   // -- TEMPORARY --
-  #ifdef DEBUG_EXECUTION
-    printf("FREEING GC OBJECTS..\n");
+  #ifdef DEBUG_MODE
+    if (flag_debug_execution)
+      printf("FREEING GC OBJECTS..\n");
   #endif
   // ---------------
 

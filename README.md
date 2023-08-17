@@ -262,17 +262,24 @@ Run the below command to make Thusly come to life. It will create a top-level `b
 
 Once you have [built](#building-the-project) the project you can go ahead and feed it some code to interpret thusly (..get it?):
 
-**Usage example** (use the flag `-h` or `--help`):
+**Usage example:**
 
 ```
 $ ./bin/cthusly --help
 
 Usage: ./bin/cthusly [options] [path]
 
-    REPL (interactive prompt) starts if no [path] is provided
+    The REPL (interactive prompt) starts if no [path] is provided
 
-    -h, --help                Show usage
+    -h,     --help           Show usage
+    -d,     --debug          Enable all debug flags below
+    -dcomp, --debug-comp     Show compiler output (bytecode)
+    -dexec, --debug-exec     Show VM execution trace
 ```
+
+> **Flags:**
+>
+> Currently, only 1 flag may be provided.
 
 **Interpret code from a file:**
 
@@ -286,6 +293,10 @@ Usage: ./bin/cthusly [options] [path]
 ./bin/cthusly
 ```
 
+> **Exit REPL:**
+>
+> Press `Cmd + D` (Mac) or `Ctrl + D` (Windows).
+
 Example:
 
 ```
@@ -298,15 +309,13 @@ true
 > 
 ```
 
-> **Enable/disable debug output:**
+> **Enable/disable debug:**
 >
-> Comment or uncomment the following macros in [src/common.h](src/common.h) to disable or enable printouts (then [rebuild](#building-the-project) the project):
+> For the [debug flags](#running-code) to have an effect, the following macro in [src/common.h](src/common.h) need to be defined.
 >
-> **DEBUG_COMPILATION**
->   - Prints the entire bytecode produced by the compiler.
+> * **DEBUG_MODE**
 >
-> **DEBUG_EXECUTION**
->   - Prints the VM execution steps including its stack state.
+> You may comment or uncomment it to disable or enable support for the flags (then [rebuild](#building-the-project) the project).
 
 ## License
 
