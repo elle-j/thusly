@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "common.h"
 #include "memory.h"
 #include "program.h"
 

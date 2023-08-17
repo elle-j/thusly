@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "gc_object.h"
 #include "memory.h"
 

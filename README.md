@@ -269,7 +269,7 @@ $ ./bin/cthusly --help
 
 Usage: ./bin/cthusly [options] [path]
 
-    The REPL (interactive prompt) starts if no path is provided
+    The REPL (interactive prompt) starts if no [path] is provided
 
     -h,     --help           Show usage
     -d,     --debug          Enable all debug flags below

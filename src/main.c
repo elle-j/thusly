@@ -16,7 +16,7 @@ static void print_help(FILE* fout) {
     "\n"
     "Usage: ./bin/cthusly [options] [path]\n"
     "\n"
-    "    The REPL (interactive prompt) starts if no arguments are provided\n"
+    "    The REPL (interactive prompt) starts if no [path] is provided\n"
     "\n"
     "    -h,     --help           Show usage\n"
     "    -d,     --debug          Show compiler output (bytecode) and VM execution trace\n"
