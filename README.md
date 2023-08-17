@@ -309,6 +309,14 @@ true
 > 
 ```
 
+> **Enable/disable debug:**
+>
+> For the [debug flags](#running-code) to have an effect, the following macro in [src/common.h](src/common.h) need to be defined.
+>
+> * **DEBUG_MODE**
+>
+> You may comment or uncomment it to disable or enable support for the flags (then [rebuild](#building-the-project) the project).
+
 ## License
 
 This software is licensed under the terms of the [MIT license](LICENSE).

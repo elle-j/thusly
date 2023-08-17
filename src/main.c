@@ -8,10 +8,8 @@
 #include "program.h"
 #include "vm.h"
 
-#ifdef DEBUG_MODE
 bool flag_debug_compilation = false;
 bool flag_debug_execution = false;
-#endif
 
 static void print_help(FILE* fout) {
   fprintf(fout,
@@ -24,6 +22,7 @@ static void print_help(FILE* fout) {
     "    -d,     --debug          Show compiler output (bytecode) and VM execution trace\n"
     "    -dcomp, --debug-comp     Show compiler output (bytecode)\n"
     "    -dexec, --debug-exec     Show VM execution trace\n"
+    "\n"
   );
 }
 
@@ -97,35 +96,41 @@ static void run_file(const char* path) {
     exit(EXIT_CODE_INTERNAL_SOFTWARE_ERROR);
 }
 
+/// Set the corresponding debug flag if it is valid. Returns `true` if valid.
+static bool validate_and_set_debug_flag(const char* flag) {
+  if (strcmp(flag, "-d") == 0 || strcmp(flag, "--debug") == 0) {
+    flag_debug_compilation = true;
+    return flag_debug_execution = true;
+  }
+  if (strcmp(flag, "-dcomp") == 0 || strcmp(flag, "--debug-comp") == 0)
+    return flag_debug_compilation = true;
+  if (strcmp(flag, "-dexec") == 0 || strcmp(flag, "--debug-exec") == 0)
+    return flag_debug_execution = true;
+
+  return false;
+}
+
 int main(int argc, const char* argv[]) {
   // Example input: ./cthusly
   if (argc == 1)
     run_repl();
-  // Example input: ./cthusly path/to/file
+  // Example input: ./cthusly path/to/file (or: ./cthusly --debug)
   else if (argc == 2) {
     const char* argv1 = argv[1];
     if (strcmp(argv1, "-h") == 0 || strcmp(argv1, "--help") == 0)
       print_help(stdout);
+    else if (validate_and_set_debug_flag(argv1))
+      run_repl();
     else
       run_file(argv1);
   }
   // Example input: ./cthusly --debug path/to/file
   else if (argc == 3) {
-    #ifdef DEBUG_MODE
-      const char* flag = argv[1];
-      if (strcmp(flag, "-d") == 0 || strcmp(flag, "--debug") == 0) {
-        flag_debug_compilation = true;
-        flag_debug_execution = true;
-      }
-      else if (strcmp(flag, "-dcomp") == 0 || strcmp(flag, "--debug-comp") == 0)
-        flag_debug_compilation = true;
-      else if (strcmp(flag, "-dexec") == 0 || strcmp(flag, "--debug-exec") == 0)
-        flag_debug_execution = true;
-      else {
-        print_help(stderr);
-        return EXIT_CODE_USAGE_ERROR;
-      }
-    #endif
+    const char* flag = argv[1];
+    if (!validate_and_set_debug_flag(flag)) {
+      print_help(stderr);
+      return EXIT_CODE_USAGE_ERROR;
+    }
 
     const char* path = argv[2];
     run_file(path);
