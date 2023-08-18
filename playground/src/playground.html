@@ -9,11 +9,10 @@
       data-name="vs/editor/editor.main"
       href="./node_modules/monaco-editor/min/vs/editor/editor.main.css"
     />
-    <link rel="stylesheet" href="styles.module.css">
+    <link rel="stylesheet" href="styles.css">
   </head>
 
   <body>
-    <hr/>
     <figure style="overflow:visible;" id="spinner">
       <div class="spinner"></div><center style="margin-top:0.5em"><strong>emscripten</strong></center>
     </figure>
@@ -24,38 +23,27 @@
       <progress value="0" max="100" id="progress" hidden=1></progress>
     </div>
     <hr/>
-    <textarea class="emscripten" id="input" rows="20"></textarea>
-    <textarea class="emscripten" id="output" rows="10"></textarea>
     <div id="editor"></div>
-    <button id="run">Run</button>
-    <hr>
+    <textarea readonly class="emscripten" id="output" rows="10"></textarea>
+    <button id="run">
+      Run
+    </button>
 
+    <!-- Load the Wasm setup first. -->
     <script src="wasm_setup.js" type="text/javascript"></script>
 
-    <script type="text/javascript">
-      document.getElementById("run").addEventListener("click", () => {
-        const code = document.getElementById("input").value;
-        clearOutput();
-        run(code);
-      });
-
-      function clearOutput() {
-        document.getElementById("output").value = "";
-      }
-    </script>
-
+    <!-- VS Code's Monaco editor. -->
     <script>
       var require = { paths: { vs: "./node_modules/monaco-editor/min/vs" } };
     </script>
     <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
     <script src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
     <script src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-    <script>
-      var editor = monaco.editor.create(document.getElementById("editor"), {
-        value: ["function x() {", "\tconsole.log('Hello world!');", "}"].join("\n"),
-        language: "javascript"
-      });
-    </script>
+    <script src="editor_setup.js" type="module"></script>
+    <!-- <script src="editor_setup.js" type="module" async></script> -->
+
+    <!-- Main handling of the DOM. -->
+    <script src="playground.js" type="module"></script>
 
     <!-- Emscripten -->
     {{{ SCRIPT }}}
