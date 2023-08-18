@@ -3,9 +3,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "debug.h"
 #include "exit_code.h"
-#include "program.h"
 #include "vm.h"
 
 bool flag_debug_compilation = false;

@@ -1,38 +1,61 @@
+const outputElement = document.getElementById("output");
 const statusElement = document.getElementById("status");
 const progressElement = document.getElementById("progress");
 const spinnerElement = document.getElementById("spinner");
 
-// Need `var` or no declaration here.
+// Will be set `onRuntimeInitialized`.
+function run(code) {}
+
+function getPrintFn(/*isError = false*/) {
+  outputElement.value = "";
+
+  return function(text) {
+    if (arguments.length > 1)
+      text = Array.prototype.slice.call(arguments).join(" ");
+
+    // These replacements are necessary if rendering to raw HTML.
+    // text = text.replace(/&/g, "&amp;");
+    // text = text.replace(/</g, "&lt;");
+    // text = text.replace(/>/g, "&gt;");
+    // text = text.replace("\n", "<br>", "g");
+
+    // If also wanting to log to the JS console.
+    // if (isError)
+    //   console.error(text);
+    // else
+    //   console.log(text);
+
+    outputElement.value += text + "\n";
+    // Go to bottom
+    outputElement.scrollTop = outputElement.scrollHeight;
+  };
+};
+
+// Need `var` or no declaration here due to JS glue code starting with:
+// `var Module=typeof Module!="undefined"?Module:{}`
 var Module = {
   preRun: [],
 
   postRun: [],
 
-  print: (function() {
-    const element = document.getElementById("output");
-    if (element)
-      // Clear browser cache.
-      element.value = "";
+  print: getPrintFn(),
 
-    return function(text) {
-      if (arguments.length > 1)
-        text = Array.prototype.slice.call(arguments).join(" ");
+  printErr: getPrintFn(),
 
-      // These replacements are necessary if you render to raw HTML.
-      //text = text.replace(/&/g, "&amp;");
-      //text = text.replace(/</g, "&lt;");
-      //text = text.replace(/>/g, "&gt;");
-      //text = text.replace("\n", "<br>", "g");
+  // Invoked when the runtime is fully initialized; i.e., when compiled code is safe to run.
+  onRuntimeInitialized: () => {
+    run = function(code) {
+      if (!code)
+        return;
 
-      console.log(text);
-
-      if (element) {
-        element.value += text + "\n";
-        // Focus on bottom
-        element.scrollTop = element.scrollHeight;
-      }
-    };
-  })(),
+      Module.ccall(
+        "run_source",   // C function name
+        "int",          // Return type
+        ["string"],     // Argument types
+        [code],         // Arguments
+      );
+    }
+  },
 
   canvas: (() => {
     const canvas = document.getElementById("canvas");
