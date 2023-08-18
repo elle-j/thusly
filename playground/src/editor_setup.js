@@ -12,153 +12,154 @@ const editorConfiguration = {
 };
 
 const languageConfiguration = {
-	// wordPattern:
-	// 	/(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
+  // wordPattern:
+  //   /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
 
-	comments: {
-		lineComment: "//",
-	},
+  comments: {
+    lineComment: "//",
+  },
 
-	brackets: [
-		["{", "}"],
-		["(", ")"]
-	],
+  brackets: [
+    ["{", "}"],
+    ["(", ")"],
+  ],
 
-	// onEnterRules: [],
+  // onEnterRules: [],
 
-	autoClosingPairs: [
-		{ open: "{", close: "}" },
-		{ open: "(", close: ")" },
+  autoClosingPairs: [
+    { open: "{", close: "}" },
+    { open: "(", close: ")" },
     { open: '"', close: '"', notIn: ["string"] },
-		{ open: "block", close: "end" },
-		{ open: "if", close: "end" },
-		{ open: "else", close: "end" },
-		{ open: "foreach", close: "end" },
-		{ open: "while", close: "end" },
-	],
+    { open: "block", close: "end" },
+    { open: "if", close: "end" },
+    { open: "else", close: "end" },
+    { open: "foreach", close: "end" },
+    { open: "while", close: "end" },
+  ],
 
-	folding: {
-		markers: {
-			start: new RegExp("^\\s*//\\s*#?region\\b"),
-			end: new RegExp("^\\s*//\\s*#?endregion\\b")
-		}
-	}
+  folding: {
+    markers: {
+      start: new RegExp("^\\s*//\\s*#?region\\b"),
+      end: new RegExp("^\\s*//\\s*#?endregion\\b"),
+    },
+  },
 };
 
 const tokensProvider = {
-	// Set defaultToken to `invalid` to see what is not yet tokenized.
-	defaultToken: "invalid",
-	tokenPostfix: ".thusly",
+  // Set defaultToken to `invalid` to see what is not yet tokenized.
+  defaultToken: "invalid",
+  tokenPostfix: ".thusly",
 
-	keywords: [
+  keywords: [
     "and",
     "block",
-		"else",
+    "else",
     "end",
-		"false",
-		"foreach",
-		"if",
-		"in",
-		"mod",
-		"none",
-		"not",
-		"or",
-		"@out",
-		"step",
-		"true",
-		"var",
-		"while",
-	],
+    "false",
+    "foreach",
+    "if",
+    "in",
+    "mod",
+    "none",
+    "not",
+    "or",
+    "@out",
+    "step",
+    "true",
+    "var",
+    "while",
+  ],
 
-	operators: [
-		":",
-		"..",
-		"=",
-		"!=",
-		">",
-		">=",
-		"<",
-		"<=",
-		"-",
-		"-:",
-		"+",
-		"+:",
-		"/",
-		"*",
-		"*:",
-	],
+  operators: [
+    ":",
+    "..",
+    "=",
+    "!=",
+    ">",
+    ">=",
+    "<",
+    "<=",
+    "-",
+    "-:",
+    "+",
+    "+:",
+    "/",
+    "*",
+    "*:",
+  ],
 
-	symbols: /[=><:+\-*\/]+/,
-	digits: /\d+(_+\d+)*/,
+  symbols: /[=><:+\-*\/]+/,
 
-	tokenizer: {
-		root: [
+  digits: /\d+(_+\d+)*/,
+
+  tokenizer: {
+    root: [
       [/[{}]/, "delimiter.bracket"],
       { include: "common" },
     ],
 
-		common: [
-			// Identifiers and keywords.
-			[
-				/[a-z_@][\w$]*/,
-				{
-					cases: {
-						"@keywords": "keyword",
-						"@default": "identifier"
-					}
-				}
-			],
-			// [/[A-Z][\w\$]*/, "type.identifier"], // Shows class names nicely
-			[/[A-Z_@][\w\$]*/, "identifier"],
-
-			// Whitespace.
-			{ include: "@whitespace" },
-
-			// Delimiters and operators.
-			[/[()\[\]]/, "@brackets"],
-			// [/(?:=([^=]))/, "delimiter"],
+    common: [
+      // Identifiers and keywords.
       [
-				/@symbols/,
-				{
-					cases: {
-						"@operators": "delimiter",
-						"@default": ""
-					}
-				}
-			],
+        /[a-z_@][\w$]*/,
+        {
+          cases: {
+            "@keywords": "keyword",
+            "@default": "identifier",
+          },
+        },
+      ],
+      // [/[A-Z][\w\$]*/, "type.identifier"], // Shows class names nicely
+      [/[A-Z_@][\w\$]*/, "identifier"],
 
-			// Numbers.
-			[/(@digits)\.(@digits)/, "number.float"],
-			[/(@digits)/, "number"],
+      // Whitespace.
+      { include: "@whitespace" },
 
-			// Delimiter: after number because of .\d floats.
-			[/[,.]/, "delimiter"],
+      // Delimiters and operators.
+      [/[()\[\]]/, "@brackets"],
+      // [/(?:=([^=]))/, "delimiter"],
+      [
+        /@symbols/,
+        {
+          cases: {
+            "@operators": "delimiter",
+            "@default": "",
+          },
+        },
+      ],
 
-			// Strings.
-			[/"([^"\\]|\\.)*$/, "string.invalid"], // Non-teminated string.
-			[/"/, "string", "@string_double"],
-		],
+      // Numbers.
+      [/(@digits)\.(@digits)/, "number.float"],
+      [/(@digits)/, "number"],
 
-		whitespace: [
+      // Delimiter: after number because of .\d floats.
+      [/[,.]/, "delimiter"],
+
+      // Strings.
+      [/"([^"\\]|\\.)*$/, "string.invalid"], // Non-teminated string.
+      [/"/, "string", "@string_double"],
+    ],
+
+    whitespace: [
       [/[ \t]+/, ""],
-			[/\/\/.*$/, "comment"]
-		],
+      [/\/\/.*$/, "comment"],
+    ],
 
-		comment: [
-			// [/\/\/.*$/, "comment"]
-		],
+    comment: [
+      // [/\/\/.*$/, "comment"],
+    ],
 
-		string_double: [
-			[/[^\\"]+/, "string"],
-			[/"/, "string", "@pop"]
-		],
+    string_double: [
+      [/[^\\"]+/, "string"],
+      [/"/, "string", "@pop"],
+    ],
 
-		bracketCounting: [
-			[/\{/, "delimiter.bracket", "@bracketCounting"],
-			[/\}/, "delimiter.bracket", "@pop"],
-			{ include: "common" }
-		]
-	}
+    bracketCounting: [
+      [/\{/, "delimiter.bracket", "@bracketCounting"],
+      [/\}/, "delimiter.bracket", "@pop"],
+      { include: "common" },
+    ]
+  }
 };
 
 // monaco.editor.defineTheme("", );
