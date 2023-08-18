@@ -8,6 +8,12 @@ then
   exit 1
 fi
 
+if ! which node;
+then
+  echo -e "\nConfiguration error: Node was not found. Please install Node.js and rerun the script."
+  exit 1
+fi
+
 output_dir="playground/dist"
 source_dir="playground/src"
 interpreter_dir=src
@@ -15,6 +21,10 @@ interpreter_dir=src
 echo -e "\nCreating directory \`$output_dir\` for the distribution files..."
 rm -rf $output_dir
 mkdir $output_dir
+echo "Done!"
+
+echo -e "\nInstalling dependencies..."
+npm i monaco-editor@0.41.0 --prefix ./$output_dir
 echo "Done!"
 
 echo -e "\nCompiling to Wasm and generating distribution files..."

@@ -14,6 +14,7 @@ An interactive playground in the browser for the Thusly programming language.
     ```sh
     source path/to/emsdk_env.sh
     ```
+* [Node.js](https://nodejs.org/en/download)
 
 ### Building the Project
 

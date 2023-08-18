@@ -57,22 +57,6 @@ var Module = {
     }
   },
 
-  canvas: (() => {
-    const canvas = document.getElementById("canvas");
-    // As a default initial behavior, pop up an alert when webgl context is lost.
-    canvas.addEventListener(
-      "webglcontextlost",
-      (e) => {
-        // (Temporary use of `alert()`)
-        alert("WebGL context lost. You will need to reload the page.");
-        e.preventDefault();
-      },
-      false
-    );
-
-    return canvas;
-  })(),
-
   setStatus: (text) => {
     if (!Module.setStatus.last)
       Module.setStatus.last = { time: Date.now(), text: "" };
