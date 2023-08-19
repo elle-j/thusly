@@ -92,9 +92,9 @@ const tokensProvider = {
 
   digits: /\d+(_+\d+)*/,
 
-  charsStartWithLowerCase: /[a-z_@][\w$]*/,
+  charsLowerCaseStart: /[a-z_@][\w$]*/,
 
-  charsStartWithUpperCase: /[A-Z@][\w\$]*/,
+  charsUpperCaseStart: /[A-Z][\w\$]*/,
 
   tokenizer: {
     root: [
@@ -105,7 +105,7 @@ const tokensProvider = {
     common: [
       // Identifiers and keywords.
       [
-        /@charsStartWithLowerCase/,
+        /@charsLowerCaseStart/,
         {
           cases: {
             "@keywords": "keyword",
@@ -114,7 +114,7 @@ const tokensProvider = {
         },
       ],
       // [/[A-Z][\w\$]*/, "type.identifier"], // Shows class names nicely
-      [/@charsStartWithUpperCase/, "identifier"],
+      [/@charsUpperCaseStart/, "identifier"],
 
       // Whitespace.
       { include: "@whitespace" },
