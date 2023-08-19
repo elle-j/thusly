@@ -1,9 +1,166 @@
-#editor {
-  width: 800px;
-  height: 600px;
-  border: 1px solid grey;
+:root {
+  --black: #111111;
+  --purple: #1e1e3f;
+  --purple-light: #363675;
+
+  --font-size: 12px;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-width: thin;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* =============== HEADER =============== */
+
+header {
+  height: 55px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--purple);
+  color: white;
+}
+
+.th-title {
+  margin-right: 5px;
+  font-size: var(--font-size);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.th-tabs {
+  align-self: flex-end;
+  display: flex;
+}
+
+.th-tab {
+  margin: 0 5px;
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  background-color: var(--purple-light);
+  box-shadow: 0 0 15px -6px var(--black);
+  cursor: pointer;
+}
+
+.th-tab * {
+  cursor: pointer;
+}
+
+.th-tab input {
+  margin-right: 8px;
+}
+
+.th-operations {
+  display: flex;
+  align-items: center;
+}
+
+.th-operation {
+  margin: 0 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.th-operation label {
+  margin-bottom: 6px;
+  font-size: var(--font-size);
+  text-transform: uppercase;
+}
+
+.th-operation input {
+  cursor: pointer;
+}
+
+#th-run {
+  height: 40px;
+  width: 40px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 15px -6px var(--black);
+  background-color: var(--purple-light);
+  font-size: 100%;
+  font-family: inherit;
+  outline: none;
+  /* cursor: pointer; */
+}
+
+.th-run-icon {
+  height: 0;
+  width: 0;
+  margin: auto;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 14px solid var(--black);
+}
+
+.th-separator {
+  height: 20px;
+  background-color: var(--purple-light);
+}
+
+/* =============== MAIN =============== */
+
+main {
+  flex: 1;
+  display: flex;
+  background: linear-gradient(to left, rgba(123, 48, 194, 0.17), transparent);
+	background-color: var(--purple);
+  overflow: hidden;
+}
+
+#th-editor {
+  width: 50%;
+  padding-top: 20px;
+}
+
+#th-output {
+  width: 50%;
+  padding: 20px 20px 0;
+  white-space: pre;
+  resize: none;
+  box-shadow: none;
+  outline: none;
+  border: none;
+  background-color: var(--purple-light);
+  color: white;
+  line-height: 22px;
+  overflow: auto
+}
+
+/* =============== FOOTER =============== */
+
+footer {
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+}
+
+/* =============== TEMPORARY =============== */
+
+/*
 .emscripten {
   padding-right: 0;
   margin-left: auto;
@@ -19,11 +176,6 @@ div.emscripten {
 }
 div.emscripten_border {
   border: 1px solid black;
-}
-/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-canvas.emscripten {
-  border: 0px none;
-  background-color: black;
 }
 .spinner {
   height: 50px;
@@ -56,3 +208,4 @@ canvas.emscripten {
   from {transform: rotate(0deg);}
   to {transform: rotate(360deg);}
 }
+*/

@@ -14,7 +14,7 @@
 
   <body>
     <!-- Temporary -->
-    <figure style="overflow:visible;" id="spinner">
+    <!-- <figure style="overflow:visible;" id="spinner">
       <div class="spinner"></div><center style="margin-top:0.5em"><strong>emscripten</strong></center>
     </figure>
     <div class="emscripten" id="status">
@@ -23,71 +23,76 @@
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>
     </div>
-    <hr/>
+    <hr/> -->
     <!---->
 
     <header>
       <!-- Code snippets to choose from. -->
       <!-- Their `value`s are identical to the properties in `snippets.js`. -->
-      <div>
-        <div>
-          <label for="loops-snippet">Loops</label>
+      <div class="th-tabs">
+        <h1 class="th-title">
+          Thusly<br>Playground
+        </h1>
+        <div class="th-tab">
           <input
             type="radio"
-            id="loops-snippet"
+            id="th-loops-snippet"
             name="snippet"
             value="loops"
             checked
           />
+          <label for="th-loops-snippet">Loops</label>
         </div>
-        <div>
-          <label for="selection-snippet">Selection</label>
+        <div class="th-tab">
           <input
             type="radio"
-            id="selection-snippet"
+            id="th-selection-snippet"
             name="snippet"
             value="selection"
           />
+          <label for="th-selection-snippet">Selection</label>
         </div>
-        <div>
-          <label for="block-snippet">Standalone Block</label>
+        <div class="th-tab">
           <input
             type="radio"
-            id="block-snippet"
+            id="th-block-snippet"
             name="snippet"
             value="standaloneBlock"
           />
+          <label for="th-block-snippet">Block</label>
         </div>
       </div>
       <!-- The `Run` button and debug options. -->
-      <div>
-        <div>
-          <label for="debug-compilation">Bytecode</label>
+      <div class="th-operations">
+        <div class="th-operation">
+          <label for="th-debug-compilation">Bytecode</label>
           <input
             type="checkbox"
-            id="debug-compilation"
+            id="th-debug-compilation"
             name="debug option"
+            checked
           />
         </div>
-        <div>
-          <label for="debug-execution">Execution</label>
+        <div class="th-operation">
+          <label for="th-debug-execution">Execution</label>
           <input
             type="checkbox"
-            id="debug-execution"
+            id="th-debug-execution"
             name="debug option"
           />
         </div>
         <!-- The button will become enabled when `Module.onRuntimeInitialized`. -->
-        <button id="thusly-run" disabled>
-          Run
+        <button id="th-run" disabled style="cursor: not-allowed;">
+          <div class="th-run-icon"></div>
         </button>
       </div>
     </header>
+    <div class="th-separator"></div>
 
     <!-- The editor and output. -->
     <main>
-      <div id="editor"></div>
-      <textarea readonly class="emscripten" id="output" rows="10"></textarea>
+      <div id="th-editor"></div>
+      <textarea readonly id="th-output" rows="10"></textarea>
     </main>
 
     <!-- Extra information. -->

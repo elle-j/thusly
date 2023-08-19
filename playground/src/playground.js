@@ -1,14 +1,14 @@
 import { editor } from "./editor_setup.js";
 import { snippets } from "./snippets.js";
 
-const runButtonElement = document.getElementById("thusly-run");
-const debugCompilationElement = document.getElementById("debug-compilation");
-const debugExecutionElement = document.getElementById("debug-execution");
-const outputElement = document.getElementById("output");
+const runButtonElement = document.getElementById("th-run");
+const debugCompilationElement = document.getElementById("th-debug-compilation");
+const debugExecutionElement = document.getElementById("th-debug-execution");
+const outputElement = document.getElementById("th-output");
 
-const loopsSnippetElement = document.getElementById("loops-snippet");
-const selectionSnippetElement = document.getElementById("selection-snippet");
-const blockSnippetElement = document.getElementById("block-snippet");
+const loopsSnippetElement = document.getElementById("th-loops-snippet");
+const selectionSnippetElement = document.getElementById("th-selection-snippet");
+const blockSnippetElement = document.getElementById("th-block-snippet");
 
 runButtonElement.addEventListener("click", () => {
   clearOutput();

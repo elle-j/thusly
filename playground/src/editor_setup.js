@@ -5,7 +5,7 @@ const languageId = "thusly";
 const editorConfiguration = {
   // name: "overview.thusly",
   language: languageId,
-  // extraEditorClassName: "thusly-editor",
+  // extraEditorClassName: "",
   // theme: "TODO",
   autoClosingBrackets: true,
   automaticLayout: true,
@@ -173,6 +173,6 @@ const tokensProvider = {
 monaco.languages.register({ id: languageId });
 monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
 monaco.languages.setMonarchTokensProvider(languageId, tokensProvider);
-const editor = monaco.editor.create(document.getElementById("editor"), editorConfiguration);
+const editor = monaco.editor.create(document.getElementById("th-editor"), editorConfiguration);
 
 export { editor };
