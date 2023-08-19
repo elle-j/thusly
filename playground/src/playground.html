@@ -13,6 +13,7 @@
   </head>
 
   <body>
+    <!-- Temporary -->
     <figure style="overflow:visible;" id="spinner">
       <div class="spinner"></div><center style="margin-top:0.5em"><strong>emscripten</strong></center>
     </figure>
@@ -23,11 +24,32 @@
       <progress value="0" max="100" id="progress" hidden=1></progress>
     </div>
     <hr/>
+    <!---->
+
+
+    <div>
+      <div>
+        <div>
+          <label for="debug-compilation">Bytecode</label>
+          <input
+            type="checkbox"
+            id="debug-compilation"
+            name="debug-compilation"
+          />
+        </div>
+        <label for="debug-execution">Execution</label>
+        <input
+          type="checkbox"
+          id="debug-execution"
+          name="debug-execution"
+        />
+      </div>
+      <button id="run">
+        Run
+      </button>
+    </div>
     <div id="editor"></div>
     <textarea readonly class="emscripten" id="output" rows="10"></textarea>
-    <button id="run">
-      Run
-    </button>
 
     <!-- Load the Wasm setup first. -->
     <script src="wasm_setup.js" type="text/javascript"></script>

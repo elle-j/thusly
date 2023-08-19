@@ -44,15 +44,15 @@ var Module = {
 
   // Invoked when the runtime is fully initialized; i.e., when compiled code is safe to run.
   onRuntimeInitialized: () => {
-    run = function(code) {
+    run = function(code, debugCompilation, debugExecution) {
       if (!code)
         return;
 
       Module.ccall(
-        "run_source",   // C function name
-        "int",          // Return type
-        ["string"],     // Argument types
-        [code],         // Arguments
+        "run_source",                             // C function name
+        "int",                                    // Return type
+        ["string", "boolean", "boolean"],         // Argument types
+        [code, debugCompilation, debugExecution], // Arguments
       );
     }
   },
