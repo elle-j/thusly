@@ -1,4 +1,6 @@
 const outputElement = document.getElementById("output");
+const runElement = document.getElementById("run");
+
 const statusElement = document.getElementById("status");
 const progressElement = document.getElementById("progress");
 const spinnerElement = document.getElementById("spinner");
@@ -44,17 +46,18 @@ var Module = {
 
   // Invoked when the runtime is fully initialized; i.e., when compiled code is safe to run.
   onRuntimeInitialized: () => {
-    run = function(code) {
+    run = function(code, debugCompilation, debugExecution) {
       if (!code)
         return;
 
       Module.ccall(
-        "run_source",   // C function name
-        "int",          // Return type
-        ["string"],     // Argument types
-        [code],         // Arguments
+        "run_source",                             // C function name
+        "int",                                    // Return type
+        ["string", "boolean", "boolean"],         // Argument types
+        [code, debugCompilation, debugExecution], // Arguments
       );
-    }
+    };
+    runElement.removeAttribute("disabled");
   },
 
   setStatus: (text) => {
