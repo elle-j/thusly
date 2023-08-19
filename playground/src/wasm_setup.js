@@ -1,4 +1,6 @@
 const outputElement = document.getElementById("output");
+const runElement = document.getElementById("run");
+
 const statusElement = document.getElementById("status");
 const progressElement = document.getElementById("progress");
 const spinnerElement = document.getElementById("spinner");
@@ -54,7 +56,8 @@ var Module = {
         ["string", "boolean", "boolean"],         // Argument types
         [code, debugCompilation, debugExecution], // Arguments
       );
-    }
+    };
+    runElement.removeAttribute("disabled");
   },
 
   setStatus: (text) => {
