@@ -92,6 +92,10 @@ const tokensProvider = {
 
   digits: /\d+(_+\d+)*/,
 
+  charsStartWithLowerCase: /[a-z_@][\w$]*/,
+
+  charsStartWithUpperCase: /[A-Z@][\w\$]*/,
+
   tokenizer: {
     root: [
       [/[{}]/, "delimiter.bracket"],
@@ -101,7 +105,7 @@ const tokensProvider = {
     common: [
       // Identifiers and keywords.
       [
-        /[a-z_@][\w$]*/,
+        /@charsStartWithLowerCase/,
         {
           cases: {
             "@keywords": "keyword",
@@ -110,13 +114,13 @@ const tokensProvider = {
         },
       ],
       // [/[A-Z][\w\$]*/, "type.identifier"], // Shows class names nicely
-      [/[A-Z_@][\w\$]*/, "identifier"],
+      [/@charsStartWithUpperCase/, "identifier"],
 
       // Whitespace.
       { include: "@whitespace" },
 
       // Delimiters and operators.
-      [/[()\[\]]/, "@brackets"],
+      [/[{}()]/, "@brackets"],
       // [/(?:=([^=]))/, "delimiter"],
       [
         /@symbols/,
@@ -137,7 +141,7 @@ const tokensProvider = {
 
       // Strings.
       [/"([^"\\]|\\.)*$/, "string.invalid"], // Non-teminated string.
-      [/"/, "string", "@string_double"],
+      [/"/, "string", "@stringDouble"],
     ],
 
     whitespace: [
@@ -149,7 +153,7 @@ const tokensProvider = {
       // [/\/\/.*$/, "comment"],
     ],
 
-    string_double: [
+    stringDouble: [
       [/[^\\"]+/, "string"],
       [/"/, "string", "@pop"],
     ],
@@ -162,7 +166,7 @@ const tokensProvider = {
   }
 };
 
-// monaco.editor.defineTheme("", );
+// monaco.editor.defineTheme("TODO", );
 monaco.languages.register({ id: languageId });
 monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
 monaco.languages.setMonarchTokensProvider(languageId, tokensProvider);
