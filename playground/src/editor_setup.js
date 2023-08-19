@@ -3,12 +3,15 @@ import { snippets } from "./snippets.js";
 const languageId = "thusly";
 
 const editorConfiguration = {
-  name: "overview.thusly",
+  // name: "overview.thusly",
   language: languageId,
+  // extraEditorClassName: "thusly-editor",
   // theme: "TODO",
   autoClosingBrackets: true,
   automaticLayout: true,
-  value: snippets.overview,
+  detectIndentation: true,
+  tabSize: 2,
+  value: snippets.loops,
 };
 
 const languageConfiguration = {

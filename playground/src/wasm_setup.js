@@ -1,5 +1,5 @@
 const outputElement = document.getElementById("output");
-const runElement = document.getElementById("run");
+const runElement = document.getElementById("thusly-run");
 
 const statusElement = document.getElementById("status");
 const progressElement = document.getElementById("progress");
@@ -29,7 +29,7 @@ function getPrintFn(/*isError = false*/) {
 
     outputElement.value += text + "\n";
     // Go to bottom
-    outputElement.scrollTop = outputElement.scrollHeight;
+    // outputElement.scrollTop = outputElement.scrollHeight;
   };
 };
 

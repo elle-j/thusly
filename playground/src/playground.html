@@ -26,31 +26,76 @@
     <hr/>
     <!---->
 
-
-    <div>
+    <header>
+      <!-- Code snippets to choose from. -->
+      <!-- Their `value`s are identical to the properties in `snippets.js`. -->
+      <div>
+        <div>
+          <label for="loops-snippet">Loops</label>
+          <input
+            type="radio"
+            id="loops-snippet"
+            name="snippet"
+            value="loops"
+            checked
+          />
+        </div>
+        <div>
+          <label for="selection-snippet">Selection</label>
+          <input
+            type="radio"
+            id="selection-snippet"
+            name="snippet"
+            value="selection"
+          />
+        </div>
+        <div>
+          <label for="block-snippet">Standalone Block</label>
+          <input
+            type="radio"
+            id="block-snippet"
+            name="snippet"
+            value="standaloneBlock"
+          />
+        </div>
+      </div>
+      <!-- The `Run` button and debug options. -->
       <div>
         <div>
           <label for="debug-compilation">Bytecode</label>
           <input
             type="checkbox"
             id="debug-compilation"
-            name="debug-compilation"
+            name="debug option"
           />
         </div>
-        <label for="debug-execution">Execution</label>
-        <input
-          type="checkbox"
-          id="debug-execution"
-          name="debug-execution"
-        />
+        <div>
+          <label for="debug-execution">Execution</label>
+          <input
+            type="checkbox"
+            id="debug-execution"
+            name="debug option"
+          />
+        </div>
+        <!-- The button will become enabled when `Module.onRuntimeInitialized`. -->
+        <button id="thusly-run" disabled>
+          Run
+        </button>
       </div>
-      <!-- The button will become enabled when `Module.onRuntimeInitialized`. -->
-      <button id="run" disabled>
-        Run
-      </button>
-    </div>
-    <div id="editor"></div>
-    <textarea readonly class="emscripten" id="output" rows="10"></textarea>
+    </header>
+
+    <!-- The editor and output. -->
+    <main>
+      <div id="editor"></div>
+      <textarea readonly class="emscripten" id="output" rows="10"></textarea>
+    </main>
+
+    <!-- Extra information. -->
+    <footer>
+      <a href="https://github.com/elle-j/thusly" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
+
+    <!-- Scripts. -->
 
     <!-- Load the Wasm setup first. -->
     <script src="wasm_setup.js" type="text/javascript"></script>
