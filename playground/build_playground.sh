@@ -14,9 +14,9 @@ then
   exit 1
 fi
 
-output_dir="playground/dist"
-source_dir="playground/src"
-interpreter_dir=src
+output_dir="dist"
+source_dir="src"
+interpreter_dir="../src"
 
 echo -e "\nCreating directory \`$output_dir\` for the distribution files..."
 rm -rf $output_dir
