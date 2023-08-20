@@ -25,23 +25,36 @@ The instructions below show how to build and run the playground locally on your 
 ### Prerequisites
 
 * [Emscripten](https://emscripten.org/docs/getting_started/downloads.html#download-and-install)
-  * Download the recommended emsdk.
-  * Don't forget to activate PATH and other environment variables in your terminal after installing it.
-    ```sh
-    source path/to/emsdk_env.sh
-    ```
+  * If you do not already have `emcc` installed, you can select the build script below that includes the download and installation process.
+    * This requires [Git](https://git-scm.com/downloads).
+  * If you'd rather install it yourself, [download](https://emscripten.org/docs/getting_started/downloads.html#download-and-install) the recommended emsdk.
+    * Don't forget to activate PATH and other environment variables in your terminal after installing it.
+      ```sh
+      source path/to/emsdk_env.sh
+      ```
 * [Node.js](https://nodejs.org/en/download)
 
 ### Building the Project
 
-Run the below command to compile the C source code to WebAssembly and generate browser distribution files to `dist`.
+Run **one** of the below commands to compile the C source code to WebAssembly and generate browser distribution files to `dist`.
+
+**A: Includes downloading and installing Emscripten:**
+
+This will download Emscripten to a directory called `emsdk`.
+
+```sh
+./install_emcc_and_build_playground.sh
+```
+
+**or B: Does NOT download and install Emscripten:**
 
 ```sh
 ./build_playground.sh
 ```
 
-> **If permission is denied**, first add executable permission to the build script by running:
-> `chmod +x build_playground.sh`.
+> **If permission is denied**, first add executable permission to the build script by running:<br>
+> `chmod +x build_playground.sh` or<br>
+> `chmod +x install_emcc_and_build_playground.sh`.
 
 ### Starting the Playground
 
