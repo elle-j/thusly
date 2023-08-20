@@ -6,6 +6,7 @@ A general-purpose programming language coming to life through a custom one-pass 
 
 ## Table of Contents
 
+- [Playground](#playground)
 - [Language](#language)
     - [Characteristics](#characteristics)
     - [Syntax](#syntax)
@@ -19,6 +20,12 @@ A general-purpose programming language coming to life through a custom one-pass 
     - [Building the Project](#building-the-project)
     - [Running Code](#running-code)
 - [License](#license)
+
+## Playground
+
+Try out Thusly in the [interactive playground](./playground).
+
+![Thusly Playground](design/media/thusly-playground.png)
 
 ## Language
 

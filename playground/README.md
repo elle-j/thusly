@@ -2,9 +2,25 @@
 
 An interactive playground in the browser for the Thusly programming language.
 
-**---> THIS README IS A WORK IN PROGRESS <---**
+## Try Out the Playground
+
+TODO: Will add link to live URL.
+
+### Screenshot
+
+![Thusly Playground](../design/media/thusly-playground.png)
+
+### Functionality
+
+* Write Thusly code in VS Code's Monaco Editor.
+* Execute Thusly code.
+  * Enable `Bytecode` to see the compilation bytecode output.
+  * Enable `Execution` to see the VM execution trace.
+* Choose between pre-made Thusly code examples or write everything yourself.
 
 ## Getting Started
+
+The instructions below show how to build and run the playground locally on your machine. To try out the playground without building it, see 
 
 ### Prerequisites
 
@@ -18,7 +34,7 @@ An interactive playground in the browser for the Thusly programming language.
 
 ### Building the Project
 
-Run the below command to compile the C source code to WebAssembly and generate browser distribution files to `playground/dist`.
+Run the below command to compile the C source code to WebAssembly and generate browser distribution files to `dist`.
 
 ```sh
 ./build_playground.sh
@@ -29,7 +45,7 @@ Run the below command to compile the C source code to WebAssembly and generate b
 
 ### Starting the Playground
 
-Once you have [built](#building-the-project) the project you can open `playground/dist/index.html` in a browser via an HTTP server.
+Once you have [built](#building-the-project) the project you can open `dist/index.html` in a browser via an HTTP server.
 
 > **HTTP Server:**
 >
