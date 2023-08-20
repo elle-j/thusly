@@ -13,7 +13,8 @@ A general-purpose programming language coming to life through a custom one-pass 
 - [Milestones](#milestones)
     - [Milestone 1 - Expressions](#milestone-1-support-arithmetic-comparison-and-equality-operations)
     - [Milestone 2 - Variables and Control Flow](#milestone-2-support-variables-and-control-flow)
-    - [Milestone 3 - First-Class Functions](#milestone-3-support-first-class-functions)
+    - [Milestone 3 - Provide an Interactive Playground](#milestone-3-provide-an-interactive-playground)
+    - [Milestone 4 - First-Class Functions](#milestone-4-support-first-class-functions)
     - [Example Input](#example-input)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -198,7 +199,11 @@ The development of both the language and the surrounding documentation is curren
 - [ ] Range comparison expression can be evaluated (`<value> in <min>..<max>`)
 - [ ] TODO (more milestones will be added here)
 
-### Milestone 3: Support first-class functions
+### Milestone 3: Provide an interactive playground
+
+- [x] A Thusly VM can run and execute code in the browser via an interactive playground.
+
+### Milestone 4: Support first-class functions
 
 - [ ] Functions can be defined and invoked.
 - [ ] Closures are supported.

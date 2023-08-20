@@ -2,9 +2,9 @@
 
 An interactive playground in the browser for the Thusly programming language.
 
-## Try Out the Playground
+## Live Playground
 
-TODO: Will add link to live URL.
+Go to [thusly.netlify.app](https://thusly.netlify.app/) to start writing Thusly!
 
 ### Screenshot
 
@@ -20,7 +20,7 @@ TODO: Will add link to live URL.
 
 ## Getting Started
 
-The instructions below show how to build and run the playground locally on your machine. To start the live playground without building it, see [Try Out the Playground](#try-out-the-playground).
+The instructions below show how to build and run the playground locally on your machine. To start the live playground without building it, see [Live Playground](#live-playground).
 
 ### Prerequisites
 
