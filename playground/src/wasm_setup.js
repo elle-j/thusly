@@ -1,9 +1,9 @@
-const outputElement = document.getElementById("output");
-const runElement = document.getElementById("thusly-run");
+const outputElement = document.getElementById("th-output");
+const runElement = document.getElementById("th-run");
 
-const statusElement = document.getElementById("status");
-const progressElement = document.getElementById("progress");
-const spinnerElement = document.getElementById("spinner");
+// const statusElement = document.getElementById("status");
+// const progressElement = document.getElementById("progress");
+// const spinnerElement = document.getElementById("spinner");
 
 // Will be set `onRuntimeInitialized`.
 function run(code) {}
@@ -58,39 +58,40 @@ var Module = {
       );
     };
     runElement.removeAttribute("disabled");
+    runElement.style.cursor = "pointer";
   },
 
   setStatus: (text) => {
-    if (!Module.setStatus.last)
-      Module.setStatus.last = { time: Date.now(), text: "" };
+    // if (!Module.setStatus.last)
+    //   Module.setStatus.last = { time: Date.now(), text: "" };
 
-    if (text === Module.setStatus.last.text)
-      return;
+    // if (text === Module.setStatus.last.text)
+    //   return;
 
-    const progressUpdate = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-    const now = Date.now();
-    const updateTooSoon = now - Module.setStatus.last.time < 30;
-    if (progressUpdate && updateTooSoon)
-      return;
+    // const progressUpdate = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+    // const now = Date.now();
+    // const updateTooSoon = now - Module.setStatus.last.time < 30;
+    // if (progressUpdate && updateTooSoon)
+    //   return;
 
-    Module.setStatus.last.time = now;
-    Module.setStatus.last.text = text;
+    // Module.setStatus.last.time = now;
+    // Module.setStatus.last.text = text;
 
-    if (progressUpdate) {
-      text = progressUpdate[1];
-      progressElement.value = parseInt(progressUpdate[2]) * 100;
-      progressElement.max = parseInt(progressUpdate[4]) * 100;
-      progressElement.hidden = false;
-      spinnerElement.hidden = false;
-    }
-    else {
-      progressElement.value = null;
-      progressElement.max = null;
-      progressElement.hidden = true;
-      if (!text)
-        spinnerElement.hidden = true;
-    }
-    statusElement.innerHTML = text;
+    // if (progressUpdate) {
+    //   text = progressUpdate[1];
+    //   progressElement.value = parseInt(progressUpdate[2]) * 100;
+    //   progressElement.max = parseInt(progressUpdate[4]) * 100;
+    //   progressElement.hidden = false;
+    //   spinnerElement.hidden = false;
+    // }
+    // else {
+    //   progressElement.value = null;
+    //   progressElement.max = null;
+    //   progressElement.hidden = true;
+    //   if (!text)
+    //     spinnerElement.hidden = true;
+    // }
+    // statusElement.innerHTML = text;
   },
 
   totalDependencies: 0,
@@ -107,8 +108,8 @@ var Module = {
 Module.setStatus("Downloading...");
 
 window.onerror = () => {
-  Module.setStatus("Exception thrown, see JavaScript console");
-  spinnerElement.style.display = "none";
+  // Module.setStatus("Exception thrown, see JavaScript console");
+  // spinnerElement.style.display = "none";
   Module.setStatus = (text) => {
     if (text)
       console.error("[post-exception status] " + text);

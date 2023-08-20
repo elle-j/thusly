@@ -1,9 +1,335 @@
-#editor {
-  width: 800px;
-  height: 600px;
-  border: 1px solid grey;
+:root {
+  --black: #111111;
+  --purple: #1e1e3f;
+  --light-purple: #2d2154;
+  --sand: burlywood;
+  --gray: #787878;
+  --gray-dark: #575757;
+  --light-gray: #e7e7e7;
+  
+  --font-size: 12px;
+
+  --transition: all 120ms ease-in;
+
+  --width-level-md: 800px;
+  --width-level-sm: 550px;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-width: thin;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--purple);
+  color: var(--light-gray);
+  font-family: sans-serif;
+  font-size: var(--font-size);
+  letter-spacing: 0.8px;
+  overflow-x: hidden;
+}
+
+input {
+  appearance: none;
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: none;
+  cursor: pointer;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =============== HEADER =============== */
+
+header {
+  height: 75px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-dark);
+}
+
+.th-title {
+  align-self: center;
+  margin-right: 12px;
+  color: var(--gray);
+  font-size: var(--font-size);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.th-tabs {
+  display: flex;
+}
+
+.th-tab {
+  margin: 0 10px;
+  padding: 6px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--gray-dark);
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.th-tab-heading {
+  margin-bottom: 5px;
+  color: var(--gray);
+  font-size: calc(var(--font-size) - 2px);
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.th-tab-content {
+  display: flex;
+  align-items: center;
+}
+
+.th-tab * {
+  cursor: pointer;
+}
+
+.th-tab input {
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 1px solid var(--sand);
+  border-radius: 50%;
+  background-color: transparent;
+  transition: var(--transition);
+}
+
+.th-tab input:checked {
+  background-color: var(--sand);
+}
+
+.th-operations {
+  display: flex;
+  align-items: center;
+}
+
+.th-operation {
+  margin: 0 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.th-operation label {
+  margin-bottom: 6px;
+  font-size: calc(var(--font-size) - 1px);
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.th-toggle {
+  position: relative;
+  border: 1px solid var(--gray);
+  border-radius: 2rem;
+}
+
+.th-toggle::before,
+.th-toggle::after,
+.th-toggle:checked::before,
+.th-toggle:checked::after {
+  transition: var(--transition);
+}
+
+.th-toggle::after {
+  content: "";
+  width: 50px;
+  height: 20px;
+  display: inline-block;
+}
+
+.th-toggle::before {
+  position: absolute;
+  left: 2px;
+  top: 3px;
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: block;
+  border: 1px solid var(--sand);
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.th-toggle:checked::before {
+  left: auto;
+  right: 2px;
+  background-color: var(--sand);
+}
+
+#th-run {
+  height: 40px;
+  width: 40px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 15px -6px var(--black);
+  background-color: var(--light-gray);
+  font-size: 100%;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+}
+
+#th-run:hover {
+  background-color: white;
+}
+
+.th-run-icon {
+  height: 0;
+  width: 0;
+  margin: auto;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 14px solid var(--black);
+}
+
+/* =============== MAIN =============== */
+
+main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+#th-editor {
+  width: 50%;
+  border-right: 1px solid var(--gray-dark);
+}
+
+#th-output {
+  width: 50%;
+  padding: 22px 40px 0;
+  white-space: pre;
+  resize: none;
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: none;
+	background-color: var(--light-purple);
+  color: white;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 22px;
+  overflow: auto;
+}
+
+/* =============== FOOTER =============== */
+
+footer {
+  height: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid var(--gray-dark);
+}
+
+.th-social-icon {
+  width: 30px;
+  height: 30px;
+  margin-top: 2px;
+}
+
+/* =============== MEDIA QUERIES =============== */
+
+/* Needed to have these top-level rather than nested in */
+/* each relevant element due to not working on Firefox. */
+
+/* @media (max-width: var(--width-level-md)) { */
+@media (max-width: 800px) {
+  header {
+    height: max-content;
+    padding: 15px 20px;
+    flex-direction: column;
+  }
+
+  .th-tabs {
+    margin-bottom: 15px;
+  }
+}
+
+/* @media (max-width: var(--width-level-sm)) { */
+@media (max-width: 550px) {
+  header {
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  .th-title {
+    margin-right: 0;
+  }
+
+  .th-tabs {
+    margin-bottom: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .th-tabs > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  .th-operations {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .th-operations > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  #th-run {
+    margin-left: 0;
+  }
+
+  main {
+    flex-direction: column;
+  }
+
+  #th-editor {
+    width: 100%;
+    flex: 0.5;
+    border-right: none;
+    border-bottom: 1px solid var(--gray-dark);
+  }
+
+  #th-output {
+    width: 100%;
+    flex: 0.5;
+  }
+}
+
+/* =============== TEMPORARY =============== */
+
+/*
 .emscripten {
   padding-right: 0;
   margin-left: auto;
@@ -19,11 +345,6 @@ div.emscripten {
 }
 div.emscripten_border {
   border: 1px solid black;
-}
-/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-canvas.emscripten {
-  border: 0px none;
-  background-color: black;
 }
 .spinner {
   height: 50px;
@@ -56,3 +377,4 @@ canvas.emscripten {
   from {transform: rotate(0deg);}
   to {transform: rotate(360deg);}
 }
+*/
