@@ -3,14 +3,24 @@ import { snippets } from "./snippets.js";
 const languageId = "thusly";
 
 const editorConfiguration = {
-  // name: "overview.thusly",
-  language: languageId,
-  // extraEditorClassName: "",
-  // theme: "TODO",
   autoClosingBrackets: true,
+  autoIndent: true,
   automaticLayout: true,
+  "bracketPairColorization.enabled": false,
   detectIndentation: true,
-  tabSize: 2,
+  fontFamily: "monospace",
+  fontSize: 14,
+  // fontWeight: "normal",
+  language: languageId,
+  letterSpacing: 0.5,
+  minimap: { enabled: true },
+  padding: { top: 30 },
+  scrollbar: {
+    horizontalScrollbarSize: 5,
+    verticalScrollbarSize: 5,
+  },
+  tabSize: 4,
+  theme: languageId,
   value: snippets.loops,
 };
 
@@ -169,7 +179,48 @@ const tokensProvider = {
   }
 };
 
-// monaco.editor.defineTheme("TODO", );
+const colors = {
+  gold: "#deb26f",
+  gray: "#a7a7a7",
+  pink: "#c692e9",
+  purple: "#81a8fd",
+  purpleDark: "#1e1e3f",
+  red: "#cf3b3b",
+  white: "#ffffff",
+};
+
+const thuslyTheme = {
+  base: "vs-dark",
+  inherit: false,
+
+  colors: {
+    "editor.background": colors.purpleDark,
+    // "editor.foreground": colors.white,
+  },
+
+  rules: [
+    { token: "", foreground: colors.white, fontStyle: "bold" },
+    { token: "keyword", foreground: colors.pink },
+    { token: "punctuation", foreground: colors.white },
+    { token: "variable", foreground: colors.white },
+    { token: "variable.predefined", foreground: colors.white },
+    { token: "variable.function", foreground: colors.pink },
+    { token: "string", foreground: colors.gold },
+    { token: "number", foreground: colors.gold },
+    { token: "boolean", foreground: colors.gold },
+    // { token: "constant", foreground: colors.gold },
+    { token: "comment", foreground: colors.gray },
+    // { token: "type", foreground: "" },
+    { token: "delimiter", foreground: colors.white },
+    { token: "entity.name.function", foreground: colors.pink }, // <--
+    // { token: "key", foreground: colors.white },
+    // { token: "emphasis", fontStyle: "italic" },
+    // { token: "strong", fontStyle: "bold" },
+    { token: "invalid", foreground: colors.red },
+  ],
+}
+
+monaco.editor.defineTheme(languageId, thuslyTheme);
 monaco.languages.register({ id: languageId });
 monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
 monaco.languages.setMonarchTokensProvider(languageId, tokensProvider);

@@ -47,6 +47,7 @@ files_to_compile="$source_dir/main_wasm.c $interpreter_dir/*.c"
 #   (Adding this option until `$interpreter_dir/main.c` can be removed from `$files_to_compile`.)
 emcc $files_to_compile -o $output_dir/index.html -O3 --shell-file $source_dir/playground.html -s NO_EXIT_RUNTIME=1 -s "EXPORTED_RUNTIME_METHODS=['ccall']" --no-entry
 cp $source_dir/*.js $output_dir
+# TODO: Run through a CSS post-processor to add vendor prefixes.
 cp $source_dir/*.css $output_dir
 echo "Done!"
 
