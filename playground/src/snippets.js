@@ -3,7 +3,7 @@ export const snippets = {
 
 // Bounded loop
 
-foreach value in 0..5
+foreach value in 0..3
     @out value
 end
 
@@ -11,7 +11,7 @@ end
 
 var i: 0
 
-while i < 5 {i +: 1}
+while i < 3 {i +: 1}
     @out i
 end
 `,
@@ -20,7 +20,7 @@ end
 
 // Selection
 
-var age: 30
+var age: 35
 if age < 30
     @out "You are young"
 else
