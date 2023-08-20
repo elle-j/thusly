@@ -20,3 +20,4 @@ TODO_ADD_SEMANTICS
 |:----------------------------------------------------|:----:|:--------------:|
 | Updated the README                                  |      |                |
 | Added the new statement as a synchronization point  |      |                |
+| Updated the Playground                              |      |                |
