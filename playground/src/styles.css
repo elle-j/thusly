@@ -10,6 +10,9 @@
   --font-size: 12px;
 
   --transition: all 120ms ease-in;
+
+  --width-level-md: 800px;
+  --width-level-sm: 550px;
 }
 
 * {
@@ -251,6 +254,77 @@ footer {
   width: 30px;
   height: 30px;
   margin-top: 2px;
+}
+
+/* =============== MEDIA QUERIES =============== */
+
+/* Needed to have these top-level rather than nested in */
+/* each relevant element due to not working on Firefox. */
+
+/* @media (max-width: var(--width-level-md)) { */
+@media (max-width: 800px) {
+  header {
+    height: max-content;
+    padding: 15px 20px;
+    flex-direction: column;
+  }
+
+  .th-tabs {
+    margin-bottom: 15px;
+  }
+}
+
+/* @media (max-width: var(--width-level-sm)) { */
+@media (max-width: 550px) {
+  header {
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  .th-title {
+    margin-right: 0;
+  }
+
+  .th-tabs {
+    margin-bottom: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .th-tabs > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  .th-operations {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .th-operations > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  #th-run {
+    margin-left: 0;
+  }
+
+  main {
+    flex-direction: column;
+  }
+
+  #th-editor {
+    width: 100%;
+    flex: 0.5;
+    border-right: none;
+    border-bottom: 1px solid var(--gray-dark);
+  }
+
+  #th-output {
+    width: 100%;
+    flex: 0.5;
+  }
 }
 
 /* =============== TEMPORARY =============== */
