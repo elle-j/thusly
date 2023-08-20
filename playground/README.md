@@ -20,7 +20,7 @@ TODO: Will add link to live URL.
 
 ## Getting Started
 
-The instructions below show how to build and run the playground locally on your machine. To try out the playground without building it, see 
+The instructions below show how to build and run the playground locally on your machine. To start the live playground without building it, see [Try Out the Playground](#try-out-the-playground).
 
 ### Prerequisites
 
