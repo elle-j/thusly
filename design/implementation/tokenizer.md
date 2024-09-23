@@ -45,17 +45,24 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
 
 ### Example: Arithmetic
 
-Source code:
+<u>Source code:</u>
 
 ```
 1.2 + 3 * 4 / -5
 ```
 
-Expected tokens:
+<u>Expected tokens:</u>
 
 ![Thusly generated tokens](../media/thusly-design-example-arithmetic-tokens.svg)
 
+<u>Tokenization process:</u>
+
 **Token #1** (expected lexeme: `"1.2"`):
+
+```
+1.2
+^
+```
 
 ![Thusly tokenizer scanning number](../media/thusly-design-example-arithmetic-scan-number.svg)
 
@@ -73,6 +80,11 @@ Token:
 
 **Token #2** (expected lexeme: `"+"`):
 
+```
+1.2 +
+    ^
+```
+
 1. The `start` and `current` pointers point to `"+"`.
 1. Since Thusly supports augmented assignment via the `+:` operator, it looks ahead one character to see if it is a `:`. Since the next character is not a `:`, only `+` is consumed.
 1. The token is generated:
@@ -84,6 +96,11 @@ Token:
 ```
 
 **Token #3** (expected lexeme: `"3"`):
+
+```
+1.2 + 3
+      ^
+```
 
 1. The `start` and `current` pointers point to `"3"`.
 1. Only `"3"` is consumed since consuming the next character would not produce a valid number.
@@ -97,6 +114,11 @@ Token:
 
 **Token #4** (expected lexeme: `"*"`):
 
+```
+1.2 + 3 *
+        ^
+```
+
 1. The `start` and `current` pointers point to `"*"`.
 1. Since Thusly supports augmented assignment via the `*:` operator, it looks ahead one character to see if it is a `:`. Since the next character is not a `:`, only `*` is consumed.
 1. The token is generated:
@@ -108,6 +130,11 @@ Token:
 ```
 
 **Token #5** (expected lexeme: `"4"`):
+
+```
+1.2 + 3 * 4
+          ^
+```
 
 1. The `start` and `current` pointers point to `"4"`.
 1. Only `"4"` is consumed since consuming the next character would not produce a valid number.
@@ -121,6 +148,11 @@ Token:
 
 **Token #6** (expected lexeme: `"/"`):
 
+```
+1.2 + 3 * 4 /
+            ^
+```
+
 1. The `start` and `current` pointers point to `"/"`.
 1. Since Thusly supports augmented assignment via the `/:` operator, it looks ahead one character to see if it is a `:`. Since the next character is not a `:`, only `/` is consumed.
 1. The token is generated:
@@ -132,6 +164,11 @@ Token:
 ```
 
 **Token #7** (expected lexeme: `"-"`):
+
+```
+1.2 + 3 * 4 / -
+              ^
+```
 
 1. The `start` and `current` pointers point to `"-"`.
 1. Since Thusly supports augmented assignment via the `-:` operator, it looks ahead one character to see if it is a `:`. Since the next character is not a `:`, only `-` is consumed.
@@ -145,6 +182,11 @@ Token:
 
 **Token #8** (expected lexeme: `"5"`):
 
+```
+1.2 + 3 * 4 / -5
+               ^
+```
+
 1. The `start` and `current` pointers point to `"5"`.
 1. Only `"5"` is consumed since we are now at the end of the string.
 1. The token is generated:
@@ -156,6 +198,11 @@ Token:
 ```
 
 **Token #9** (expected lexeme: null byte character):
+
+```
+1.2 + 3 * 4 / -5
+                 ^
+```
 
 1. The `start` and `current` pointers point to the terminating null byte character in the string.
 1. Since this signifies the end of the source file, an end-of-file sentinel token is also generated:
