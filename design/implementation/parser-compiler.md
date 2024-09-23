@@ -65,10 +65,8 @@ Hence, when parsing literals of varying size, such as strings, as well as litera
 
 These examples demonstrate some of the details of the parser's and compiler's steps when processing a token.
 
-> [!INFO]
-> **Processing Strategy:** To get an overview of the parsing strategy used, see [Top-Down Operator Precedence Parsing](#top-down-operator-precedence-parsing).
->
-> **Bytecode format:** To get an overview of the bytecode format, see [bytecode.md](./bytecode.md).
+> [!TIP]
+> To more easily follow along in the examples, you can read the overviews of Thusly's [parsing strategy](#top-down-operator-precedence-parsing) and [bytecode format](./bytecode.md).
 
 * Example: [Arithmetic](#example-arithmetic)
 
@@ -106,9 +104,9 @@ These examples demonstrate some of the details of the parser's and compiler's st
 Current state:
 * Constant pool:
 
-|        | Index 0 | ... |
-|:-------|:-------:|:---:|
-| Value  | 1.2     |     |
+|        | Index 0 |
+|:-------|:-------:|
+| Value  | 1.2     |
 
 * Bytecode:
 
