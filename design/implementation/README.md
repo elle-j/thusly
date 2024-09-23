@@ -17,7 +17,7 @@ Thusly is a dynamic and general-purpose programming language implemented using f
 * Compiler
 * Virtual machine
 
-> **TODO:** INSERT DIAGRAM
+![Thusly architectural overview](../media/thusly-design-architectural-overview.svg)
 
 ### Tokenizer
 

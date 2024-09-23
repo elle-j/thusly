@@ -1,10 +1,15 @@
 # Thusly Design - Tokenizer
 
-> **TODO:** INSERT TABLE OF CONTENTS
+## Table of Contents
+
+- [Abstract](#abstract)
+- [Token](#token)
+- [Walk-Through of Examples](#walk-through-of-examples)
+    - [Example: Arithmetic](#example-arithmetic)
 
 ## Abstract
 
-> **TODO:** INSERT DIAGRAM
+![Thusly architectural overview](../media/thusly-design-architectural-overview-highlight-tokenizer.svg)
 
 The tokenizer generates *tokens* on demand which is controlled by the parser, by advancing through the source file character-by-character.
 
@@ -36,7 +41,7 @@ Token:
 
 These examples demonstrate some of the details of the tokenizer's steps when processing a string containing the code of a source file.
 
-> **TODO:** INSERT LINKS TO EACH EXAMPLE
+* Example: [Arithmetic](#example-arithmetic)
 
 ### Example: Arithmetic
 
@@ -48,16 +53,11 @@ Source code:
 
 Expected tokens:
 
-> **TODO:** REPLACE TABLE WITH DIAGRAM
-
-|        | Token #1       | Token #2       | ...     |
-|:-------|:--------------:|:--------------:|:-------:|
-| lexeme | `"1.2"`        | `"+"`          | ...     |
-| type   | `TOKEN_NUMBER` | `TOKEN_PLUS`   | ...     |
+![Thusly generated tokens](../media/thusly-design-example-arithmetic-tokens.svg)
 
 **Token #1** (expected lexeme: `"1.2"`):
 
-> **TODO:** INSERT DIAGRAM
+![Thusly tokenizer scanning number](../media/thusly-design-example-arithmetic-scan-number.svg)
 
 1. When the tokenizer scans for a new token, it has a pointer to the `start` of the lexeme and to the `current` character being scanned.
 1. When the digit `1` is encountered, it keeps advancing the `current` pointer until a non-digit is found, in this case `.`.
