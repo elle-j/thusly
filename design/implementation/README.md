@@ -21,7 +21,7 @@ Thusly is a dynamic and general-purpose programming language implemented using f
 
 ### Tokenizer
 
-* The tokenizer generates *tokens* on demand which is controlled by the parser, by advancing through the source file character-by-character.
+* The tokenizer generates *tokens* on demand which is controlled by the parser, by advancing through the source code character-by-character.
 * It performs lexical analysis to ensure use of valid characters and sequence of characters, and hence also flags any lexical errors encountered.
 * Details: [tokenizer.md](./tokenizer.md)
 
