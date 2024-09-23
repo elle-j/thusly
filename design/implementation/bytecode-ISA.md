@@ -1,3 +1,3 @@
-# Thusly Design - Bytecode / Instruction Format
+# Thusly Design - Bytecode & Instruction Format
 
 > **TODO**
