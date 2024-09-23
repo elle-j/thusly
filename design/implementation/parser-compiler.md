@@ -2,7 +2,11 @@
 
 ## Table of Contents
 
-> **TODO:** INSERT TABLE OF CONTENTS
+- [Abstract](#abstract)
+- [Top-Down Operator Precedence Parsing](#top-down-operator-precedence-parsing)
+- [Constant Pool](#constant-pool)
+- [Walk-Through of Examples](#walk-through-of-examples)
+    - [Example: Arithmetic](#example-arithmetic)
 
 ## Abstract
 
