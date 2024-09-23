@@ -44,3 +44,9 @@ The parsing of the above source code example is hence conceptually represented a
 
 > [!NOTE]
 > Do note that the above parsing tree is merely conceptual. Since the Thusly compiler only does one pass, there is no abstract syntax tree created and traversed. Bytecode is written as the statements and expressions are parsed, but the evaluation order (performed later by the VM) will coincide with this conceptual tree.
+
+## Constant Pool
+
+A bytecode instruction to load a constant only has a certain number of bytes to represent the constant. Currently, Thusly supports one such instruction with 1 byte for the constant operand. But since strings, for instance, may be of arbitrary size, they are instead stored in a constant pool, allowing the bytecode instructions to refer to an address rather than the constant value itself.
+
+Hence, when parsing literals of varying size, such as strings, as well as literals of fixed size, such as numbers (all Thusly numbers are C `double`s), they get added to a constant pool. The callee function for adding the constant returns the address of the constant which the compiler then uses to write the bytecode instruction.
