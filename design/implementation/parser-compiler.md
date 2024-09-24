@@ -22,21 +22,21 @@ All steps are performed in a single pass.
 
 The parser parses statements and expressions recursively starting from the top (expressions using lower-precedence operators) to bottom (expressions using higher-precedence operators).
 
-Each production (or definition) of an expression rule in the Thusly grammar always either calls itself (same-level precedence) or a rule of higher precedence. Thus, it is defined from top (lower-precedence) to bottom (higher-precedence). This is used to create a precedence table, associating each operator token with a precedence level.
+Each production of an expression rule in the Thusly grammar always either calls itself (same-level precedence) or a rule of higher precedence. Thus, it is defined from top (lower-precedence) to bottom (higher-precedence). This is used to create a precedence table, associating each operator token with a precedence level.
 
 In the same precedence table, operator and expression tokens are also associated with either a *prefix* parse function (to be used where the beginning of an expression is expected), an *infix* parse function (to be used where a right-hand operand of an expression also is expected), or both.
 
 The precedence table below shows the entries for some arithmetic operators as well as for a number token.
 
 | Token Type   | Prefix Function | Infix Function | Precedence
-|:-------------|:---------------:|:--------------:|:--------------------:|
+|:-------------|:----------------|:---------------|:--------------------|
 | TOKEN_MINUS  | parse_unary     | parse_binary   | PRECEDENCE_TERM (6)
 | TOKEN_PLUS   | -               | parse_binary   | PRECEDENCE_TERM (6)
 | TOKEN_SLASH  | -               | parse_binary   | PRECEDENCE_FACTOR (7)
 | TOKEN_STAR   | -               | parse_binary   | PRECEDENCE_FACTOR (7)
 | TOKEN_NUMBER | parse_number    | -              | -
 
-**Example illustration:**
+### Illustration
 
 Source code:
 
@@ -44,45 +44,48 @@ Source code:
 1.2 + 3 * 4 / -5
 ```
 
-When the parser encounters the token representing `*`, it should recursively keep parsing the next expression since the precedence of `*` is greater than that of `+`. Although, when it encounters `/`, it should return (by recursively unwinding) to the binary `*` expression and write the bytecode instruction for evaluating `3 * 4` before proceeding with parsing `/`.
+When the parser encounters the token representing `*`, it should recursively keep parsing the next expression since the precedence of `*` is greater than that of `+`. Although, when it encounters `/`, it should return (by recursively unwinding) to the binary `*` expression and write the bytecode instruction for evaluating `3 * 4` before proceeding with parsing `/` since the precedence of `/` is equal to, not greater than, that of `*`.
 
-This ensures that expressions are evaluated in the expected order, with higher-precedence operators first, and left-to-right for same-level-precedence operators in the case of left-associative operators such as the arithmetic ones.
+Parsing based on precedence levels ensures that expressions are evaluated in the expected order, with higher-precedence operators first. It also allows enforcing operator associativity in order for same-level precedence operators to either be evaluated from left-to-right (such as the binary arithmetic operators) or right-to-left (such as the unary operators).
 
 The parsing of the above source code example is hence conceptually represented as the below parsing tree, where lower-precedence operators appear higher up, and bottom nodes are evaluated first. As each expression is parsed (as indicated by the arrows) the operator is applied as the recursion unwinds, caused by encountering an operator with a precedence not high enough to proceed parsing.
 
 ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-full.svg)
+
+To get a more detailed walk-through of the parser's steps when parsing this example, see [Example: Arithmetic](#example-arithmetic).
 
 > [!NOTE]
 > Do note that the above parsing tree is merely conceptual. Since the Thusly compiler only does one pass, there is no abstract syntax tree created and traversed. Bytecode is written as the statements and expressions are parsed, but the evaluation order (performed later by the VM) will coincide with this conceptual tree.
 
 ## Constant Pool
 
-A bytecode instruction to load a constant only has a certain number of bytes to represent the constant. Currently, Thusly supports one such instruction with 1 byte for the constant operand. But since strings, for instance, may be of arbitrary size, they are instead stored in a constant pool, allowing the bytecode instructions to refer to an address rather than the constant value itself.
+A bytecode instruction to load a constant only has a certain number of bytes to represent the constant. Currently, Thusly supports one such instruction with 1 byte for the constant operand. But since strings, for instance, may be of arbitrary size, they are instead stored in a constant pool, allowing the bytecode instructions to refer to an address rather than the constant value itself. (As a side note, all strings are *interned* which you can read more about once that documentation is ready.)
 
-Hence, when parsing literals of varying size, such as strings, as well as literals of fixed size, such as numbers (all Thusly numbers are C `double`s), they get added to a constant pool. The callee function for adding the constant returns the address of the constant which the compiler then uses to write the bytecode instruction.
+Hence, when parsing literals of varying size, such as strings, as well as literals of fixed size, such as numbers (the underlying type for all Thusly numbers are C `double`), they get added to a constant pool. The callee function for adding the constant returns the address of the constant which the compiler then uses to write the bytecode instruction.
 
 ## Walk-Through of Examples
 
 These examples demonstrate some of the details of the parser's and compiler's steps when processing a token.
 
 > [!TIP]
-> To more easily follow along in the examples, you can read the overviews of Thusly's [parsing strategy](#top-down-operator-precedence-parsing) and [bytecode format](./bytecode.md).
+> To more easily follow along, you can first read the overviews of Thusly's [parsing strategy](#top-down-operator-precedence-parsing) and [bytecode format](./bytecode.md).
 
-* Example: [Arithmetic](#example-arithmetic)
+* Examples:
+  * [Arithmetic](#example-arithmetic)
 
 ### Example: Arithmetic
 
-<u>Source code:</u>
+**Source code:**
 
 ```
 1.2 + 3 * 4 / -5
 ```
 
-<u>Tokens generated by the tokenizer:</u>
+**Tokens generated by the tokenizer:**
 
 ![Thusly generated tokens](../media/thusly-design-example-arithmetic-tokens.svg)
 
-<u>Parsing process:</u>
+**Parsing process:**
 
 **Token #1** (`1.2`):
 
@@ -101,22 +104,22 @@ These examples demonstrate some of the details of the parser's and compiler's st
     OP_CONSTANT 0
     ```
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 |
-|:-------|:-------:|
-| Value  | 1.2     |
+    |        | Index 0 |
+    |:-------|:-------:|
+    | Value  | 1.2     |
 
-* Bytecode:
+  * Bytecode:
 
-```
-OP_CONSTANT 0
-```
+    ```
+    OP_CONSTANT 0
+    ```
 
-* Conceptual parsing tree:
+  * Conceptual parsing tree:
 
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-01.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-01.svg)
 
 **Token #2** (`+`):
 
@@ -145,23 +148,23 @@ OP_CONSTANT 0
     OP_CONSTANT 1
     ```
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 | Index 1 |
-|:-------|:-------:|:-------:|
-| Value  | 1.2     | 3       |
+    |        | Index 0 | Index 1 |
+    |:-------|:-------:|:-------:|
+    | Value  | 1.2     | 3       |
 
-* Bytecode:
+  * Bytecode:
 
-```
-OP_CONSTANT 0
-OP_CONSTANT 1
-```
+    ```
+    OP_CONSTANT 0
+    OP_CONSTANT 1
+    ```
 
-* Conceptual parsing tree:
+  * Conceptual parsing tree:
 
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-02.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-02.svg)
 
 **Token #4** (`*`):
 
@@ -189,24 +192,24 @@ OP_CONSTANT 1
     OP_CONSTANT 2
     ```
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 | Index 1 | Index 2 |
-|:-------|:-------:|:-------:|:-------:|
-| Value  | 1.2     | 3       | 4       |
+    |        | Index 0 | Index 1 | Index 2 |
+    |:-------|:-------:|:-------:|:-------:|
+    | Value  | 1.2     | 3       | 4       |
 
-* Bytecode:
+  * Bytecode:
 
-```
-OP_CONSTANT 0
-OP_CONSTANT 1
-OP_CONSTANT 2
-```
+    ```
+    OP_CONSTANT 0
+    OP_CONSTANT 1
+    OP_CONSTANT 2
+    ```
 
-* Conceptual parsing tree:
+  * Conceptual parsing tree:
 
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-03.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-03.svg)
 
 **Token #6** (`/`):
 
@@ -226,25 +229,25 @@ OP_CONSTANT 2
 1. Since the precedence of `/` is greater than `+` (hence satisfies the minimum "precedence of `+` + 1"), `current` is updated by advancing to the next token generated (its right-hand side), and since the parser expects the operator to be an infix operator, it gets the *infix* function (`parse_binary`) associated with `TOKEN_SLASH` in the precedence table.
 1. `parse_binary` recursively continues parsing the expression now using a minimum precedence level set to "the precedence of `/` + 1", which will be compared against when the next operator is encountered.
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 | Index 1 | Index 2 |
-|:-------|:-------:|:-------:|:-------:|
-| Value  | 1.2     | 3       | 4       |
+    |        | Index 0 | Index 1 | Index 2 |
+    |:-------|:-------:|:-------:|:-------:|
+    | Value  | 1.2     | 3       | 4       |
+ 
+  * Bytecode:
 
-* Bytecode:
+    ```
+    OP_CONSTANT 0
+    OP_CONSTANT 1
+    OP_CONSTANT 2
+    OP_MULTIPLY
+    ```
 
-```
-OP_CONSTANT 0
-OP_CONSTANT 1
-OP_CONSTANT 2
-OP_MULTIPLY
-```
+  * Conceptual parsing tree:
 
-* Conceptual parsing tree:
-
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-04.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-04.svg)
 
 **Token #7** (`-`):
 
@@ -272,26 +275,26 @@ OP_MULTIPLY
     OP_CONSTANT 3
     ```
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 | Index 1 | Index 2 | Index 3 |
-|:-------|:-------:|:-------:|:-------:|:-------:|
-| Value  | 1.2     | 3       | 4       | 5       |
+    |        | Index 0 | Index 1 | Index 2 | Index 3 |
+    |:-------|:-------:|:-------:|:-------:|:-------:|
+    | Value  | 1.2     | 3       | 4       | 5       |
 
-* Bytecode:
+  * Bytecode:
 
-```
-OP_CONSTANT 0
-OP_CONSTANT 1
-OP_CONSTANT 2
-OP_MULTIPLY
-OP_CONSTANT 3
-```
+    ```
+    OP_CONSTANT 0
+    OP_CONSTANT 1
+    OP_CONSTANT 2
+    OP_MULTIPLY
+    OP_CONSTANT 3
+    ```
 
-* Conceptual parsing tree:
+  * Conceptual parsing tree:
 
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-05.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-05.svg)
 
 **Token #9** (`EOF`, end of file):
 
@@ -321,26 +324,26 @@ OP_CONSTANT 3
     OP_ADD
     ```
 
-Current state:
-* Constant pool:
+* **Current state:**
+  * Constant pool:
 
-|        | Index 0 | Index 1 | Index 2 | Index 3 |
-|:-------|:-------:|:-------:|:-------:|:-------:|
-| Value  | 1.2     | 3       | 4       | 5       |
+    |        | Index 0 | Index 1 | Index 2 | Index 3 |
+    |:-------|:-------:|:-------:|:-------:|:-------:|
+    | Value  | 1.2     | 3       | 4       | 5       |
 
-* Bytecode:
+  * Bytecode:
 
-```
-OP_CONSTANT 0
-OP_CONSTANT 1
-OP_CONSTANT 2
-OP_MULTIPLY
-OP_CONSTANT 3
-OP_NEGATE
-OP_DIVIDE
-OP_ADD
-```
+    ```
+    OP_CONSTANT 0
+    OP_CONSTANT 1
+    OP_CONSTANT 2
+    OP_MULTIPLY
+    OP_CONSTANT 3
+    OP_NEGATE
+    OP_DIVIDE
+    OP_ADD
+    ```
 
-* Conceptual parsing tree:
+  * Conceptual parsing tree:
 
-![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-06.svg)
+    ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-06.svg)
