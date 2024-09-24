@@ -35,7 +35,7 @@ Thusly is a dynamic and general-purpose programming language implemented using f
 ### Virtual Machine (VM)
 
 * The VM evaluates expressions and executes statements by decoding and executing the instructions in the compiled program in a sequential order.
-* It specifies the [instruction format](./bytecode-ISA.md), or instruction set architecture (ISA), of the bytecode which the compiler must adhere to when writing the instructions.
+* It specifies the [instruction format](./bytecode.md), or instruction set architecture (ISA), of the bytecode which the compiler must adhere to when writing the instructions.
 * Details: [vm.md](./vm.md)
 
 ## Data Flow and Walk-Throughs
@@ -43,7 +43,7 @@ Thusly is a dynamic and general-purpose programming language implemented using f
 To get an understanding of the process and data flow from the first step of analyzing characters in the source code up until interpreting the statements, the recommended reading order is:
 
 1. [tokenizer.md](./tokenizer.md)
-2. [bytecode-ISA.md](./bytecode-ISA.md)
+2. [bytecode.md](./bytecode.md)
 3. [parser-compiler.md](./parser-compiler.md)
 4. [vm.md](./vm.md)
 
