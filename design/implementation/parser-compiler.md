@@ -96,7 +96,7 @@ These examples demonstrate some of the details of the parser's and compiler's st
 
 1. The parser tells the tokenizer to generate and return the current token (`1.2`), which the parser now stores as `current`.
 1. Since the parser expects the current token to be the beginning of an expression, it gets the *prefix* function (`parse_number`) associated with `TOKEN_NUMBER` in the [precedence table](#top-down-operator-precedence-parsing).
-1. The lexeme `"1.2"` is converted to the double `1.2`, and that value is in turn wrapped in a `ThuslyValue`.
+1. `parse_number` converts the lexeme `"1.2"` to the double `1.2` and in turn wraps it in a `ThuslyValue`.
 1. The value is added to the constant pool at index 0.
 1. The bytecode instruction is written:
 
@@ -130,7 +130,7 @@ These examples demonstrate some of the details of the parser's and compiler's st
 
 1. Since `+` is the first operator encountered, the precedence of `+` is compared to the lowest possible precedence level.
 1. Since the precedence of `+` is greater than the lowest, `current` is updated by advancing to the next token generated  (its right-hand side), and since the parser expects the operator to be an infix operator, it gets the *infix* function (`parse_binary`) associated with `TOKEN_PLUS` in the precedence table.
-1. `parse_binary` recursively continues parsing the expression now using a minimum precedence level set to "the precedence of `+` + 1", which will be compared against when the next operator is encountered. If the minimum precedence is not incremented and the next operator is a `+` or `-`, then those expressions will continue being parsed, causing right-associativity. For the binary arithmetic operators, the parser enforces left-associativity by incrementing the minimum precedence before proceeding parsing the subsequent expression.
+1. `parse_binary` recursively continues parsing the expression now using a minimum precedence level set to "the precedence of `+` + 1", which will be compared against when the next operator is encountered. If the minimum precedence is not incremented and the next operator is, for instance, a `+` or `-`, then those expressions will continue being parsed, mistakenly causing right-associativity. For the binary arithmetic operators, the parser enforces left-associativity by incrementing the minimum precedence before proceeding parsing the subsequent expression.
 
 **Token #3** (`3`):
 
@@ -140,7 +140,7 @@ These examples demonstrate some of the details of the parser's and compiler's st
 ```
 
 1. Since the parser now expects the current token to be the beginning of an expression, it gets the *prefix* function (`parse_number`) associated with `TOKEN_NUMBER` in the precedence table.
-1. The lexeme `"3"` is converted to the double `3`, and that value is in turn wrapped in a `ThuslyValue`.
+1. `parse_number` converts the lexeme `"3"` to the double `3` and in turn wraps it in a `ThuslyValue`.
 1. The value is added to the constant pool at index 1.
 1. The bytecode instruction is written:
 
@@ -184,7 +184,7 @@ These examples demonstrate some of the details of the parser's and compiler's st
 ```
 
 1. Since the parser now expects the current token to be the beginning of an expression, it gets the *prefix* function (`parse_number`) associated with `TOKEN_NUMBER` in the precedence table.
-1. The lexeme `"4"` is converted to the double `4`, and that value is in turn wrapped in a `ThuslyValue`.
+1. `parse_number` converts the lexeme `"4"` to the double `4` and in turn wraps it in a `ThuslyValue`.
 1. The value is added to the constant pool at index 2.
 1. The bytecode instruction is written:
 
@@ -267,7 +267,7 @@ These examples demonstrate some of the details of the parser's and compiler's st
 ```
 
 1. Since the parser now expects the current token to be the beginning of an expression, it gets the *prefix* function (`parse_number`) associated with `TOKEN_NUMBER` in the precedence table.
-1. The lexeme `"5"` is converted to the double `5`, and that value is in turn wrapped in a `ThuslyValue`.
+1. `parse_number` converts the lexeme `"5"` to the double `5` and in turn wraps it in a `ThuslyValue`.
 1. The value is added to the constant pool at index 3.
 1. The bytecode instruction is written:
 
