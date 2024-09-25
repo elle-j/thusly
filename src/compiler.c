@@ -20,17 +20,17 @@
 #define NOT_FOUND (-1)
 #define UNINITIALIZED (-1)
 
-/// The compiler and parser - parses the tokens received by the tokenizer on demand
-/// (it controls the tokenizer) and writes the bytecode instructions for the VM in
-/// a single pass in the instruction format expected by the VM. (It performs top-down
-/// operator precedence parsing.)
-
 /// A user-defined variable declared in the source code.
 typedef struct {
   Token name;
   // The depth/level at which the variable was declared.
   int depth;
 } Variable;
+
+/// The compiler and parser - Parses the tokens received by the tokenizer on demand
+/// (it controls the tokenizer) and writes the bytecode instructions for the VM in
+/// a single pass in the instruction format expected by the VM. (It performs top-down
+/// operator precedence parsing.)
 
 typedef struct {
   // When a variable is declared in the source code, it gets added to this array.
@@ -43,6 +43,7 @@ typedef struct {
   int scope_depth;
 } Compiler;
 
+// (see docs above)
 typedef struct {
   Compiler* compiler;
   Environment* environment;

@@ -4,6 +4,8 @@
 #include "gc_object.h"
 #include "memory.h"
 
+/// Handle reallocation (allocating, freeing, growing, shrinking) of memory.
+/// This manages all dynamic memory.
 void* handle_reallocation(void* memory, size_t old_size, size_t new_size) {
   bool should_free = new_size == 0;
   if (should_free) {

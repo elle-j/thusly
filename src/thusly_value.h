@@ -6,15 +6,16 @@
 typedef struct GCObject GCObject;
 typedef struct TextObject TextObject;
 
-/// Built-in data types for a ThuslyValue.
+/// Built-in data type for a ThuslyValue.
 typedef enum {
   TYPE_BOOLEAN,
   TYPE_NONE,
   TYPE_NUMBER,
-  // Dynamically (heap) allocated type (e.g. `text` (string))
+  // Dynamically (heap) allocated type (e.g. `text` (string)).
   TYPE_GC_OBJECT,
 } DataType;
 
+/// The representation of a value in Thusly.
 typedef struct {
   DataType type;
   // A ThuslyValue can hold either of these underlying C types.

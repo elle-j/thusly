@@ -107,6 +107,9 @@ static ErrorReport decode_and_execute(VM* vm) {
   #define READ_SHORT()    (vm->next_instruction += 2, (uint16_t)((vm->next_instruction[-2] << 8) | vm->next_instruction[-1]))
   #define READ_CONSTANT() (vm->program->constant_pool.values[READ_BYTE()])
 
+  // This macro uses a do-while loop to both allow these statements to
+  // be executed in the same block and to allow a terminating semicolon
+  // after calling the macro (e.g. DO_BINARY_OP();) without a C syntax error.
   #define DO_BINARY_OP(from_c_value, operator, operator_string)                             \
     do {                                                                                    \
       if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {                             \
@@ -219,10 +222,11 @@ static ErrorReport decode_and_execute(VM* vm) {
         DO_BINARY_OP(FROM_C_DOUBLE, *, "*");
         break;
       case OP_DIVIDE:
+        // TODO: Handle division by 0
         DO_BINARY_OP(FROM_C_DOUBLE, /, "/");
         break;
-        // TODO: Handle division by 0
       case OP_MODULO: {
+        // TODO: Handle division by 0
         if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
           error(vm, "Modulo (\%) can only be performed on numbers.");
           return REPORT_RUNTIME_ERROR;
@@ -231,7 +235,6 @@ static ErrorReport decode_and_execute(VM* vm) {
         double a = TO_C_DOUBLE(pop(vm));
         push(vm, FROM_C_DOUBLE(fmod(a, b)));
         break;
-        // TODO: Handle division by 0
       }
       case OP_NEGATE:
         // Peek at the stack rather than pop here in case there is garbage
@@ -240,6 +243,9 @@ static ErrorReport decode_and_execute(VM* vm) {
           error(vm, "Negation (-) can only be performed on numbers.");
           return REPORT_RUNTIME_ERROR;
         }
+        // TODO: Consider negating the value in place without popping and
+        // pushing, in order to circumvent unnecessarily incrementing and
+        // decrementing the stack pointer (as the stack size is unchanged).
         push(vm, FROM_C_DOUBLE(-TO_C_DOUBLE(pop(vm))));
         break;
       case OP_NOT:
