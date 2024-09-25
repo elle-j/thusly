@@ -13,6 +13,7 @@
 #define TO_TEXT(thusly_value)            ((TextObject*)TO_C_OBJECT_PTR(thusly_value))
 #define TO_C_STRING(thusly_value)        (((TextObject*)TO_C_OBJECT_PTR(thusly_value))->chars)
 
+/// The type of a heap-allocated value.
 typedef enum {
   GC_OBJECT_TYPE_TEXT,
 } GCObjectType;

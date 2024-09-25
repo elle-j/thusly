@@ -244,6 +244,7 @@ static Token consume_keyword_or_identifier(Tokenizer* tokenizer) {
   return make_token(tokenizer, get_keyword_or_identifier_type(tokenizer));
 }
 
+/// Generates and returns (by value) the next token found in the source code.
 Token tokenize(Tokenizer* tokenizer) {
   skip_insignificant(tokenizer);
 

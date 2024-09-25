@@ -51,8 +51,9 @@ static char* read_file(const char* path) {
     exit(EXIT_CODE_IO_OP_ERROR);
   }
 
-  // Going to the end of the file (`fseek()`) and checking how many bytes there are (`ftell()`)
-  // determines the size of the source/string buffer needed when allocating it (`malloc()`).
+  // Going to the end of the file (`fseek()`) and checking how many
+  // bytes there are (`ftell()`) determines the size of the source/string
+  // buffer needed when allocating it (`malloc()`).
   fseek(file, 0L, SEEK_END);
   size_t file_size = ftell(file);
   rewind(file);

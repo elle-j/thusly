@@ -4,6 +4,8 @@
 #include "common.h"
 #include "thusly_value.h"
 
+/// The opcode of the instruction for determining
+/// which operation the VM should perform.
 typedef enum {
   OP_ADD,
   OP_CONSTANT,
@@ -36,15 +38,24 @@ typedef enum {
   OP_SUBTRACT,
 } Opcode;
 
+/// The constant pool containing all literal values used in
+/// the program. To access a constant, the instruction will
+/// always contain the index of the constant pool value.
 typedef struct {
   ThuslyValue* values;
   int count;
   int capacity;
 } ConstantPool;
 
+/// The compiled program containing the bytecode
+/// instructions in sequential order.
 typedef struct {
   ConstantPool constant_pool;
-  int* source_lines; // Mirrors the `instructions`
+  // The `source_lines` array follows the `instructions` in
+  // that the bytecode instruction at e.g. index 2 corresponds
+  // to the source file line at index 2.
+  // TODO: Use run-length encoding to only store unique source lines.
+  int* source_lines;
   byte* instructions;
   int count;
   int capacity;

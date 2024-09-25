@@ -19,8 +19,8 @@ typedef struct {
   Table texts;
 } Environment;
 
-/// The virtual machine interpreting and executing the instructions in
-/// the compiled program in a sequential order.
+/// The virtual machine - Interprets and executes the instructions
+/// in the compiled program in a sequential order.
 typedef struct VM {
   Environment environment;
   Program* program;
@@ -30,6 +30,8 @@ typedef struct VM {
   ThuslyValue* next_stack_top;
 } VM;
 
+/// The error report from interpreting the source file, used
+/// for determining whether to continue or exit the process.
 typedef enum {
   REPORT_NO_ERROR,
   REPORT_COMPILE_ERROR,
