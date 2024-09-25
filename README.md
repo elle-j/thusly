@@ -94,7 +94,7 @@ To read more about the architectural design, implementation details, and follow 
 
 ### Milestone 1: Support arithmetic, comparison, and equality operations
 
-- [x] The terminals in the initial [grammar](design/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
+- [x] The terminals in the initial [grammar](design/implementation/grammar.txt) can be identified from user input via a multi-line file or single-line REPL input and then tokenized.
 - [x] Arithmetic expressions using `number` (double) can be evaluated.
   - [x] Addition (`+`)
   - [x] Subtraction (`-`)
