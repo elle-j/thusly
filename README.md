@@ -10,6 +10,7 @@ A general-purpose programming language coming to life through a custom one-pass 
 - [Language](#language)
     - [Characteristics](#characteristics)
     - [Syntax](#syntax)
+    - [Design](#design)
 - [Milestones](#milestones)
     - [Milestone 1 - Expressions](#milestone-1-support-arithmetic-comparison-and-equality-operations)
     - [Milestone 2 - Variables and Control Flow](#milestone-2-support-variables-and-control-flow)
@@ -84,6 +85,10 @@ The development of both the language and the surrounding documentation is curren
 > **Whitespace:**
 >
 > Whitespace is semantically insignificant except for newline characters on non-blank lines.
+
+### Design
+
+To read more about the architectural design, implementation details, and follow along walk-throughs of examples of tokenization, parsing, compilation, evaluation, and execution, see [design/implementation](./design/implementation/).
 
 ## Milestones
 
