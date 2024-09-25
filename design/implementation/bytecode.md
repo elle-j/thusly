@@ -4,7 +4,11 @@
 
 ## Table of Contents
 
-> **TODO:** INSERT TABLE OF CONTENTS
+- [Abstract](#abstract)
+- [Format](#format)
+    - [Loading Constants](#loading-constants)
+    - [Branching](#branching)
+    - [Arithmetic](#arithmetic)
 
 ## Abstract
 
@@ -21,7 +25,7 @@ In order for the VM to *decode* the instruction and know which type of operation
 
 Some of the supported instructions are explained below.
 
-### Loading constants
+### Loading Constants
 
 When, for instance, a number literal is used in the source code, the VM will know to use, or load, that constant by the opcode `OP_CONSTANT`. However, the opcode itself does not indicate which constant to load, so all `OP_CONSTANT` instructions also have an 8-bit operand representing the *location* of where to get the actual constant.
 
