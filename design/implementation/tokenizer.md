@@ -1,5 +1,7 @@
 # Thusly Design - Tokenizer
 
+> 👉️ These design documents are currently being added to incrementally.
+
 ## Table of Contents
 
 - [Abstract](#abstract)
