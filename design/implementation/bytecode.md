@@ -80,7 +80,7 @@ Since the left and right operands of the `+` operator are now on the stack, a by
 
 The VM can then pop the values from the stack, perform the appropriate operation using those values, and push the result back onto the stack. (You can read more about the VM internals in [vm.md](./vm.md)).
 
-Thus, when parsing and compiling `1.2 + 3`, in addition to `OP_CONSTANT` instructions explained in an [earlier section](#loading-constants), `OP_ADD` and `OP_POP` instructionsare also used:
+Thus, when parsing and compiling `1.2 + 3`, in addition to `OP_CONSTANT` instructions explained in an [earlier section](#loading-constants), `OP_ADD` and `OP_POP` instructions are also used:
 
 | Opcode (8 bits) | Operand Size | Total Size | Example Instruction |
 |:----------------|:------------:|:----------:|:-------------------:|
