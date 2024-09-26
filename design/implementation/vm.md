@@ -4,7 +4,12 @@
 
 ## Table of Contents
 
-> **TODO:** INSERT TABLE OF CONTENTS
+- [Abstract](#abstract)
+- [Decoding an Instruction](#decoding-an-instruction)
+    - [Program Counter](#program-counter)
+- [Operand Stack](#operand-stack)
+- [Walk-Through of Examples](#walk-through-of-examples)
+    - [Example: Arithmetic](#example-arithmetic)
 
 ## Abstract
 
