@@ -61,7 +61,7 @@ OP_ADD            # Add the two top-most values
 OP_POP            # Discard the result
 ```
 
-The stack in the Thusly VM is implemented using an array. To keep track of the top of the stack, the VM stores a `ThuslyValue` pointer pointing to the slot immediately following the top of the stack. (Due to C internals, it does not point to the current top since an empty array would cause it to point immediately *before* the array which is undefined behavior, unlike pointing immediately *after*.)
+The stack in the Thusly VM is implemented using an array. To keep track of the top of the stack, the VM stores a `ThuslyValue` pointer pointing to the slot immediately following the top of the stack. (Pointing to the zeroth element indicates an empty stack in this case, and due to C internals, it does not point to the current top since an empty array would cause it to point immediately *before* the array which is undefined behavior, unlike pointing immediately *after*.)
 
 Once the two `OP_CONSTANT` instructions have been executed, the stack contains the two values (`sp` below signifies the stack pointer):
 
@@ -121,7 +121,7 @@ OP_ADD
 OP_POP
 ```
 
-**Constant pool built by the compiler:**
+**Constant pool populated by the compiler:**
 
 |        | Index 0 | Index 1 | Index 2 | Index 3 |
 |:-------|:-------:|:-------:|:-------:|:-------:|
