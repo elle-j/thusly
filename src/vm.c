@@ -228,7 +228,7 @@ static ErrorReport decode_and_execute(VM* vm) {
       case OP_MODULO: {
         // TODO: Handle division by 0
         if (!IS_NUMBER(peek(vm, 0)) || !IS_NUMBER(peek(vm, 1))) {
-          error(vm, "Modulo (\%) can only be performed on numbers.");
+          error(vm, "Modulo (mod) can only be performed on numbers.");
           return REPORT_RUNTIME_ERROR;
         }
         double b = TO_C_DOUBLE(pop(vm));
