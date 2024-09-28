@@ -326,6 +326,12 @@ These examples demonstrate some of the details of the parser's and compiler's st
     OP_ADD
     ```
 
+1. Since the entire expression has been parsed and a newline terminates the statement, the bytecode instruction for discarding the result is written:
+
+    ```
+    OP_POP
+    ```
+
 * **Current state:**
   * Constant pool:
 
@@ -344,8 +350,9 @@ These examples demonstrate some of the details of the parser's and compiler's st
     OP_NEGATE
     OP_DIVIDE
     OP_ADD
+    OP_POP
     ```
 
-  * Conceptual parsing tree:
+  * Conceptual parsing tree for the arithmetic operations:
 
     ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-06.svg)
