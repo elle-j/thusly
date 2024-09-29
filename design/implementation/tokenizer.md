@@ -73,7 +73,7 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
 1. When the digit `1` is encountered, it keeps advancing the `current` pointer until a non-digit is found, in this case `.`.
 1. Since numbers in Thusly are double-precision floating point numbers, it looks ahead one character to see if it is a `.`, and if so, looks ahead another character to see if it is a digit.
 1. The `current` pointer is then advanced until it encounters the whitespace.
-1. The token is generated:
+1. The token is generated using the characters between `start` and `current` as the lexeme:
 
     ```
     Token:
@@ -200,7 +200,7 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
         lexeme: "5"
     ```
 
-**Token #9** (expected lexeme: `"\n"` (newline)):
+**Token #9** (expected lexeme: `"\n"`, newline):
 
 ```
 1.2 + 3 * 4 / -5
@@ -214,10 +214,10 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
     ```
     Token:
         type: TOKEN_NEWLINE
-        lexeme: `"\n"`
+        lexeme: "\n"
     ```
 
-**Token #10** (expected lexeme: `"\0"` (null byte)):
+**Token #10** (expected lexeme: `"\0"`, null byte):
 
 ```
 1.2 + 3 * 4 / -5
@@ -229,5 +229,5 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
     ```
     Token:
         type: TOKEN_EOF
-        lexeme: `"\0"`
+        lexeme: "\0"
     ```
