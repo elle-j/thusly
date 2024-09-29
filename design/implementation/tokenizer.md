@@ -191,7 +191,7 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
 ```
 
 1. The `start` and `current` pointers point to `"5"`.
-1. Only `"5"` is consumed since we are now at the end of the string.
+1. Only `"5"` is consumed since consuming the next character would not produce a valid number.
 1. The token is generated:
 
     ```
@@ -200,18 +200,34 @@ These examples demonstrate some of the details of the tokenizer's steps when pro
         lexeme: "5"
     ```
 
-**Token #9** (expected lexeme: null byte character):
+**Token #9** (expected lexeme: `"\n"` (newline)):
 
 ```
 1.2 + 3 * 4 / -5
                  ^
 ```
 
-1. The `start` and `current` pointers point to the terminating null byte character in the string.
+1. The `start` and `current` pointers point to the newline character.
+1. Since the newline is not on a blank line (i.e. a line only containing whitespace and/or comments and/or a newline), the newline is semantically significant and is consumed.
+1. The token is generated:
+
+    ```
+    Token:
+        type: TOKEN_NEWLINE
+        lexeme: `"\n"`
+    ```
+
+**Token #10** (expected lexeme: `"\0"` (null byte)):
+
+```
+1.2 + 3 * 4 / -5
+```
+
+1. The `start` and `current` pointers point to the terminating null byte character in the string buffer.
 1. Since this signifies the end of the source file, an end-of-file sentinel token is also generated:
 
     ```
     Token:
         type: TOKEN_EOF
-        lexeme: <null byte>
+        lexeme: `"\0"`
     ```

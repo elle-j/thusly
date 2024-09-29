@@ -13,6 +13,8 @@
 
 ## Abstract
 
+![Thusly architectural overview](../media/thusly-design-architectural-overview-highlight-vm.svg)
+
 The virtual machine, or VM, evaluates expressions and executes statements by decoding and executing the instructions in the compiled program in a sequential order, unless the instruction itself is to jump to a different section of the program.
 
 It specifies the [instruction format](./bytecode.md) of the bytecode which the compiler must adhere to when writing the instructions, which is based on the stack-based architecture of the VM.
@@ -64,7 +66,6 @@ OP_POP            # Discard the result
 The stack in the Thusly VM is implemented using an array. To keep track of the top of the stack, the VM stores a `ThuslyValue` pointer pointing to the slot immediately following the top of the stack. (Pointing to the zeroth element indicates an empty stack in this case, and due to C internals, it does not point to the current top since an empty array would cause it to point immediately *before* the array which is undefined behavior, unlike pointing immediately *after*.)
 
 Once the two `OP_CONSTANT` instructions have been executed, the stack contains the two values (`sp` below signifies the stack pointer):
-
 
 |        | Index 0 | Index 1 (top) | Index 2 |
 |:-------|:-------:|:-------------:|:-------:|
