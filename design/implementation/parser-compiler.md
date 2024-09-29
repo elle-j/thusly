@@ -298,14 +298,14 @@ These examples demonstrate some of the details of the parser's and compiler's st
 
     ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-05.svg)
 
-**Token #9** (`EOF`, end of file):
+**Token #9** (`NEWLINE`):
 
 ```
 1.2 + 3 * 4 / -5
                  ^
 ```
 
-1. Since the end has been detected, the recursive calls unwind to where `parse_unary` was parsing the right-hand expression of the `-` operator.
+1. Since the `NEWLINE` token is not a token with a precedence, the recursive calls unwind to where `parse_unary` was parsing the right-hand expression of the `-` operator.
 1. Since the right operand of `-` have now been parsed, the bytecode instruction is written:
 
     ```
@@ -326,7 +326,8 @@ These examples demonstrate some of the details of the parser's and compiler's st
     OP_ADD
     ```
 
-1. Since the entire expression has been parsed and a newline terminates the statement, the bytecode instruction for discarding the result is written:
+1. Since the entire expression has been parsed, the mandatory `NEWLINE` token (which terminates the statement) is consumed.
+1. The bytecode instruction for discarding the expression result is written:
 
     ```
     OP_POP
@@ -356,3 +357,11 @@ These examples demonstrate some of the details of the parser's and compiler's st
   * Conceptual parsing tree for the arithmetic operations:
 
     ![Thusly conceptual parsing tree example](../media/thusly-design-example-arithmetic-parsing-tree-06.svg)
+
+**Token #10** (`EOF`, end of file):
+
+```
+1.2 + 3 * 4 / -5
+```
+
+1. Since the end has been detected, no more statements are parsed and the compilation ends.
