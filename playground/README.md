@@ -1,6 +1,6 @@
 # Interactive Browser Playground for Thusly
 
-An interactive playground in the browser for the Thusly programming language.
+An interactive WASM-based playground in the browser for the Thusly programming language.
 
 ## Live Playground
 

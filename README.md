@@ -25,7 +25,7 @@ A general-purpose programming language coming to life through a custom one-pass 
 
 ## Playground
 
-Try out Thusly in the [interactive playground](./playground).
+Try out Thusly in the WASM-based [interactive playground](./playground) directly in the browser.
 
 ![Thusly Playground](design/media/thusly-playground.png)
 
