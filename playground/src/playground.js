@@ -11,20 +11,14 @@ runButtonElement.addEventListener("click", () => {
   run(code, debugCompilationElement.checked, debugExecutionElement.checked);
 });
 
-const loopsSnippetElement = document.getElementById("th-loops-snippet");
-loopsSnippetElement.parentElement.addEventListener("click", () => {
-  showSelectedSnippet(loopsSnippetElement.value);
-});
-
-const selectionSnippetElement = document.getElementById("th-selection-snippet");
-selectionSnippetElement.parentElement.addEventListener("click", () => {
-  showSelectedSnippet(selectionSnippetElement.value);
-});
-
-const blockSnippetElement = document.getElementById("th-block-snippet");
-blockSnippetElement.parentElement.addEventListener("click", () => {
-  showSelectedSnippet(blockSnippetElement.value);
-});
+const exampleContainerElements = document.getElementsByClassName("th-tab-example");
+for (const container of exampleContainerElements) {
+  container.addEventListener("click", () => {
+    const inputElement = container.getElementsByTagName("input")[0];
+    inputElement.checked = true;
+    showSelectedSnippet(inputElement.value);
+  });
+}
 
 function showSelectedSnippet(name) {
   editor.setValue(snippets[name]);
