@@ -83,6 +83,7 @@ header {
 
 .th-tab {
   margin: 0 10px;
+  width: max-content;
   padding: 6px 20px;
   display: flex;
   flex-direction: column;
