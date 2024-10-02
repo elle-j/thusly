@@ -5,8 +5,45 @@
 #include "program.h"
 #include "thusly_value.h"
 
+#define LINE_HEADING ("Source Line    ")
+#define LINE_HEADING_LENGTH 15
+#define OFFSET_HEADING ("Byte Offset    ")
+#define OFFSET_HEADING_LENGTH 15
+#define INSTRUCTION_HEADING ("Instruction")
+
+void disassembler_print_headings(const char* title) {
+  printf("================ %s ================\n\n", title);
+  printf(LINE_HEADING);
+  printf(OFFSET_HEADING);
+  printf(INSTRUCTION_HEADING);
+  printf("\n\n");
+}
+
+static void indent(int size) {
+  printf("%*c", size, ' ');
+}
+
+void disassembler_indent_to_last_column() {
+  indent(LINE_HEADING_LENGTH + OFFSET_HEADING_LENGTH);
+}
+
+static void print_source_line_number(Program* program, int offset) {
+  bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
+  if (is_same_line_as_previous)
+    indent(LINE_HEADING_LENGTH);
+  else {
+    printf("%-4d", program->source_lines[offset]);
+    indent(LINE_HEADING_LENGTH - 4);
+  }
+}
+
+static void print_bytecode_offset(int offset) {
+  printf("%-4d", offset);
+  indent(OFFSET_HEADING_LENGTH - 4);
+}
+
 static int print_opcode(const char* op_name, int offset) {
-  printf("op[%s]\n", op_name);
+  printf("%s\n", op_name);
 
   return offset + 1;
 }
@@ -14,17 +51,17 @@ static int print_opcode(const char* op_name, int offset) {
 static int print_pop_n(const char* op_name, Program* program, int offset) {
   byte number = program->instructions[offset + 1];
   // See `compiler.discard_scope()` for comments regarding `number + 1`.
-  printf("op[%s] count[%d]\n", op_name, number + 1);
+  printf("%s %d        (pops %d + 1 values)\n", op_name, number, number);
 
   return offset + 2;
 }
 
 static int print_constant(const char* op_name, Program* program, int offset) {
   byte constant_index = program->instructions[offset + 1]; 
-  // printf("op[%-16s] index[%4d] value[", op_name, constant_index);
-  printf("op[%s] index[%d] value[", op_name, constant_index);
+  // printf("%-16s %d (points to: ", op_name, constant_index);
+  printf("%s %d    (points to: ", op_name, constant_index);
   print_value(program->constant_pool.values[constant_index]);
-  printf("]\n");
+  printf(")\n");
 
   return offset + 2;
 }
@@ -34,48 +71,23 @@ static int print_variable(const char* op_name, Program* program, int offset) {
   // names of the variables are not stored in the program. (Only the
   // values exist on the stack.)
   byte variable_slot = program->instructions[offset + 1];
-  printf("op[%s] slot[%d]\n", op_name, variable_slot);
+  printf("%s %d\n", op_name, variable_slot);
 
   return offset + 2;
 }
 
 static int print_jump(const char* op_name, Program* program, int sign, int offset) {
   uint16_t jump_offset = (uint16_t)((program->instructions[offset + 1] << 8) | program->instructions[offset + 2]);
-  printf("op[%s] from[%d] to[%d]\n", op_name, offset, offset + 3 + sign * jump_offset);
+  int target_offset = offset + 3 + sign * jump_offset;
+  printf("%s %d    (jumps from %d to %d)\n", op_name, jump_offset, offset, target_offset);
 
   return offset + 3;
 }
 
-void disassemble_stack(VM* vm) {
-  printf("                        stack[");
-  for (ThuslyValue* stack_elem_ptr = vm->stack; stack_elem_ptr < vm->next_stack_top; stack_elem_ptr++) {
-    print_value(*stack_elem_ptr);
-    bool is_last = stack_elem_ptr + 1 == vm->next_stack_top;
-    if (!is_last)
-      printf(", ");
-  }
-  printf("]\n");
-}
-
-void disassemble_program(Program* program, const char* name) {
-  printf("========== %s ==========\n", name);
-
-  int offset = 0;
-  while (offset < program->count)
-    offset = disassemble_instruction(program, offset);
-
-  printf("\n");
-}
-
 /// Disassemble the instruction and return the offset to the next instruction.
 int disassemble_instruction(Program* program, int offset) {
-  printf("offset[%04d] ", offset);
-
-  bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
-  if (is_same_line_as_previous)
-    printf("           ");
-  else
-    printf("line[%4d] ", program->source_lines[offset]);
+  print_source_line_number(program, offset);
+  print_bytecode_offset(offset);
 
   byte instruction = program->instructions[offset];
   switch (instruction) {
@@ -137,4 +149,26 @@ int disassemble_instruction(Program* program, int offset) {
       printf("Unsupported opcode %d\n", instruction);
       return offset + 1;
   }
+}
+
+void disassemble_program(Program* program) {
+  disassembler_print_headings("Program");
+
+  int offset = 0;
+  while (offset < program->count)
+    offset = disassemble_instruction(program, offset);
+
+  printf("\n");
+}
+
+void disassemble_stack(VM* vm) {
+  disassembler_indent_to_last_column();
+  printf("stack: [");
+  for (ThuslyValue* stack_elem_ptr = vm->stack; stack_elem_ptr < vm->next_stack_top; stack_elem_ptr++) {
+    print_value(*stack_elem_ptr);
+    bool is_last = stack_elem_ptr + 1 == vm->next_stack_top;
+    if (!is_last)
+      printf(", ");
+  }
+  printf("]\n\n");
 }

@@ -123,7 +123,7 @@ static ErrorReport decode_and_execute(VM* vm) {
 
   #ifdef DEBUG_MODE
     if (flag_debug_execution)
-      printf("========== Execution ==========\n");
+      disassembler_print_headings("Execution");
   #endif
 
   while (true) {
@@ -252,6 +252,12 @@ static ErrorReport decode_and_execute(VM* vm) {
         push(vm, FROM_C_BOOL(!is_truthy(pop(vm))));
         break;
       case OP_OUT:
+        #ifdef DEBUG_MODE
+          if (flag_debug_execution) {
+            disassembler_indent_to_last_column();
+            printf("output: ");
+          }
+        #endif
         print_value(pop(vm));
         printf("\n");
         break;

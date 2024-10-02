@@ -935,7 +935,7 @@ static void end_compilation(Parser* parser) {
 
   #ifdef DEBUG_MODE
     if (flag_debug_compilation && !parser->saw_error)
-      disassemble_program(get_writable_program(parser), "Program");
+      disassemble_program(get_writable_program(parser));
   #endif
 }
 
