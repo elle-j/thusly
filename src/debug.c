@@ -5,8 +5,22 @@
 #include "program.h"
 #include "thusly_value.h"
 
+#define DEBUG_LINE_HEADING ("Source Line    ")
+#define DEBUG_LINE_HEADING_LENGTH 15
+#define DEBUG_OFFSET_HEADING ("Byte Offset    ")
+#define DEBUG_OFFSET_HEADING_LENGTH 15
+#define DEBUG_INSTRUCTION_HEADING ("Instruction")
+
+void print_headings() {
+  printf("================ Program ================\n\n");
+  printf(DEBUG_LINE_HEADING);
+  printf(DEBUG_OFFSET_HEADING);
+  printf(DEBUG_INSTRUCTION_HEADING);
+  printf("\n\n");
+}
+
 static int print_opcode(const char* op_name, int offset) {
-  printf("op[%s]\n", op_name);
+  printf("%s\n", op_name);
 
   return offset + 1;
 }
@@ -14,17 +28,17 @@ static int print_opcode(const char* op_name, int offset) {
 static int print_pop_n(const char* op_name, Program* program, int offset) {
   byte number = program->instructions[offset + 1];
   // See `compiler.discard_scope()` for comments regarding `number + 1`.
-  printf("op[%s] count[%d]\n", op_name, number + 1);
+  printf("%s %d        (pops %d + 1 values)\n", op_name, number, number);
 
   return offset + 2;
 }
 
 static int print_constant(const char* op_name, Program* program, int offset) {
   byte constant_index = program->instructions[offset + 1]; 
-  // printf("op[%-16s] index[%4d] value[", op_name, constant_index);
-  printf("op[%s] index[%d] value[", op_name, constant_index);
+  // printf("%-16s %d (points to: ", op_name, constant_index);
+  printf("%s %d    (points to: ", op_name, constant_index);
   print_value(program->constant_pool.values[constant_index]);
-  printf("]\n");
+  printf(")\n");
 
   return offset + 2;
 }
@@ -34,14 +48,15 @@ static int print_variable(const char* op_name, Program* program, int offset) {
   // names of the variables are not stored in the program. (Only the
   // values exist on the stack.)
   byte variable_slot = program->instructions[offset + 1];
-  printf("op[%s] slot[%d]\n", op_name, variable_slot);
+  printf("%s %d\n", op_name, variable_slot);
 
   return offset + 2;
 }
 
 static int print_jump(const char* op_name, Program* program, int sign, int offset) {
   uint16_t jump_offset = (uint16_t)((program->instructions[offset + 1] << 8) | program->instructions[offset + 2]);
-  printf("op[%s] from[%d] to[%d]\n", op_name, offset, offset + 3 + sign * jump_offset);
+  int target_offset = offset + 3 + sign * jump_offset;
+  printf("%s %d    (jumps from %d to %d)\n", op_name, jump_offset, offset, target_offset);
 
   return offset + 3;
 }
@@ -57,8 +72,8 @@ void disassemble_stack(VM* vm) {
   printf("]\n");
 }
 
-void disassemble_program(Program* program, const char* name) {
-  printf("========== %s ==========\n", name);
+void disassemble_program(Program* program) {
+  print_headings();
 
   int offset = 0;
   while (offset < program->count)
@@ -69,13 +84,16 @@ void disassemble_program(Program* program, const char* name) {
 
 /// Disassemble the instruction and return the offset to the next instruction.
 int disassemble_instruction(Program* program, int offset) {
-  printf("offset[%04d] ", offset);
-
   bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
   if (is_same_line_as_previous)
-    printf("           ");
-  else
-    printf("line[%4d] ", program->source_lines[offset]);
+    printf("%*c", DEBUG_LINE_HEADING_LENGTH, ' ');
+  else {
+    printf("%-4d", program->source_lines[offset]);
+    printf("%*c", DEBUG_LINE_HEADING_LENGTH - 4, ' ');
+  }
+
+  printf("%-4d", offset);
+  printf("%*c", DEBUG_OFFSET_HEADING_LENGTH - 4, ' ');
 
   byte instruction = program->instructions[offset];
   switch (instruction) {
