@@ -11,12 +11,20 @@
 #define DEBUG_OFFSET_HEADING_LENGTH 15
 #define DEBUG_INSTRUCTION_HEADING ("Instruction")
 
-void print_headings() {
-  printf("================ Program ================\n\n");
+void disassembler_print_headings(const char* title) {
+  printf("================ %s ================\n\n", title);
   printf(DEBUG_LINE_HEADING);
   printf(DEBUG_OFFSET_HEADING);
   printf(DEBUG_INSTRUCTION_HEADING);
   printf("\n\n");
+}
+
+static void disassembler_indent(int size) {
+  printf("%*c", size, ' ');
+}
+
+void disassembler_indent_to_last_column() {
+  disassembler_indent(DEBUG_LINE_HEADING_LENGTH + DEBUG_OFFSET_HEADING_LENGTH);
 }
 
 static int print_opcode(const char* op_name, int offset) {
@@ -62,18 +70,19 @@ static int print_jump(const char* op_name, Program* program, int sign, int offse
 }
 
 void disassemble_stack(VM* vm) {
-  printf("                        stack[");
+  disassembler_indent_to_last_column();
+  printf("stack: [");
   for (ThuslyValue* stack_elem_ptr = vm->stack; stack_elem_ptr < vm->next_stack_top; stack_elem_ptr++) {
     print_value(*stack_elem_ptr);
     bool is_last = stack_elem_ptr + 1 == vm->next_stack_top;
     if (!is_last)
       printf(", ");
   }
-  printf("]\n");
+  printf("]\n\n");
 }
 
 void disassemble_program(Program* program) {
-  print_headings();
+  disassembler_print_headings("Program");
 
   int offset = 0;
   while (offset < program->count)
@@ -86,14 +95,14 @@ void disassemble_program(Program* program) {
 int disassemble_instruction(Program* program, int offset) {
   bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
   if (is_same_line_as_previous)
-    printf("%*c", DEBUG_LINE_HEADING_LENGTH, ' ');
+    disassembler_indent(DEBUG_LINE_HEADING_LENGTH);
   else {
     printf("%-4d", program->source_lines[offset]);
-    printf("%*c", DEBUG_LINE_HEADING_LENGTH - 4, ' ');
+    disassembler_indent(DEBUG_LINE_HEADING_LENGTH - 4);
   }
 
   printf("%-4d", offset);
-  printf("%*c", DEBUG_OFFSET_HEADING_LENGTH - 4, ' ');
+  disassembler_indent(DEBUG_OFFSET_HEADING_LENGTH - 4);
 
   byte instruction = program->instructions[offset];
   switch (instruction) {
