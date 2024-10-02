@@ -5,17 +5,17 @@
 #include "program.h"
 #include "thusly_value.h"
 
-#define DEBUG_LINE_HEADING ("Source Line    ")
-#define DEBUG_LINE_HEADING_LENGTH 15
-#define DEBUG_OFFSET_HEADING ("Byte Offset    ")
-#define DEBUG_OFFSET_HEADING_LENGTH 15
-#define DEBUG_INSTRUCTION_HEADING ("Instruction")
+#define LINE_HEADING ("Source Line    ")
+#define LINE_HEADING_LENGTH 15
+#define OFFSET_HEADING ("Byte Offset    ")
+#define OFFSET_HEADING_LENGTH 15
+#define INSTRUCTION_HEADING ("Instruction")
 
 void disassembler_print_headings(const char* title) {
   printf("================ %s ================\n\n", title);
-  printf(DEBUG_LINE_HEADING);
-  printf(DEBUG_OFFSET_HEADING);
-  printf(DEBUG_INSTRUCTION_HEADING);
+  printf(LINE_HEADING);
+  printf(OFFSET_HEADING);
+  printf(INSTRUCTION_HEADING);
   printf("\n\n");
 }
 
@@ -24,22 +24,22 @@ static void indent(int size) {
 }
 
 void disassembler_indent_to_last_column() {
-  indent(DEBUG_LINE_HEADING_LENGTH + DEBUG_OFFSET_HEADING_LENGTH);
+  indent(LINE_HEADING_LENGTH + OFFSET_HEADING_LENGTH);
 }
 
 static void print_source_line_number(Program* program, int offset) {
   bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
   if (is_same_line_as_previous)
-    indent(DEBUG_LINE_HEADING_LENGTH);
+    indent(LINE_HEADING_LENGTH);
   else {
     printf("%-4d", program->source_lines[offset]);
-    indent(DEBUG_LINE_HEADING_LENGTH - 4);
+    indent(LINE_HEADING_LENGTH - 4);
   }
 }
 
 static void print_bytecode_offset(int offset) {
   printf("%-4d", offset);
-  indent(DEBUG_OFFSET_HEADING_LENGTH - 4);
+  indent(OFFSET_HEADING_LENGTH - 4);
 }
 
 static int print_opcode(const char* op_name, int offset) {
