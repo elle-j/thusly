@@ -5,17 +5,12 @@
 #include "program.h"
 #include "thusly_value.h"
 
-#define LINE_HEADING ("Source Line    ")
-#define LINE_HEADING_LENGTH 15
-#define OFFSET_HEADING ("Byte Offset    ")
-#define OFFSET_HEADING_LENGTH 15
-#define INSTRUCTION_HEADING ("Instruction")
+#define COLUMN_LENGTH 12
 
 void disassembler_print_headings(const char* title) {
   printf("================ %s ================\n\n", title);
-  printf(LINE_HEADING);
-  printf(OFFSET_HEADING);
-  printf(INSTRUCTION_HEADING);
+  printf("Source      Bytecode    Bytecode\n");
+  printf("Line        Offset      Instruction");
   printf("\n\n");
 }
 
@@ -24,22 +19,22 @@ static void indent(int size) {
 }
 
 void disassembler_indent_to_last_column() {
-  indent(LINE_HEADING_LENGTH + OFFSET_HEADING_LENGTH);
+  indent(COLUMN_LENGTH * 2);
 }
 
 static void print_source_line_number(Program* program, int offset) {
   bool is_same_line_as_previous = offset > 0 && program->source_lines[offset] == program->source_lines[offset - 1];
   if (is_same_line_as_previous)
-    indent(LINE_HEADING_LENGTH);
+    indent(COLUMN_LENGTH);
   else {
     printf("%-4d", program->source_lines[offset]);
-    indent(LINE_HEADING_LENGTH - 4);
+    indent(COLUMN_LENGTH - 4);
   }
 }
 
 static void print_bytecode_offset(int offset) {
   printf("%-4d", offset);
-  indent(OFFSET_HEADING_LENGTH - 4);
+  indent(COLUMN_LENGTH - 4);
 }
 
 static int print_opcode(const char* op_name, int offset) {
