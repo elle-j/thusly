@@ -24,7 +24,7 @@ void vm_init(VM* vm) {
 
 void vm_free(VM* vm) {
   // -- TEMPORARY --
-  #ifdef DEBUG_MODE
+  #ifdef DEBUG_MODE_IMPLEMENTER
     if (flag_debug_execution)
       printf("FREEING VM..\n");
   #endif
