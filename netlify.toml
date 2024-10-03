@@ -1,0 +1,5 @@
+# Proceed with the build process if there are changes in the Netlify
+# base directory (playground), or src, or CMakeLists.txt.
+# https://docs.netlify.com/configure-builds/ignore-builds/
+[build]
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../src/ ../CMakeLists.txt"
