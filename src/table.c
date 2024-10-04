@@ -17,7 +17,7 @@ void table_init(Table* table) {
 
 void table_free(Table* table) {
   // -- TEMPORARY --
-  #ifdef DEBUG_MODE
+  #ifdef DEBUG_MODE_IMPLEMENTER
     if (flag_debug_execution)
       printf("FREEING TABLE..\n");
   #endif

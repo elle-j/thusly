@@ -43,6 +43,9 @@ TextObject* claim_c_string(Environment* environment, char* chars, int length);
 TextObject* copy_c_string(Environment* environment, const char* chars, int length);
 void print_object(ThuslyValue value);
 
+// Note: The body of this function is not used directly in a macro since the
+// `value` is used more than once here (twice). This prevents the macro's argument
+// from incorrectly being evaluated twice.
 static inline bool matches_gc_object_type(ThuslyValue value, GCObjectType type) {
   return IS_GC_OBJECT(value) && TO_C_OBJECT_PTR(value)->type == type;
 }

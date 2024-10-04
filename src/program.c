@@ -12,7 +12,7 @@ static void constant_pool_init(ConstantPool* pool) {
 
 static void constant_pool_free(ConstantPool* pool) {
   // -- TEMPORARY --
-  #ifdef DEBUG_MODE
+  #ifdef DEBUG_MODE_IMPLEMENTER
     if (flag_debug_execution)
       printf("FREEING CONSTANT POOL..\n");
   #endif
@@ -44,7 +44,7 @@ void program_init(Program* program) {
 
 void program_free(Program* program) {
   // -- TEMPORARY --
-  #ifdef DEBUG_MODE
+  #ifdef DEBUG_MODE_IMPLEMENTER
     if (flag_debug_execution)
       printf("FREEING PROGRAM..\n");
   #endif
