@@ -199,7 +199,7 @@ To read more about the architectural design, implementation details, and follow 
   - [x] Addition and assignment (`+:`)
   - [x] Subtraction and assignment (`-:`)
   - [x] Multiplication and assignment (`*:`)
-  - [ ] Division and assignment (`/:`)
+  - [x] Division and assignment (`/:`)
   - [ ] Modulo and assignment (`mod:`)
 - [ ] Range comparison expression can be evaluated (`<value> in <min>..<max>`)
 - [ ] TODO (more milestones will be added here)
