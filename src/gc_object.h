@@ -25,8 +25,8 @@ typedef enum {
 /// first field of the `GCObject` struct. (There is never padding in the beginning of a struct.)
 struct GCObject {
   GCObjectType type;
-  // Pointer to the next heap-allocated object in the (intrusive) linked list.
-  // (The head is pointed to by the VM's `Environment` struct.)
+  /// Pointer to the next heap-allocated object in the (intrusive) linked list.
+  /// (The head is pointed to by the VM's `Environment` struct.)
   struct GCObject* next;
 };
 

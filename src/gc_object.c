@@ -9,9 +9,11 @@
 #define ALLOCATE_OBJECT(environment, type, gc_object_type) \
   (type*)allocate_object(environment, sizeof(type), gc_object_type)
 
+/// Allocate memory for a `GCObject`.
+///
+/// The size of the object needs to be passed as an argument (rather than
+/// using `sizeof(GCObject)`) since there are different-sized object types.
 static GCObject* allocate_object(Environment* environment, size_t size, GCObjectType gc_object_type) {
-  // `size` needs to come from the argument (rather than using `sizeof(GCObject)`)
-  // since there are different-sized object types.
   GCObject* object = (GCObject*)handle_reallocation(NULL, 0, size);
   object->type = gc_object_type;
 
@@ -22,6 +24,7 @@ static GCObject* allocate_object(Environment* environment, size_t size, GCObject
   return object;
 }
 
+/// Allocate memory for a text object and add the object to the text intern pool.
 static TextObject* allocate_text_object(Environment* environment, char* chars, int length, uint32_t hash_code) {
   TextObject* text = ALLOCATE_OBJECT(environment, TextObject, GC_OBJECT_TYPE_TEXT);
   text->chars = chars;
@@ -32,8 +35,9 @@ static TextObject* allocate_text_object(Environment* environment, char* chars, i
   return text;
 }
 
+/// Produce a deterministic fixed-size hash code from a given key.
+/// (Uses the FNV1 hash algorithm: http://www.isthe.com/chongo/tech/comp/fnv/)
 static uint32_t hash(const char* key, int length) {
-  // FNV1 hash algorithm: http://www.isthe.com/chongo/tech/comp/fnv/
   #define FNV1_32_INIT ((uint32_t)2166136261u)
   #define FNV_32_PRIME ((uint32_t)16777619)
 
@@ -51,6 +55,7 @@ static uint32_t hash(const char* key, int length) {
   #undef FNV_32_PRIME
 }
 
+/// Have a Thusly text object claim ownership of a C string.
 TextObject* claim_c_string(Environment* environment, char* chars, int length) {
   uint32_t hash_code = hash(chars, length);
   TextObject* interned_text = table_get_interned_text(&environment->texts, chars, length, hash_code);
@@ -62,6 +67,7 @@ TextObject* claim_c_string(Environment* environment, char* chars, int length) {
   return allocate_text_object(environment, chars, length, hash_code);
 }
 
+/// Have a Thusly text object copy a C string.
 TextObject* copy_c_string(Environment* environment, const char* chars, int length) {
   uint32_t hash_code = hash(chars, length);
   TextObject* interned_text = table_get_interned_text(&environment->texts, chars, length, hash_code);

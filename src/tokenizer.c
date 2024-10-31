@@ -9,6 +9,7 @@ void tokenizer_init(Tokenizer* tokenizer, const char* source) {
   tokenizer->is_blank_line = true;
 }
 
+/// Make a token from the current lexeme scanned.
 static Token make_token(Tokenizer* tokenizer, TokenType type) {
   Token token;
   token.type = type;
@@ -19,6 +20,7 @@ static Token make_token(Tokenizer* tokenizer, TokenType type) {
   return token;
 }
 
+/// Make a sentinel error token, storing the error message as the lexeme.
 static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   Token token;
   token.type = TOKEN_LEXICAL_ERROR;
@@ -29,34 +31,41 @@ static Token make_error_token(Tokenizer* tokenizer, const char* message) {
   return token;
 }
 
+/// Check whether a character is an alpha (a-z, A-Z) or underscore.
 static bool is_alpha(char character) {
   return (character >= 'a' && character <= 'z')
     || (character >= 'A' && character <= 'Z')
     || character == '_';
 }
 
+/// Check whether a character is a digit (0-9).
 static bool is_digit(char character) {
   return character >= '0' && character <= '9';
 }
 
+/// Check whether a character is alphanumeric (a-z, A-Z, 0-9) or underscore.
 static bool is_alphanumeric(char character) {
   return is_alpha(character) || is_digit(character);
 }
 
+/// Check whether the tokenizer has reached the end of the source string.
 static bool is_at_end(Tokenizer* tokenizer) {
   return *tokenizer->current == '\0';
 }
 
+/// Advance to the next character and return the just consumed one.
 static char advance(Tokenizer* tokenizer) {
   tokenizer->current++;
 
   return tokenizer->current[-1];
 }
 
+/// Look ahead at the current character to be consumed without consuming it.
 static char peek(Tokenizer* tokenizer) {
   return *tokenizer->current;
 }
 
+/// Look ahead at the second character to be consumed without consuming it.
 static char peek_next(Tokenizer* tokenizer) {
   if (is_at_end(tokenizer))
     return '\0';
@@ -64,6 +73,8 @@ static char peek_next(Tokenizer* tokenizer) {
   return tokenizer->current[1];
 }
 
+/// Check whether the current unconsumed character matches an expected
+/// character, and consume it if they match.
 static bool match(Tokenizer* tokenizer, char expected) {
   if (is_at_end(tokenizer) || *tokenizer->current != expected)
     return false;
@@ -73,12 +84,15 @@ static bool match(Tokenizer* tokenizer, char expected) {
   return true;
 }
 
+/// Check whether the current unconsumed character should be treated as whitespace.
+/// This includes newline characters on blank lines.
 static inline bool is_whitespace(Tokenizer* tokenizer) {
   // TODO: Double check '\r' and '\r\n'.
   char character = peek(tokenizer);
   return character == ' ' || character == '\t' || character == '\r' || (tokenizer->is_blank_line && character == '\n');
 }
 
+/// Advance the tokenizer passed all consecutively encountered whitespace.
 static void skip_whitespace(Tokenizer* tokenizer) {
   while (is_whitespace(tokenizer)) {
     if (peek(tokenizer) == '\n')
@@ -88,10 +102,12 @@ static void skip_whitespace(Tokenizer* tokenizer) {
   }
 }
 
+/// Check whether the next unconsumed characters indicate a comment.
 static bool is_comment(Tokenizer* tokenizer) {
   return peek(tokenizer) == '/' && peek_next(tokenizer) == '/';
 }
 
+/// Advance the tokenizer to the end of the line.
 static void skip_comment(Tokenizer* tokenizer) {
   char character = peek(tokenizer);
   if (is_comment(tokenizer)) {
@@ -109,6 +125,7 @@ static void skip_comment(Tokenizer* tokenizer) {
   }
 }
 
+/// Advance the tokenizer passed all consecutive whitespace and comments.
 static void skip_insignificant(Tokenizer* tokenizer) {
   while (is_whitespace(tokenizer) || is_comment(tokenizer)) {
     skip_whitespace(tokenizer);
@@ -116,6 +133,7 @@ static void skip_insignificant(Tokenizer* tokenizer) {
   }
 }
 
+/// Consume the current number literal.
 static Token consume_number(Tokenizer* tokenizer) {
   while (is_digit(peek(tokenizer)))
     advance(tokenizer);
@@ -131,6 +149,7 @@ static Token consume_number(Tokenizer* tokenizer) {
   return make_token(tokenizer, TOKEN_NUMBER);
 }
 
+/// Consume the current text literal.
 static Token consume_text(Tokenizer* tokenizer) {
   // Save separate `line` variable rather than incrementing `tokenizer->line`
   // directly so that tokens store the line number at the start of the text.
@@ -156,6 +175,14 @@ static Token consume_text(Tokenizer* tokenizer) {
   return token;
 }
 
+/// Search for a keyword where its suffix matches the provided suffix,
+/// and return the corresponding keyword token type if they match,
+/// otherwise return an identifier token type.
+///
+/// By the time this function is called, it is known that the prefix of the
+/// current lexeme being scanned matches the prefix of the keyword represented
+/// by the token type provided. Thus, only the keyword suffix and the
+/// provided suffix are compared to see if the current lexeme is a keyword.
 static TokenType search_keyword(Tokenizer* tokenizer, int prefix_length, const char* suffix, int suffix_length, TokenType type) {
   int lexeme_length = tokenizer->current - tokenizer->start;
   const char* lexeme_suffix = tokenizer->start + prefix_length;
@@ -166,8 +193,11 @@ static TokenType search_keyword(Tokenizer* tokenizer, int prefix_length, const c
   return is_exact_match ? type : TOKEN_IDENTIFIER;
 }
 
+/// Get a keyword token type if the current lexeme being scanned matches
+/// a reserved keyword, otherwise get an identifier token type.
+///
+/// A trie is used for searching for a keyword.
 static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
-  // Using a trie to check if it is one of the keywords.
   int lexeme_length = tokenizer->current - tokenizer->start;
   switch (tokenizer->start[0]) {
     case '@':
@@ -237,6 +267,7 @@ static TokenType get_keyword_or_identifier_type(Tokenizer* tokenizer) {
   return TOKEN_IDENTIFIER;
 }
 
+/// Consume the current keyword or identifier.
 static Token consume_keyword_or_identifier(Tokenizer* tokenizer) {
   while (is_alphanumeric(peek(tokenizer)))
     advance(tokenizer);
@@ -244,7 +275,7 @@ static Token consume_keyword_or_identifier(Tokenizer* tokenizer) {
   return make_token(tokenizer, get_keyword_or_identifier_type(tokenizer));
 }
 
-/// Generates and returns (by value) the next token found in the source code.
+/// Generate and return (by value) the next token found in the source code.
 Token tokenize(Tokenizer* tokenizer) {
   skip_insignificant(tokenizer);
 
