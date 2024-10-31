@@ -4,6 +4,11 @@
 #include "gc_object.h"
 #include "thusly_value.h"
 
+/// Check whether two Thusly values are equal.
+///
+/// Values of different types are never equal.
+/// Primitive types are equal if their values are the same.
+/// Non-primitive types are equal if their memory addresses are the same.
 bool values_are_equal(ThuslyValue a, ThuslyValue b) {
   if (a.type != b.type)
     return false;

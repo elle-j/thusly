@@ -11,7 +11,7 @@ typedef enum {
   TYPE_BOOLEAN,
   TYPE_NONE,
   TYPE_NUMBER,
-  // Dynamically (heap) allocated type (e.g. `text` (string)).
+  /// Dynamically (heap) allocated type (e.g. `text` (string)).
   TYPE_GC_OBJECT,
 } DataType;
 

@@ -12,10 +12,11 @@ struct VM;
 /// Heap data used by the VM.
 typedef struct {
   struct VM* vm;
-  // Heap-allocated objects (points to the head).
+  /// Heap-allocated objects (points to the head).
   GCObject* gc_objects;
-  // All texts (strings) created are interned. (Only the keys in this
-  // table are used, so the values will all be `none` ThuslyValues.)
+  /// The text (string) intern pool. All texts created are interned
+  /// and added to this pool. (Only the keys in this table are used,
+  /// so the values will all be `none` ThuslyValues.)
   Table texts;
 } Environment;
 
@@ -24,9 +25,13 @@ typedef struct {
 typedef struct VM {
   Environment environment;
   Program* program;
+  /// The next instruction to be executed.
   byte* next_instruction;
+  /// The last-in-first-out (LIFO) operand stack used for the operands of the
+  /// operators used, as well as for the result of an evaluated expression.
   ThuslyValue stack[STACK_MAX];
-  // When pointing to the zeroth element, the stack is empty.
+  /// The next slot for the top of the stack.
+  /// (When pointing to the zeroth element, the stack is empty.)
   ThuslyValue* next_stack_top;
 } VM;
 
