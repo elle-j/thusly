@@ -23,7 +23,7 @@
 /// A user-defined variable declared in the source code.
 typedef struct {
   Token name;
-  // The depth/level at which the variable was declared.
+  /// The depth/level at which the variable was declared.
   int depth;
 } Variable;
 
@@ -33,13 +33,14 @@ typedef struct {
 /// operator precedence parsing.)
 
 typedef struct {
-  // When a variable is declared in the source code, it gets added to this array.
-  // The order will coincide with how they end up on the VM's stack. Due to only
-  // supporting instructions using 1 byte for operands, the array count cannot exceed 256.
+  /// The variables declared in the source code.
+  /// When a variable is declared, it gets added to this array. The order will
+  /// coincide with how they end up on the VM's stack. Due to only supporting
+  /// instructions using 1 byte for operands, the array count cannot exceed 256.
   Variable variables[VARIABLES_MAX];
-  // Number of variables currently in scope.
+  /// The number of variables currently in scope.
   int variable_count;
-  // The current level of nesting (number of surrounding blocks).
+  /// The current level of nesting (number of surrounding blocks).
   int scope_depth;
 } Compiler;
 
@@ -156,15 +157,18 @@ static ParseRule rules[] = {
   [TOKEN_LEXICAL_ERROR]         = { NULL, NULL, PRECEDENCE_IGNORE },
 };
 
+/// Get the parse rule associated with the given token type.
 static ParseRule* get_rule(TokenType type) {
   return &rules[type];
 }
 
+/// Initialize the compiler.
 static void compiler_init(Compiler* compiler) {
   compiler->variable_count = 0;
   compiler->scope_depth = 0;
 }
 
+/// Initialize the parser.
 static void parser_init(Parser* parser, Compiler* compiler, Environment* environment, Program* writable_program) {
   parser->compiler = compiler;
   parser->environment = environment;
@@ -177,10 +181,12 @@ static Program* get_writable_program(Parser* parser) {
   return parser->writable_program;
 }
 
+/// Get the offset of the current instruction from the start instruction.
 static int get_current_instruction_offset(Parser* parser) {
   return get_writable_program(parser)->count;
 }
 
+/// Report a compile time error and put the parser in panic mode.
 static void error_at(Parser* parser, Token* token, const char* message) {
   // If the parser is in panic mode, return here in order to not report
   // potentially false and unhelpful cascaded errors.
@@ -212,6 +218,8 @@ static void error_at(Parser* parser, Token* token, const char* message) {
   fprintf(stderr, "\n\t> What's wrong:\n\t\t%s\n", message);
 }
 
+/// Report a compile time error at the most recently consumed token,
+/// and put the parser in panic mode.
 static void error(Parser* parser, const char* message) {
   error_at(parser, &parser->previous, message);
 }
@@ -221,6 +229,7 @@ static bool compare(Parser* parser, TokenType type) {
   return parser->current.type == type;
 }
 
+/// Advance to the next valid token.
 static void advance(Parser* parser) {
   parser->previous = parser->current;
   parser->current = tokenize(&parser->tokenizer);
@@ -235,8 +244,8 @@ static void advance(Parser* parser) {
   }
 }
 
-/// Compare the type of the current token being parsed with the expected type,
-/// and advance if they match or generate an error.
+/// Consume the current unconsumed token if it matches the expected type,
+/// otherwise report a compile time error.
 static void consume(Parser* parser, TokenType expected_type, const char* err_message) {
   if (compare(parser, expected_type)) {
     advance(parser);
@@ -246,17 +255,19 @@ static void consume(Parser* parser, TokenType expected_type, const char* err_mes
   error_at(parser, &parser->current, err_message);
 }
 
+/// Consume the current newline.
 static void consume_newline(Parser* parser) {
   consume(parser, TOKEN_NEWLINE, "The line has not been terminated. Add a newline at the end of the line.");
 }
 
+/// Consume the current end of a block.
 static void consume_end_of_block(Parser* parser) {
   consume(parser, TOKEN_END, "The block has not been terminated. Use 'end' at the end of the block.");
   consume_newline(parser);
 }
 
-/// Compare the type of the current token being parsed with a given type,
-/// and advance the parser if they match.
+/// Compare the type of the current token with a given type, and advance
+/// the parser if they match.
 static bool match(Parser* parser, TokenType type) {
   if (!compare(parser, type))
     return false;
@@ -266,10 +277,12 @@ static bool match(Parser* parser, TokenType type) {
   return true;
 }
 
+/// Check whether all tokens have been parsed.
 static bool is_at_end_of_file(Parser* parser) {
   return parser->current.type == TOKEN_EOF;
 }
 
+/// Check whether the current token is the start of a statement.
 static bool is_at_start_of_statement(Parser* parser) {
   switch (parser->current.type) {
     // TODO: Add synchronization points if new statements are added to the language.
@@ -285,6 +298,7 @@ static bool is_at_start_of_statement(Parser* parser) {
   }
 }
 
+/// Check whether the current token is the end of a block.
 static bool is_at_end_of_block(Parser* parser) {
   return compare(parser, TOKEN_END);
 }
@@ -300,6 +314,7 @@ static void synchronize(Parser* parser) {
   }
 }
 
+/// Add a value to the constant pool and get the location.
 static byte make_constant(Parser* parser, ThuslyValue value) {
   unsigned int constant_index = program_add_constant(get_writable_program(parser), value);
   // The operand to the OP_CONSTANT instruction (i.e. the index of the constant)
@@ -321,26 +336,36 @@ static byte make_identifier_constant(Parser* parser, Token* token) {
   );
 }
 
+/// Overwrite a previously written bytecode instruction.
 static void overwrite_instruction(Parser* parser, int offset, byte updated_instruction) {
   program_overwrite(get_writable_program(parser), offset, updated_instruction);
 }
 
+/// Write a byte of an instruction.
 static void write_instruction(Parser* parser, byte instruction) {
   program_write(get_writable_program(parser), instruction, parser->previous.line);
 }
 
+/// Write two bytes of an instruction.
 static void write_instructions(Parser* parser, byte instruction1, byte instruction2) {
   write_instruction(parser, instruction1);
   write_instruction(parser, instruction2);
 }
 
+/// Write an instruction to load a constant.
 static void write_constant_instruction(Parser* parser, ThuslyValue value) {
   write_instructions(parser, OP_CONSTANT, make_constant(parser, value));
 }
 
+/// Write an instruction to jump to an earlier instruction.
 static void write_jump_backward_instruction(Parser* parser, int target_offset) {
   write_instruction(parser, OP_JUMP_BWD);
 
+  // The jump size (the operand for the jump instruction) should be 2 bytes MORE
+  // than the size from the current instruction to the target when jumping backward.
+  // This is due to that the VM will read the 3-byte jump instruction (1-byte opcode,
+  // 2-byte operand) and thereby move the program counter ahead. So, it needs to jump
+  // over the jump instruction itself as well.
   int jump_operand_bytes = 2;
   int jump_size = get_current_instruction_offset(parser) - target_offset + jump_operand_bytes;
   if (jump_size > JUMP_MAX)
@@ -349,8 +374,9 @@ static void write_jump_backward_instruction(Parser* parser, int target_offset) {
   write_instructions(parser, (jump_size >> 8) & PLACEHOLDER_JUMP_TARGET, jump_size & PLACEHOLDER_JUMP_TARGET);
 }
 
-/// Write an instruction to jump forward. This uses a 16-bit placeholder jump offset
-/// and returns where that placeholder starts which should be used for backpatching it.
+/// Write an instruction to jump to a later instruction. This uses a 16-bit
+/// placeholder jump offset and returns where that placeholder starts which
+/// should be used for backpatching it.
 static int write_jump_forward_instruction(Parser* parser, byte instruction) {
   write_instruction(parser, instruction);
   write_instructions(parser, PLACEHOLDER_JUMP_TARGET, PLACEHOLDER_JUMP_TARGET);
@@ -365,6 +391,11 @@ static int write_jump_forward_instruction(Parser* parser, byte instruction) {
 /// placeholder offset with the now-correct jump target offset. This assumes the
 /// function is called immediately before the instruction to jump to is written.
 static void patch_jump_forward_instruction(Parser* parser, int placeholder_start) {
+  // The jump size (the operand for the jump instruction) should be 2 bytes LESS
+  // than the size from the current instruction to the target when jumping forward.
+  // This is due to that the VM will read the 3-byte jump instruction (1-byte opcode,
+  // 2-byte operand) and thereby move the program counter ahead. So, the VM does
+  // not need to jump those bytes again.
   int jump_operand_bytes = 2;
   int jump_size = get_current_instruction_offset(parser) - placeholder_start - jump_operand_bytes;
   if (jump_size > JUMP_MAX)
@@ -374,19 +405,23 @@ static void patch_jump_forward_instruction(Parser* parser, int placeholder_start
   overwrite_instruction(parser, placeholder_start + 1, jump_size & PLACEHOLDER_JUMP_TARGET);
 }
 
+/// Write an instruction to return.
 static void write_return_instruction(Parser* parser) {
   write_instruction(parser, OP_RETURN);
 }
 
+/// Check whether a variable is declared in the innermost scope.
 static bool is_in_innermost_scope(Parser* parser, Variable* variable) {
   return variable->depth == parser->compiler->scope_depth;
 }
 
+/// Create a new scope.
 static void create_scope(Parser* parser) {
   parser->compiler->scope_depth++;
 }
 
-/// Discard the innermost scope along with the variables declared there.
+/// Discard the innermost scope along with writing instructions to discard the
+/// variables declared there.
 static void discard_scope(Parser* parser) {
   Compiler* compiler = parser->compiler;
 
@@ -414,6 +449,7 @@ static void discard_scope(Parser* parser) {
   compiler->scope_depth--;
 }
 
+/// Check whether two variables' names are the same.
 static bool is_same_name(Token* first, Token* second) {
   if (first->length != second->length)
     return false;
@@ -421,6 +457,9 @@ static bool is_same_name(Token* first, Token* second) {
   return memcmp(first->lexeme, second->lexeme, first->length) == 0;
 }
 
+/// Add a variable to the compiler's list of declared variables.
+/// The variable will initially be marked as "uninitialized". Once its
+/// initializer has been compiled, it will be treated as initialized.
 static void add_variable(Parser* parser, Token name) {
   bool has_reached_max_variables = parser->compiler->variable_count == VARIABLES_MAX;
   if (has_reached_max_variables) {
@@ -435,17 +474,21 @@ static void add_variable(Parser* parser, Token name) {
   variable->depth = UNINITIALIZED;
 }
 
-/// Mark the last variable added as initialized; i.e. the initializer has
-/// been compiled. This is denoted by having a depth != -1.
+/// Mark the last variable added as initialized; meaning, the initializer has
+/// been compiled. This is denoted by having a depth != UNINITIALIZED.
 static void mark_initialized(Parser* parser) {
   Compiler* compiler = parser->compiler;
   compiler->variables[compiler->variable_count - 1].depth = compiler->scope_depth;
 }
 
+/// Check whether a declared variable has been initialized; meaning, the initializer
+/// has been compiled. This is denoted by having a depth != UNINITIALIZED.
 static bool is_initialized(Variable* variable) {
   return variable->depth != UNINITIALIZED;
 }
 
+/// Declare a variable in the current scope, or report an error if a
+/// variable with the same name already exists in the same scope.
 static void declare_variable(Parser* parser) {
   // All user-defined variables are resolved at compile time.
   Token* name = &parser->previous;
@@ -465,6 +508,7 @@ static void declare_variable(Parser* parser) {
   add_variable(parser, *name);
 }
 
+/// Define a variable by marking the last variable added as initialized.
 static void define_variable(Parser* parser) {
   mark_initialized(parser);
 }
@@ -510,7 +554,7 @@ static bool is_assignment_operator(Token* token) {
   }
 }
 
-/// Assign a value to the variable at the given stack slot.
+/// Write an instruction to assign a value to the variable at the given stack slot.
 /// (Callers should have verified that the current token is an assignment operator.)
 static void assign_variable(Parser* parser, byte stack_slot) {
   advance(parser);
@@ -539,6 +583,8 @@ static void assign_variable(Parser* parser, byte stack_slot) {
   write_instructions(parser, OP_SET_VAR, stack_slot);
 }
 
+/// Write an instruction to assign a value to the variable name provided if it
+/// is assignable. Otherwise, write an instruction to access/load a variable.
 static void access_or_assign_variable(Parser* parser, Token name, bool is_assignable) {
   int stack_slot = resolve(parser, &name);
   if (stack_slot == NOT_FOUND)
