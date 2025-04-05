@@ -1,5 +1,6 @@
 :root {
   --black: #111111;
+  --white: #ffffff;
   --purple: #1e1e3f;
   --light-purple: #2d2154;
   --sand: burlywood;
@@ -8,6 +9,7 @@
   --light-gray: #e7e7e7;
   
   --font-size: 12px;
+  --border-radius: 0.4rem;
 
   --transition: all 120ms ease-in;
 
@@ -32,10 +34,17 @@ body {
   flex-direction: column;
   background-color: var(--purple);
   color: var(--light-gray);
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
   font-size: var(--font-size);
   letter-spacing: 0.8px;
   overflow-x: hidden;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--gray);
 }
 
 input {
@@ -61,20 +70,58 @@ a {
 
 header {
   height: 75px;
-  padding: 0 20px;
+  padding: 0 30px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--gray-dark);
 }
 
 .th-title {
   align-self: center;
-  margin-right: 12px;
   color: var(--gray);
-  font-size: var(--font-size);
+  font-size: 14px;
+  font-weight: 400;
   text-transform: uppercase;
   text-align: center;
+}
+
+/* =============== MAIN =============== */
+
+main {
+  padding: 15px 20px;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.th-input-section,
+.th-output-section {
+  width: 50%;
+}
+
+.th-info-container {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-dark);
+  border-radius: var(--border-radius);
+}
+
+.th-info-container-header {
+  height: 70px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-dark);
+}
+
+.th-info-container-header h3 {
+  margin-left: 5px;
+}
+
+.th-editor-controllers {
+  display: flex;
+  justify-content: space-between;
 }
 
 .th-tabs {
@@ -82,15 +129,15 @@ header {
 }
 
 .th-tab {
-  margin: 0 10px;
+  margin: 0 5px;
   width: max-content;
-  padding: 6px 20px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   border: 1px solid var(--gray-dark);
-  border-radius: 2rem;
+  border-radius: var(--border-radius);
   cursor: pointer;
 }
 
@@ -98,7 +145,7 @@ header {
   margin-bottom: 5px;
   color: var(--gray);
   font-size: calc(var(--font-size) - 2px);
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -141,7 +188,7 @@ header {
 .th-operation label {
   margin-bottom: 6px;
   font-size: calc(var(--font-size) - 1px);
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -199,7 +246,7 @@ header {
 }
 
 #th-run:hover {
-  background-color: white;
+  background-color: var(--white);
 }
 
 .th-run-icon {
@@ -211,34 +258,28 @@ header {
   border-left: 14px solid var(--black);
 }
 
-/* =============== MAIN =============== */
-
-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
 #th-editor {
-  width: 50%;
-  border-right: 1px solid var(--gray-dark);
+  height: 90%;
 }
 
 #th-output {
-  width: 50%;
+  height: 100%;
   padding: 22px 40px 0;
   white-space: pre;
   resize: none;
   outline: none;
   border: none;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
   box-shadow: none;
   background: none;
-	background-color: var(--light-purple);
-  color: white;
+  background-color: var(--light-purple);
+  color: var(--white);
   font-family: monospace;
   font-size: 14px;
   line-height: 22px;
   overflow: auto;
+  scrollbar-width: thin;
 }
 
 /* =============== FOOTER =============== */
