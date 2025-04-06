@@ -13,7 +13,7 @@ const editorConfiguration = {
   // fontWeight: "normal",
   language: languageId,
   letterSpacing: 0.5,
-  minimap: { enabled: true },
+  minimap: { enabled: false },
   padding: { top: 30 },
   scrollbar: {
     horizontalScrollbarSize: 5,
@@ -181,10 +181,9 @@ const tokensProvider = {
 
 const colors = {
   gold: "#deb26f",
+  black: "#141319",
   gray: "#a7a7a7",
-  pink: "#c692e9",
-  purple: "#81a8fd",
-  purpleDark: "#1e1e3f",
+  purple: "#b592ff",
   red: "#cf3b3b",
   white: "#ffffff",
 };
@@ -194,17 +193,17 @@ const thuslyTheme = {
   inherit: false,
 
   colors: {
-    "editor.background": colors.purpleDark,
+    "editor.background": colors.black,
     // "editor.foreground": colors.white,
   },
 
   rules: [
     { token: "", foreground: colors.white, fontStyle: "bold" },
-    { token: "keyword", foreground: colors.pink },
+    { token: "keyword", foreground: colors.purple },
     { token: "punctuation", foreground: colors.white },
     { token: "variable", foreground: colors.white },
     { token: "variable.predefined", foreground: colors.white },
-    { token: "variable.function", foreground: colors.pink },
+    { token: "variable.function", foreground: colors.purple },
     { token: "string", foreground: colors.gold },
     { token: "number", foreground: colors.gold },
     { token: "boolean", foreground: colors.gold },
@@ -212,7 +211,7 @@ const thuslyTheme = {
     { token: "comment", foreground: colors.gray },
     // { token: "type", foreground: "" },
     { token: "delimiter", foreground: colors.white },
-    { token: "entity.name.function", foreground: colors.pink }, // <--
+    { token: "entity.name.function", foreground: colors.purple },
     // { token: "key", foreground: colors.white },
     // { token: "emphasis", fontStyle: "italic" },
     // { token: "strong", fontStyle: "bold" },

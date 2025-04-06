@@ -1,15 +1,15 @@
 :root {
   --black: #111111;
+  --medium-black: #141319;
+  --light-black: #1d1b24;
   --white: #ffffff;
-  --purple: #1e1e3f;
-  --light-purple: #2d2154;
-  --sand: burlywood;
+  --purple: #b592ff;
   --gray: #787878;
-  --gray-dark: #575757;
+  --dark-gray: #313131;
   --light-gray: #e7e7e7;
-  
+
   --font-size: 12px;
-  --border-radius: 0.4rem;
+  --border-radius: 0.65rem;
 
   --transition: all 120ms ease-in;
 
@@ -32,7 +32,7 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
-  background-color: var(--purple);
+  background-color: var(--medium-black);
   color: var(--light-gray);
   font-family: "Poppins", sans-serif;
   font-weight: 400;
@@ -70,14 +70,17 @@ a {
 
 header {
   height: 75px;
-  padding: 0 30px;
+  padding: 0 50px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--gray-dark);
+  border-bottom: 1px solid var(--dark-gray);
+  background-color: var(--light-black);
 }
 
 .th-title {
   align-self: center;
+  padding-left: 20px;
+  border-left: 1px solid var(--purple);
   color: var(--gray);
   font-size: 14px;
   font-weight: 400;
@@ -88,7 +91,7 @@ header {
 /* =============== MAIN =============== */
 
 main {
-  padding: 15px 20px;
+  padding: 30px 35px;
   flex: 1;
   display: flex;
   overflow: hidden;
@@ -97,13 +100,16 @@ main {
 .th-input-section,
 .th-output-section {
   width: 50%;
+  margin: 0 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .th-info-container {
-  margin: 10px;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--gray-dark);
+  border: 1px solid var(--dark-gray);
   border-radius: var(--border-radius);
 }
 
@@ -112,7 +118,10 @@ main {
   padding: 10px 12px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--gray-dark);
+  border-bottom: 1px solid var(--dark-gray);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  background-color: var(--light-black);
 }
 
 .th-info-container-header h3 {
@@ -131,12 +140,12 @@ main {
 .th-tab {
   margin: 0 5px;
   width: max-content;
-  padding: 8px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid var(--gray-dark);
+  border: 1px solid var(--dark-gray);
   border-radius: var(--border-radius);
   cursor: pointer;
 }
@@ -154,6 +163,10 @@ main {
   align-items: center;
 }
 
+.th-tab-content label {
+  font-weight: 300;
+}
+
 .th-tab * {
   cursor: pointer;
 }
@@ -162,14 +175,14 @@ main {
   width: 12px;
   height: 12px;
   margin-right: 8px;
-  border: 1px solid var(--sand);
+  border: 1px solid var(--purple);
   border-radius: 50%;
   background-color: transparent;
   transition: var(--transition);
 }
 
 .th-tab input:checked {
-  background-color: var(--sand);
+  background-color: var(--purple);
 }
 
 .th-operations {
@@ -194,7 +207,7 @@ main {
 
 .th-toggle {
   position: relative;
-  border: 1px solid var(--gray);
+  border: 1px solid var(--dark-gray);
   border-radius: 2rem;
 }
 
@@ -220,7 +233,7 @@ main {
   width: 16px;
   height: 16px;
   display: block;
-  border: 1px solid var(--sand);
+  border: 1px solid var(--purple);
   border-radius: 50%;
   background-color: transparent;
 }
@@ -228,7 +241,7 @@ main {
 .th-toggle:checked::before {
   left: auto;
   right: 2px;
-  background-color: var(--sand);
+  background-color: var(--purple);
 }
 
 #th-run {
@@ -260,6 +273,9 @@ main {
 
 #th-editor {
   height: 90%;
+  overflow: hidden;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
 }
 
 #th-output {
@@ -273,7 +289,6 @@ main {
   border-bottom-right-radius: var(--border-radius);
   box-shadow: none;
   background: none;
-  background-color: var(--light-purple);
   color: var(--white);
   font-family: monospace;
   font-size: 14px;
@@ -289,7 +304,7 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-top: 1px solid var(--gray-dark);
+  border-top: 1px solid var(--dark-gray);
 }
 
 .th-social-icon {
@@ -360,7 +375,7 @@ footer {
     width: 100%;
     flex: 0.5;
     border-right: none;
-    border-bottom: 1px solid var(--gray-dark);
+    border-bottom: 1px solid var(--dark-gray);
   }
 
   #th-output {

@@ -37,90 +37,94 @@
 
     <!-- The editor and output. -->
     <main>
-      <section class="th-info-container th-input-section">
-        <div class="th-info-container-header th-editor-controllers">
-          <!-- Code snippets to choose from. -->
-          <!-- Their `value`s are identical to the properties in `snippets.js`. -->
-          <div class="th-tabs">
-            <div class="th-tab">
-              <p class="th-tab-heading">
-                Example 1
-              </p>
-              <div class="th-tab-content">
-                <input
-                  type="radio"
-                  id="th-loops-snippet"
-                  name="snippet"
-                  value="loops"
-                  checked
-                />
-                <label for="th-loops-snippet">Loops</label>
+      <section class="th-input-section">
+        <div class="th-info-container">
+          <div class="th-info-container-header th-editor-controllers">
+            <!-- Code snippets to choose from. -->
+            <!-- Their `value`s are identical to the properties in `snippets.js`. -->
+            <div class="th-tabs">
+              <div class="th-tab th-tab-example">
+                <p class="th-tab-heading">
+                  Example 1
+                </p>
+                <div class="th-tab-content">
+                  <input
+                    type="radio"
+                    id="th-loops-snippet"
+                    name="snippet"
+                    value="loops"
+                    checked
+                  />
+                  <label for="th-loops-snippet">Loops</label>
+                </div>
+              </div>
+              <div class="th-tab th-tab-example">
+                <p class="th-tab-heading">
+                  Example 2
+                </p>
+                <div class="th-tab-content">
+                  <input
+                    type="radio"
+                    id="th-selection-snippet"
+                    name="snippet"
+                    value="selection"
+                  />
+                  <label for="th-selection-snippet">Selection</label>
+                </div>
+              </div>
+              <div class="th-tab th-tab-example">
+                <p class="th-tab-heading">
+                  Example 3
+                </p>
+                <div class="th-tab-content">
+                  <input
+                    type="radio"
+                    id="th-block-snippet"
+                    name="snippet"
+                    value="standaloneBlock"
+                  />
+                  <label for="th-block-snippet">Block</label>
+                </div>
               </div>
             </div>
-            <div class="th-tab">
-              <p class="th-tab-heading">
-                Example 2
-              </p>
-              <div class="th-tab-content">
+            <!-- The `Run` button and debug options. -->
+            <div class="th-operations">
+              <div class="th-operation">
+                <label for="th-debug-compilation">Bytecode</label>
                 <input
-                  type="radio"
-                  id="th-selection-snippet"
-                  name="snippet"
-                  value="selection"
+                  type="checkbox"
+                  id="th-debug-compilation"
+                  class="th-toggle"
+                  name="debug option"
                 />
-                <label for="th-selection-snippet">Selection</label>
               </div>
-            </div>
-            <div class="th-tab">
-              <p class="th-tab-heading">
-                Example 3
-              </p>
-              <div class="th-tab-content">
+              <div class="th-operation">
+                <label for="th-debug-execution">Execution</label>
                 <input
-                  type="radio"
-                  id="th-block-snippet"
-                  name="snippet"
-                  value="standaloneBlock"
+                  type="checkbox"
+                  id="th-debug-execution"
+                  class="th-toggle"
+                  name="debug option"
                 />
-                <label for="th-block-snippet">Block</label>
               </div>
+              <!-- The button will become enabled when `Module.onRuntimeInitialized`. -->
+              <button id="th-run" disabled style="cursor: not-allowed;">
+                <div class="th-run-icon"></div>
+              </button>
             </div>
           </div>
-          <!-- The `Run` button and debug options. -->
-          <div class="th-operations">
-            <div class="th-operation">
-              <label for="th-debug-compilation">Bytecode</label>
-              <input
-                type="checkbox"
-                id="th-debug-compilation"
-                class="th-toggle"
-                name="debug option"
-              />
-            </div>
-            <div class="th-operation">
-              <label for="th-debug-execution">Execution</label>
-              <input
-                type="checkbox"
-                id="th-debug-execution"
-                class="th-toggle"
-                name="debug option"
-              />
-            </div>
-            <!-- The button will become enabled when `Module.onRuntimeInitialized`. -->
-            <button id="th-run" disabled style="cursor: not-allowed;">
-              <div class="th-run-icon"></div>
-            </button>
+          <div id="th-editor">
+            <!-- The Monaco editor will be dynamically inserted here. -->
           </div>
-        </div>
-        <div id="th-editor">
-          <!-- The Monaco editor will be dynamically inserted here. -->
         </div>
       </section>
-      <section class="th-info-container th-output-section">
-        <div class="th-info-container-header">
-          <h3>Output</h3>
+      <section class="th-output-section">
+        <div class="th-info-container">
+          <div class="th-info-container-header">
+            <h3>Output</h3>
+          </div>
+          <textarea readonly id="th-output" rows="10"></textarea>
         </div>
-        <textarea readonly id="th-output" rows="10"></textarea>
       </section>
     </main>
 
