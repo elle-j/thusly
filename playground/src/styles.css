@@ -100,10 +100,11 @@ main {
   margin: 0 15px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .th-info-container {
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--dark-gray);
@@ -269,14 +270,14 @@ main {
 }
 
 #th-editor {
-  height: 90%;
+  flex: 1;
   overflow: hidden;
   border-bottom-left-radius: var(--border-radius);
   border-bottom-right-radius: var(--border-radius);
 }
 
 #th-output {
-  height: 100%;
+  flex: 1;
   padding: 30px;
   white-space: pre;
   resize: none;
@@ -312,7 +313,7 @@ footer {
 
 /* =============== MEDIA QUERIES =============== */
 
-@media (width <= 1130px) {
+@media (width <= 1160px) {
   main {
     padding: 30px 50px;
     flex-direction: column;
@@ -328,13 +329,6 @@ footer {
     width: 100%;
     margin: 0;
     flex: 1;
-  }
-}
-
-@media (width <= 800px) {
-  header {
-    height: max-content;
-    padding: 15px 50px;
   }
 }
 
