@@ -1,5 +1,5 @@
 export const snippets = {
-  loops: `// Type some code here!
+  loops: `// Go ahead and type some code here!
 
 // Bounded loop
 
@@ -11,12 +11,12 @@ end
 
 var i: 0
 
-while i < 3 {i +: 1}
+while i < 4 {i +: 1}
     @out i
 end
 `,
 
-  selection: `// Type some code here!
+  selection: `// Go ahead and type some code here!
 
 // Selection
 
@@ -28,7 +28,7 @@ else
 end
 `,
 
-  standaloneBlock: `// Type some code here!
+  standaloneBlock: `// Go ahead and type some code here!
 
 // Standalone block
 
