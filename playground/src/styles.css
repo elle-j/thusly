@@ -1,18 +1,17 @@
 :root {
   --black: #111111;
-  --purple: #1e1e3f;
-  --light-purple: #2d2154;
-  --sand: burlywood;
+  --medium-black: #141319;
+  --light-black: #1d1b24;
+  --white: #ffffff;
+  --purple: #b592ff;
   --gray: #787878;
-  --gray-dark: #575757;
+  --dark-gray: #313131;
   --light-gray: #e7e7e7;
-  
+
   --font-size: 12px;
+  --border-radius: 0.65rem;
 
   --transition: all 120ms ease-in;
-
-  --width-level-md: 800px;
-  --width-level-sm: 550px;
 }
 
 * {
@@ -30,12 +29,19 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
-  background-color: var(--purple);
+  background-color: var(--medium-black);
   color: var(--light-gray);
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
   font-size: var(--font-size);
   letter-spacing: 0.8px;
-  overflow-x: hidden;
+  overflow: hidden;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--gray);
 }
 
 input {
@@ -61,20 +67,68 @@ a {
 
 header {
   height: 75px;
-  padding: 0 20px;
+  padding: 0 50px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--gray-dark);
+  border-bottom: 1px solid var(--dark-gray);
+  background-color: var(--light-black);
 }
 
 .th-title {
   align-self: center;
-  margin-right: 12px;
+  padding-left: 20px;
+  border-left: 1px solid var(--purple);
   color: var(--gray);
-  font-size: var(--font-size);
+  font-size: 14px;
+  font-weight: 400;
   text-transform: uppercase;
   text-align: center;
+}
+
+/* =============== MAIN =============== */
+
+main {
+  padding: 30px 35px;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.th-input-section,
+.th-output-section {
+  width: 50%;
+  margin: 0 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.th-info-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--dark-gray);
+  border-radius: var(--border-radius);
+}
+
+.th-info-container-header {
+  height: 70px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--dark-gray);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  background-color: var(--light-black);
+}
+
+.th-info-container-header h3 {
+  margin-left: 5px;
+}
+
+.th-editor-controllers {
+  display: flex;
+  justify-content: space-between;
 }
 
 .th-tabs {
@@ -82,15 +136,15 @@ header {
 }
 
 .th-tab {
-  margin: 0 10px;
+  margin: 0 5px;
   width: max-content;
-  padding: 6px 20px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid var(--gray-dark);
-  border-radius: 2rem;
+  border: 1px solid var(--dark-gray);
+  border-radius: var(--border-radius);
   cursor: pointer;
 }
 
@@ -98,13 +152,17 @@ header {
   margin-bottom: 5px;
   color: var(--gray);
   font-size: calc(var(--font-size) - 2px);
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .th-tab-content {
   display: flex;
   align-items: center;
+}
+
+.th-tab-content label {
+  font-weight: 300;
 }
 
 .th-tab * {
@@ -115,14 +173,14 @@ header {
   width: 12px;
   height: 12px;
   margin-right: 8px;
-  border: 1px solid var(--sand);
+  border: 1px solid var(--purple);
   border-radius: 50%;
   background-color: transparent;
   transition: var(--transition);
 }
 
 .th-tab input:checked {
-  background-color: var(--sand);
+  background-color: var(--purple);
 }
 
 .th-operations {
@@ -141,13 +199,13 @@ header {
 .th-operation label {
   margin-bottom: 6px;
   font-size: calc(var(--font-size) - 1px);
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .th-toggle {
   position: relative;
-  border: 1px solid var(--gray);
+  border: 1px solid var(--dark-gray);
   border-radius: 2rem;
 }
 
@@ -173,7 +231,7 @@ header {
   width: 16px;
   height: 16px;
   display: block;
-  border: 1px solid var(--sand);
+  border: 1px solid var(--purple);
   border-radius: 50%;
   background-color: transparent;
 }
@@ -181,7 +239,7 @@ header {
 .th-toggle:checked::before {
   left: auto;
   right: 2px;
-  background-color: var(--sand);
+  background-color: var(--purple);
 }
 
 #th-run {
@@ -199,7 +257,7 @@ header {
 }
 
 #th-run:hover {
-  background-color: white;
+  background-color: var(--white);
 }
 
 .th-run-icon {
@@ -211,34 +269,30 @@ header {
   border-left: 14px solid var(--black);
 }
 
-/* =============== MAIN =============== */
-
-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
 #th-editor {
-  width: 50%;
-  border-right: 1px solid var(--gray-dark);
+  flex: 1;
+  overflow: hidden;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
 }
 
 #th-output {
-  width: 50%;
-  padding: 22px 40px 0;
+  flex: 1;
+  padding: 30px;
   white-space: pre;
   resize: none;
   outline: none;
   border: none;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
   box-shadow: none;
   background: none;
-	background-color: var(--light-purple);
-  color: white;
+  color: var(--white);
   font-family: monospace;
   font-size: 14px;
   line-height: 22px;
   overflow: auto;
+  scrollbar-width: thin;
 }
 
 /* =============== FOOTER =============== */
@@ -248,7 +302,7 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-top: 1px solid var(--gray-dark);
+  border-top: 1px solid var(--dark-gray);
 }
 
 .th-social-icon {
@@ -259,35 +313,56 @@ footer {
 
 /* =============== MEDIA QUERIES =============== */
 
-/* Needed to have these top-level rather than nested in */
-/* each relevant element due to not working on Firefox. */
-
-/* @media (max-width: var(--width-level-md)) { */
-@media (max-width: 800px) {
-  header {
-    height: max-content;
-    padding: 15px 20px;
+@media (width <= 1160px) {
+  main {
+    padding: 30px 50px;
     flex-direction: column;
+    gap: 30px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
   }
 
-  .th-tabs {
-    margin-bottom: 15px;
+  .th-input-section,
+  .th-output-section {
+    width: 100%;
+    margin: 0;
+    flex: 1;
   }
 }
 
-/* @media (max-width: var(--width-level-sm)) { */
-@media (max-width: 550px) {
+@media (width <= 650px) {
   header {
-    flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: center;
   }
 
   .th-title {
-    margin-right: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  main {
+    padding: 20px 10px;
+    gap: 20px;
+  }
+
+  .th-editor-controllers {
+    height: max-content;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .th-tabs {
-    margin-bottom: 0;
+    margin-bottom: 10px;
+  }
+
+  #th-output {
+    padding: 20px;
+  }
+
+  /*.th-tabs {
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -309,23 +384,7 @@ footer {
 
   #th-run {
     margin-left: 0;
-  }
-
-  main {
-    flex-direction: column;
-  }
-
-  #th-editor {
-    width: 100%;
-    flex: 0.5;
-    border-right: none;
-    border-bottom: 1px solid var(--gray-dark);
-  }
-
-  #th-output {
-    width: 100%;
-    flex: 0.5;
-  }
+  }*/
 }
 
 /* =============== TEMPORARY =============== */
