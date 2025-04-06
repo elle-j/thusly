@@ -12,9 +12,6 @@
   --border-radius: 0.65rem;
 
   --transition: all 120ms ease-in;
-
-  --width-level-md: 800px;
-  --width-level-sm: 550px;
 }
 
 * {
@@ -38,7 +35,7 @@ body {
   font-weight: 400;
   font-size: var(--font-size);
   letter-spacing: 0.8px;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 h3 {
@@ -280,7 +277,7 @@ main {
 
 #th-output {
   height: 100%;
-  padding: 22px 40px 0;
+  padding: 30px;
   white-space: pre;
   resize: none;
   outline: none;
@@ -315,35 +312,63 @@ footer {
 
 /* =============== MEDIA QUERIES =============== */
 
-/* Needed to have these top-level rather than nested in */
-/* each relevant element due to not working on Firefox. */
-
-/* @media (max-width: var(--width-level-md)) { */
-@media (max-width: 800px) {
-  header {
-    height: max-content;
-    padding: 15px 20px;
+@media (width <= 1130px) {
+  main {
+    padding: 30px 50px;
     flex-direction: column;
+    gap: 30px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
   }
 
-  .th-tabs {
-    margin-bottom: 15px;
+  .th-input-section,
+  .th-output-section {
+    width: 100%;
+    margin: 0;
+    flex: 1;
   }
 }
 
-/* @media (max-width: var(--width-level-sm)) { */
-@media (max-width: 550px) {
+@media (width <= 800px) {
   header {
-    flex-direction: row;
-    justify-content: space-evenly;
+    height: max-content;
+    padding: 15px 50px;
+  }
+}
+
+@media (width <= 650px) {
+  header {
+    justify-content: center;
   }
 
   .th-title {
-    margin-right: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  main {
+    padding: 20px 10px;
+    gap: 20px;
+  }
+
+  .th-editor-controllers {
+    height: max-content;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .th-tabs {
-    margin-bottom: 0;
+    margin-bottom: 10px;
+  }
+
+  #th-output {
+    padding: 20px;
+  }
+
+  /*.th-tabs {
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -365,23 +390,7 @@ footer {
 
   #th-run {
     margin-left: 0;
-  }
-
-  main {
-    flex-direction: column;
-  }
-
-  #th-editor {
-    width: 100%;
-    flex: 0.5;
-    border-right: none;
-    border-bottom: 1px solid var(--dark-gray);
-  }
-
-  #th-output {
-    width: 100%;
-    flex: 0.5;
-  }
+  }*/
 }
 
 /* =============== TEMPORARY =============== */
